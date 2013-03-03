@@ -1,0 +1,17 @@
+syntax: glob
+
+*/.deps/*
+#*#
+*~
+*.a
+*.pdb
+*.o
+*.so
+*.exe
+*.pyc
+*.dll
+*.lib
+*.md5
+.svn/*
+bin/*
+*/qx/*
