@@ -7,6 +7,7 @@
 #include <pthread.h>
 #include "connContext.h"
 #include "mongoose/connContext.h"
+#include <config.h>
 
 namespace rikitiki {
   struct HeaderFooterPreprocessor : public TemplatePreprocessor {
@@ -121,4 +122,15 @@ namespace rikitiki {
     AddHandler( new GHandler( handler ) );
   }
 
+  static bool _setCTemplateRoot() {
+    std::string root;
+    bool rtn = Configuration::Global().lookupValue("ctemplate_root", root);
+    LOG(Server, Verbose) << "Set ctemplate root to " << root << std::endl;
+    if(rtn)
+      ctemplate::Template::SetTemplateRootDirectory(root);
+    else
+      LOG(Server, Error) << "Could not find configuration for 'ctemplate_root'" << std::endl;
+    return rtn;
+  };
+  static bool setCTemplateRoot = _setCTemplateRoot();
 }

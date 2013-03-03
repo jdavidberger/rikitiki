@@ -12,6 +12,7 @@
 namespace logging {
 
   enum LogLevels {
+    INVALID = -100,
     Debug = -2,
     Verbose = -1,
     Info,
@@ -23,11 +24,11 @@ namespace logging {
 #include <tclap/CmdLine.h>
   struct LogArgs {
   TCLAP::ValueArg<std::string> logFileArg;
-  bool processed;
-  LogArgs(TCLAP::CmdLine& cmd);
-  ~LogArgs();
-  void Process();
-};
+    bool processed;
+    LogArgs(TCLAP::CmdLine& cmd);
+    ~LogArgs();
+    void Process();
+  };
 #endif 
 
   std::map<std::string, int>& logLevels();
@@ -36,15 +37,17 @@ namespace logging {
   std::ostream& LogStream(const std::string& category);
 
   void SetLogLevel(const std::string& category, int level);
+  void SetLogLevel(const std::string& category, const std::string& level);
 
   inline bool ShouldLog(const std::string& category, int level){
-  return logLevels()[category] <= level;
-}
+    return logLevels()[category] <= level;
+  }
 
   static inline char* getCurrThreadName() {
-  char* buffer = (char*)malloc( sizeof(char) * 1024);
-  pthread_getname_np(pthread_self(), buffer, 1024);
-  return buffer;
+    char* buffer = (char*)malloc( sizeof(char) * 1024);
+    pthread_getname_np(pthread_self(), buffer, 1024);
+    return buffer;
+  }
 }
-}
+
 #define LOG(CAT, LEVEL) if(ShouldLog(#CAT, logging::LEVEL) ) logging::LogStream(#CAT) << "[" << #CAT << ", " << #LEVEL << " (" << logging::getCurrThreadName() << ")] "

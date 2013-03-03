@@ -22,7 +22,8 @@ add_library(rikitiki
 		   apache/connContext.cc
 		   mongoose/connContext.cc 
 		   mongoose/server.cc
-		   mongoose/mongoose.c )
-target_link_libraries(rikitiki ctemplate dl pthread curl utils)
+		   mongoose/mongoose.c
+		   config.cc )
+target_link_libraries(rikitiki ctemplate dl pthread curl utils config++)
 
 add_subdirectory(examples)

@@ -2,6 +2,7 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
 #include "server.h"
+#include <sstream>
 
 namespace rikitiki {
   namespace mongoose {
@@ -15,10 +16,11 @@ static void* _handler(enum mg_event event, struct mg_connection *conn) {
   return ((Server*)(request_info->user_data))->Handle(event, conn);
 }
 
-void MongooseServer::Start() {
-  const char *options[] = {"listening_ports", "5000", 
-			   NULL};
-  ctemplate::Template::SetTemplateRootDirectory(CTEMPLATE_ROOT_DIRECTORY);
+void MongooseServer::Start() {  
+  std::stringstream _port;
+  _port << port;
+  std::string __port = _port.str();
+  const char *options[] = {"listening_ports", __port.c_str(), NULL};
   ctx = mg_start(_handler, this, options);
 }
 
