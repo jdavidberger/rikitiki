@@ -336,10 +336,10 @@ class  StaticTemplateStringInitializer {
 };
 
 // Don't use this.  This is used only in auto-generated .varnames.h files.
-#define STS_INIT_WITH_HASH(name, str, hash)                                   \
-  { { str, sizeof(""str"")-1, hash } };                                       \
-  namespace ctemplate_sts_init {                                              \
-  static const ::ctemplate::StaticTemplateStringInitializer name##_init(&name); \
+#define STS_INIT_WITH_HASH(name, str, hash)				\
+  { { str, sizeof(str)-1, hash } };					\
+  namespace ctemplate_sts_init {					\
+    static const ::ctemplate::StaticTemplateStringInitializer name##_init(&name); \
   }
 
 // We computed this hash value for the empty string online.  In debug

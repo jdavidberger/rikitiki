@@ -14,7 +14,7 @@ link_directories(
 add_subdirectory(utils)
 
 add_definitions(-DCTEMPLATE_ROOT_DIRECTORY="${CMAKE_SOURCE_DIR}/html/ctemplate")
-add_library(server 
+add_library(rikitiki 
 		   server.cc 
 		   connContext.cc 
 		   content_types.cc 
@@ -23,5 +23,6 @@ add_library(server
 		   mongoose/connContext.cc 
 		   mongoose/server.cc
 		   mongoose/mongoose.c )
-target_link_libraries(server ctemplate dl pthread curl utils)
+target_link_libraries(rikitiki ctemplate dl pthread curl utils)
 
+add_subdirectory(examples)

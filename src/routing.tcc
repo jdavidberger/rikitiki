@@ -4,6 +4,7 @@
 
 #pragma once
 
+// ----------- Parse format string -----------------
 inline bool skip_to_format(std::stringstream& b, const char*& format){
   while( *format != '{' ){
     if(b.peek() != *format) return false;    
@@ -67,22 +68,71 @@ static int modern_sscanf(const char* b, const char* format, T&... t){
   return modern_sscanf(ss, format, t...);
 }
 
-//------------------ Route specialization -----------------------
+//------------------ Route_ -----------------------
+template <typename P, typename... T> 
+Route_<P,T...>::Route_(P* p, const std::string& _route, F _f, ConnContext::Method method) : parent(p), f(_f), Route(_route, method) { }
 
-//------------------ RouteHandler -----------------------
-
-/*
-template <typename P>
-template <typename... T>
-void RouteHandler<P>::Add(const std::string& route, void (P::*F)(ConnContext& ctx, T...), ConnContext::Method method){
-  LOG(Web, Info) << "Adding handler for " << route << std::endl;
-  Route* newRoute = Route_Utils<P, T...>::make_route(p, route, F, method);
-  routes.push_back(newRoute);
+template <typename P, typename... T> 
+int Route_<P,T...>::Scan(ConnContext& ctx, T&... t){
+  return modern_sscanf(ctx.URI(), route.c_str(), t...);
 }
 
-template <typename P>
-template <typename... T>
-void RouteHandler<P>::Add(const std::string& route, ConnContext::Method method){
-  Add<T...>(route, &P::operator(), method);
+template <typename P, typename... T> 
+bool Route_<P,T...>::Handle(ConnContext& ctx){
+  if( method != ConnContext::ANY && method != ctx.RequestMethod() ) {
+    LOG(Web, Verbose) << "Not using route " << route << ", " << method << " for method failure." << std::endl;
+    return false;
+  }
+  auto args = std::tuple_cat( std::tuple<ConnContext&>(ctx),
+			      std::tuple<T...>());
+  
+    int matched = applyTuple(this, &Route_<P, T...>::Scan, args);
+    if(matched == sizeof...(T)){
+      LOG(Web, Verbose) << "Using route " << route << ", " << method << std::endl;
+      applyTuple(parent, f, args);
+      return true;
+    }
+    return false;
 }
-*/
+
+//------------------ Route_ (no argument specialization) 
+template <typename P> 
+Route_<P>::Route_(P* p, 	   
+		  const std::string& _route, 
+		  F _f,
+		  ConnContext::Method method) : parent(p), f(_f), Route(_route, method) {          
+}
+
+template <typename P> 
+bool Route_<P>::Handle(ConnContext& ctx){
+  bool shouldAttempt = 
+    strcmp(route.c_str(), ctx.URI()) == 0 &&
+    (method == ConnContext::ANY ||
+     method == ctx.RequestMethod());
+  
+  if(shouldAttempt){
+    LOG(Web, Verbose) << "Using route " << route << ", " << method << std::endl;
+    (parent->*f)(ctx);
+    return true;
+  }
+  return false;
+}
+
+//------------------ CreateRoute
+
+template <typename... T> 
+template<typename P>
+Route* CreateRoute<T...>::With(P* p, 	   
+			       const std::string& _route, 
+			       typename Route_<P, T...>::F _f,
+			       ConnContext::Method method){
+  return new Route_<P, T...>(p, _route, _f, method);
+}
+
+template <typename... T> 
+template<typename P>
+Route* CreateRoute<T...>::With(P* p, 	   
+			       const std::string& _route, 
+			       ConnContext::Method method){
+  return CreateRoute<T...>::With(p, _route, &P::operator(), method);
+}

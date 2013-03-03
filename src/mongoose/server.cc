@@ -3,6 +3,9 @@
 
 #include "server.h"
 
+namespace rikitiki {
+  namespace mongoose {
+
 MongooseServer::MongooseServer(int _port) : Server(_port)  { 
   ctx = 0;
 }
@@ -22,4 +25,6 @@ void MongooseServer::Start() {
 void MongooseServer::Stop() {
   mg_stop(ctx);
   ctx = 0;
+}
+  }
 }

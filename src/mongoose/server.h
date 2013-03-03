@@ -10,10 +10,14 @@
 #include <unistd.h>
 #endif
 
-class MongooseServer : public Server {
-  mg_context *ctx;
- public:
-  MongooseServer(int _port);
-  void Start();
-  void Stop();
-};
+namespace rikitiki {
+  namespace mongoose {
+    class MongooseServer : public Server {
+      mg_context *ctx;
+    public:
+      MongooseServer(int _port);
+      void Start();
+      void Stop();
+    };
+  }
+}

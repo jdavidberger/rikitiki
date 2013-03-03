@@ -7,59 +7,61 @@
 #include <string>
 #include "server.h"
 
-class Server;
-class ConnContext;
-struct Response {
-  web::ContentType::t ResponseType;
-  int status;
+namespace rikitiki {
+  class Server;
+  class ConnContext;
+  struct Response {
+    web::ContentType::t ResponseType;
+    int status;
 
-  std::stringstream response;
+    std::stringstream response;
 
-  Response();
+    Response();
 
-  template <class T>
-  std::ostream& operator <<(const T& obj){ return response << obj; }
+    template <class T>
+    std::ostream& operator <<(const T& obj){ return response << obj; }
 
-  std::ostream& operator <<(web::ContentType::t t);
-  std::ostream& operator <<(const ctemplate::TemplateDictionary& td);
-  std::ostream& operator ()(const std::string& fn, const ctemplate::TemplateDictionary& td);
-};
-
-struct Request {
-  virtual const char* URI() = 0;
-};
-
-class ConnContext : public Request {  
- public:
-  enum Method {
-    ANY = 0,
-    GET = 1,
-    POST = 2,
-    OTHER = 3
+    std::ostream& operator <<(web::ContentType::t t);
+    std::ostream& operator <<(const ctemplate::TemplateDictionary& td);
+    std::ostream& operator ()(const std::string& fn, const ctemplate::TemplateDictionary& td);
   };
- private:
- protected:
-  bool mappedPost; 
-  std::map<std::string, std::string> _post;
-  Method _method;
 
-  virtual void FillPost() = 0;
-  virtual void FillRequestMethod() = 0;  
-  virtual void writeResponse() = 0;
-  ConnContext(const Server*);
-  ConnContext();
- public:
-  const Server* server;
-  std::map<std::string, std::string>& Post();
+  struct Request {
+    virtual const char* URI() = 0;
+  };
 
-  Method RequestMethod();
+  class ConnContext : public Request {  
+  public:
+    enum Method {
+      ANY = 0,
+      GET = 1,
+      POST = 2,
+      OTHER = 3
+    };
+  private:
+  protected:
+    bool mappedPost; 
+    std::map<std::string, std::string> _post;
+    Method _method;
 
-  bool handled;  
-  template <class T>
-  std::ostream& operator <<(const T& obj);
+    virtual void FillPost() = 0;
+    virtual void FillRequestMethod() = 0;  
+    virtual void writeResponse() = 0;
+    ConnContext(const Server*);
+    ConnContext();
+  public:
+    const Server* server;
+    std::map<std::string, std::string>& Post();
 
-  std::ostream& operator <<(ctemplate::TemplateDictionary& td);
-  Response response;
-};
+    Method RequestMethod();
+
+    bool handled;  
+    template <class T>
+      std::ostream& operator <<(const T& obj);
+
+    std::ostream& operator <<(ctemplate::TemplateDictionary& td);
+    Response response;
+  };
 
 #include "connContext.tcc"
+}
