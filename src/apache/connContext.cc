@@ -4,6 +4,11 @@
 #include "connContext.h"
 #include <curl/curl.h>
 #include "apr_strings.h"
+#include <httpd/httpd.h>
+#include <httpd/http_config.h>
+#include <httpd/http_protocol.h>
+#include <httpd/ap_config.h>
+#include <apr_tables.h>
 
 namespace rikitiki {
   namespace apache {
@@ -15,12 +20,13 @@ namespace rikitiki {
 	_method = GET;
       }
     }
+    
 
     void ApacheConnContext::writeResponse(){
       std::string resp = response.response.str();
       std::string responseType = ToString(response.ResponseType);
-
-      ap_set_content_type  (request, responseType.c_str());
+	
+      ap_set_content_type  (request, apr_pstrdup(request->pool, &responseType[0]));
       ap_set_content_length(request, resp.size());
 
       if(request->header_only)
@@ -47,6 +53,24 @@ namespace rikitiki {
     }
 
     void ApacheConnContext::FillPost() {
+      apr_array_header_t* p_data;
+      int res = ap_parse_form_data(request, NULL, &p_data, -1, HUGE_STRING_LEN);      
+      if(res != OK || !p_data) assert(false);
+      apr_off_t len;
+      apr_size_t size;
+      std::string name, value;
+      while(p_data && !apr_is_empty_array(p_data)){
+	ap_form_pair_t *pair = (ap_form_pair_t*) apr_array_pop(p_data);
+
+	apr_brigade_length(pair->value, 1, &len);	
+	size = (apr_size_t) len;	
+	value.resize(size);
+        apr_brigade_flatten(pair->value, &value[0], &size);
+
+	name = std::string(pair->name);
+	_post[name] = value;
+      }
+
       mappedPost = true;
     }
   }

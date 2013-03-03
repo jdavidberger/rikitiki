@@ -2,8 +2,6 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
 #include "connContext.h"
-#include <curl/curl.h>
-#include <algorithm>
 
 namespace rikitiki {
   namespace mongoose {
@@ -60,28 +58,9 @@ namespace rikitiki {
 	nth += mg_read(conn, &p_data[nth], p_data.size() - nth);
       } while(nth == (int)p_data.size());
       p_data.resize(nth);
-      if(p_data.back() != '&')
-	p_data.push_back('&');
 
-      std::replace(p_data.begin(), p_data.end(), '+', ' ');
-      auto l_it = p_data.begin();
+      mapContents(p_data, _post);
 
-      std::string name, value;
-      foreach(it, p_data){
-	switch(*it){
-	case '=': 
-	  name = std::string(l_it, it);	  
-	  l_it = it+1;
-	  break; 
-	case '&': 
-	  char* value = curl_unescape(&*l_it, it - l_it);
-      
-	  _post[name] = value;
-	  curl_free(value);
-	  l_it = it+1;
-	  break;
-	}
-      }
       mappedPost = true;
     }
 

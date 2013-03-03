@@ -28,7 +28,8 @@ struct HelloWorldModule {
   void ctemplate(ConnContext& ctx, const std::string& bg){
     ctemplate::TemplateDictionary td("example.tpl");
     td.SetValue("bg", bg);
-    td.SetValue("content", "Hello world!");
+    const std::string& content = ctx.Post()["textarea"];
+    td.SetValue("content", content.size() == 0 ? "Hello world!" : content);
     ctx << td;
   }  
 };

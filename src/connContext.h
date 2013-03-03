@@ -61,8 +61,10 @@ namespace rikitiki {
 
     Response response;
   };
-
+void mapContents(std::string& raw_content, std::map<std::string, std::string>& post);
 #include "connContext.tcc"
 }
+
+
 
 #include "ctemplate/connContext_ext.h"

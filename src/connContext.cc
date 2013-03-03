@@ -2,6 +2,8 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
 #include "connContext.h"
+#include <algorithm>
+#include <curl/curl.h>
 
 namespace rikitiki { 
   ConnContext::Method ConnContext::RequestMethod() {
@@ -31,4 +33,28 @@ namespace rikitiki {
 
   ConnContext::ConnContext() : handled(false),_method(ANY), mappedPost(false), server(NULL) {}
 
+  void mapContents(std::string& raw_content, std::map<std::string, std::string>& post){
+    if(raw_content.back() != '&')
+      raw_content.push_back('&');
+    
+    std::replace(raw_content.begin(), raw_content.end(), '+', ' ');
+    auto l_it = raw_content.begin();
+    
+    std::string name, value;
+    foreach(it, raw_content){
+      switch(*it){
+      case '=': 
+	name = std::string(l_it, it);	  
+	l_it = it+1;
+	break; 
+      case '&': 
+	char* value = curl_unescape(&*l_it, it - l_it);
+      
+	post[name] = value;
+	curl_free(value);
+	l_it = it+1;
+	break;
+      }
+    }
+  }
 }

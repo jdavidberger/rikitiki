@@ -86,7 +86,7 @@ namespace logging {
     }
     return INVALID;
   }
-  void SetLogLevel(const std::string& category, const std::string& level){
+  void SetLogLevel(const std::string& category, const std::string& level){ 
     int _level = getLevel(level);
     SetLogLevel(category, _level);
     LOG(Logging, Verbose) << "Setting '" << category << "' to '" << level << "'(" << _level << ")" << std::endl;

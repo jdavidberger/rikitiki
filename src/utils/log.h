@@ -43,9 +43,10 @@ namespace logging {
     return logLevels()[category] <= level;
   }
 
-  static inline char* getCurrThreadName() {
-    char* buffer = (char*)malloc( sizeof(char) * 1024);
-    pthread_getname_np(pthread_self(), buffer, 1024);
+  static inline std::string getCurrThreadName() {
+    std::string buffer;
+    buffer.resize(32);
+    pthread_getname_np(pthread_self(), &buffer[0], 32);
     return buffer;
   }
 }
