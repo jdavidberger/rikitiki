@@ -1,0 +1,7 @@
+#include "../connContext.h"
+
+rikitiki::Response& operator <<(rikitiki::Response& response,  const ctemplate::TemplateDictionary& td){   
+  ctemplate::ExpandTemplate(td.name(), ctemplate::DO_NOT_STRIP, &td, &response.response);
+  return response;
+}
+ 

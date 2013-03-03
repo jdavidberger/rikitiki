@@ -33,12 +33,12 @@ static void getAssemblyPath(std::string& path){
     getAssemblyPath(exePath);
     
     std::vector<std::string> configLocations;
-    configLocations.push_back( "/etc/rikitiki/conf/" + exeName + ".cfg");
     configLocations.push_back( exePath + "/" + exeName + ".cfg");
     configLocations.push_back( exePath + "/../conf/" + exeName + ".cfg");
-    configLocations.push_back( "/etc/rikitiki/conf/default.cfg");
+    configLocations.push_back( "/etc/rikitiki/conf/" + exeName + ".cfg");
     configLocations.push_back( exePath + "/default.cfg");
     configLocations.push_back( exePath + "/../conf/default.cfg");
+    configLocations.push_back( "/etc/rikitiki/conf/default.cfg");
     bool success = false;
     std::string filePath;
     for(auto it = configLocations.begin();it != configLocations.end();it++){

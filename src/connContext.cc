@@ -27,26 +27,6 @@ namespace rikitiki {
     return response;
   }
 
-  std::ostream& Response::operator <<(const ctemplate::TemplateDictionary& td){   
-    ctemplate::ExpandTemplate(td.name(), ctemplate::DO_NOT_STRIP, &td, &response);
-    return response;
-  }
-
-  std::ostream& Response::operator ()(const std::string& fn, 
-				      const ctemplate::TemplateDictionary& td){    
-    ctemplate::ExpandTemplate(fn, ctemplate::DO_NOT_STRIP, &td, &response);
-    return response;
-  }
-
-
-  std::ostream& ConnContext::operator <<(ctemplate::TemplateDictionary& td){   
-    handled = true;
-    if(server)
-      foreach(it, server->templatePreprocessors)
-	(*it)->Process(*this, td);
-    return response << td;
-  }
-
   ConnContext::ConnContext(const Server* _server) : handled(false),_method(ANY), mappedPost(false), server(_server) {}
 
   ConnContext::ConnContext() : handled(false),_method(ANY), mappedPost(false), server(NULL) {}

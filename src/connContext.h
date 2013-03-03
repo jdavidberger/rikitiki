@@ -22,8 +22,8 @@ namespace rikitiki {
     std::ostream& operator <<(const T& obj){ return response << obj; }
 
     std::ostream& operator <<(web::ContentType::t t);
-    std::ostream& operator <<(const ctemplate::TemplateDictionary& td);
-    std::ostream& operator ()(const std::string& fn, const ctemplate::TemplateDictionary& td);
+    //std::ostream& operator <<(const ctemplate::TemplateDictionary& td);
+    //std::ostream& operator ()(const std::string& fn, const ctemplate::TemplateDictionary& td);
   };
 
   struct Request {
@@ -59,9 +59,10 @@ namespace rikitiki {
     template <class T>
       std::ostream& operator <<(const T& obj);
 
-    std::ostream& operator <<(ctemplate::TemplateDictionary& td);
     Response response;
   };
 
 #include "connContext.tcc"
 }
+
+#include "ctemplate/connContext_ext.h"
