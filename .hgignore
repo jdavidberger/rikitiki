@@ -1,7 +1,6 @@
 syntax: glob
 
 */.deps/*
-*/#*#
 *~
 *.a
 *.pdb
@@ -14,4 +13,3 @@ syntax: glob
 *.md5
 .svn/*
 bin/*
-*/qx/*
