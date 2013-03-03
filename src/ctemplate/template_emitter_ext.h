@@ -1,15 +1,10 @@
+/* Copyright (C) 2012-2013 Justin Berger 
+   The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 #pragma once
 #include <ctemplate/template.h>
-#include <sys/types.h>     // for size_t
+#include <sys/types.h>
 #include <string>
 #include <sstream>
-
-// NOTE: if you are statically linking the template library into your binary
-// (rather than using the template .dll), set '/D CTEMPLATE_DLL_DECL='
-// as a compiler flag in your project file to turn off the dllimports.
-#ifndef CTEMPLATE_DLL_DECL
-# define CTEMPLATE_DLL_DECL  __declspec(dllimport)
-#endif
 
 namespace ctemplate {
   class StringStreamEmitter : public ExpandEmitter {

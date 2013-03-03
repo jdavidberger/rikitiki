@@ -1,14 +1,11 @@
+/* Copyright (C) 2012-2013 Justin Berger 
+   The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
+
+/* The original concept for the tuple functionality below was largely found at http://stackoverflow.com/a/1547118. I've expanded on it
+   as need be - JB */
 #pragma once
 #include <tuple>
 
-template < typename T, typename... ArgsF>
-  struct func_ {
-    template <uint N >
-    struct apply_ {
-      
-  };
-    
-  };
 template < uint N >
 struct apply {
   template < typename T, typename... ArgsF, typename... ArgsT, typename... Args >
