@@ -7,15 +7,15 @@ using namespace rikitiki;
 using namespace rikitiki::mongoose;
 using namespace rikitiki::ctemplates;
 
-struct CTemplateExampleModule {
+struct AdvancedModule {
 
   void Register(Server& server){
     server.AddPreprocessor( new HeaderFooterPreprocessor() );
-    typedef CTemplateExampleModule T;
-    server.AddHandler( CreateRoute<>::With(this, "/", &T::Index) );
-    server.AddHandler( CreateRoute<>::With(this, "/post", &T::Get,  ConnContext::GET ) );
-    server.AddHandler( CreateRoute<>::With(this, "/post", &T::Post, ConnContext::POST ));
-    server.AddHandler( CreateRoute<>::With(this, "/qs", &T::QueryString));
+    typedef AdvancedModule T;
+    server.AddHandler( CreateRoute<>::With(this, "/adv", &T::Index) );
+    server.AddHandler( CreateRoute<>::With(this, "/adv/post", &T::Get,  ConnContext::GET ) );
+    server.AddHandler( CreateRoute<>::With(this, "/adv/post", &T::Post, ConnContext::POST ));
+    server.AddHandler( CreateRoute<>::With(this, "/adv/qs", &T::QueryString));
   }
 
   void Index(ConnContext& ctx){
@@ -58,7 +58,7 @@ struct CTemplateExampleModule {
 
 int main(){
   MongooseServer server(5000);
-  CTemplateExampleModule module;
+  AdvancedModule module;
   LOG(Main, Info) << "Remember to run this from the html directory if you want styles to work!" << std::endl;
   server.Register(module);
   server.Start();

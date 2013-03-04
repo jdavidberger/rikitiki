@@ -22,13 +22,11 @@ namespace rikitiki {
       std::string resp = response.response.str();
       std::string responseType = ToString(response.ResponseType);
 	
-      ap_set_content_type  (request, apr_pstrdup(request->pool, &responseType[0]));
+      ap_set_content_type(request, apr_pstrdup(request->pool, &responseType[0]));
       ap_set_content_length(request, resp.size());
 
-      if(request->header_only)
-	return;
+      if(request->header_only) return;
       ap_rputs(resp.c_str(), request);
-      LOG(Server, Info) << request->status << std::endl;
     }
 
     ApacheConnContext::ApacheConnContext(Server* server, request_rec* _r) : request(_r), ConnContext(server) { 
@@ -46,9 +44,12 @@ namespace rikitiki {
     const char* ApacheConnContext::URI(){
       return request->uri;
     }
+
     void ApacheConnContext::FillQueryString() {
-      assert(false);
+      mapQueryString(request->args, _qs);
+      mappedQs = true;
     }
+
     void ApacheConnContext::FillPost() {
       apr_array_header_t* p_data;
       int res = ap_parse_form_data(request, NULL, &p_data, -1, HUGE_STRING_LEN);      

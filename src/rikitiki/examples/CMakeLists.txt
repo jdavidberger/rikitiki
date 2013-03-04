@@ -21,6 +21,7 @@ IF(${USE_APACHE})
 
 	IF(${USE_CTEMPLATE})
 		add_library(mod_advanced SHARED mod_advanced.cc)
+		set_target_properties(mod_advanced PROPERTIES PREFIX "")
 		target_link_libraries(mod_advanced rikitiki)
 	ENDIF()
 ENDIF()

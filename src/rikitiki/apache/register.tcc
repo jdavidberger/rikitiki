@@ -18,11 +18,7 @@ namespace rikitiki {
       
       ApacheConnContext ctx(&server, r);
       bool handled = server.Handle(ctx);
-      if(handled){
-	ctx.writeResponse();
-	return DONE;
-      }
-      return DECLINED;
+      return handled ? DONE : DECLINED;
     }
   } 
 }
