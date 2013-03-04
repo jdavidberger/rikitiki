@@ -1,9 +1,14 @@
-<html>	
-	<body style="background-color: {{bg}}">
-		{{content}}
+{{! -*-HTML-*- }}
+{{>HEADER}}
+<body>
+	{{>PAGE_HEADER}}
+		<p>{{message}}</p>
 		<form method="POST">
-		  <textarea name="textarea"></textarea>
+		  <textarea name="message"></textarea>
+		  <br/>
 		  <button>Submit</button>
 		</form>
-	</body>
-</html>
+	{{>PAGE_FOOTER}}
+</body>
+{{>FOOTER}}
+

@@ -20,10 +20,7 @@ namespace rikitiki {
       } else if(strcmp(request->method, "GET") == 0){
 	_method = GET;
       }
-
-
-    }
-    
+    }    
 
     void ApacheConnContext::writeResponse(){
       std::string resp = response.response.str();
@@ -39,7 +36,7 @@ namespace rikitiki {
     }
 
 
-    ApacheConnContext::ApacheConnContext(request_rec* _r) : request(_r), ConnContext(NULL) { 
+    ApacheConnContext::ApacheConnContext(Server* server, request_rec* _r) : request(_r), ConnContext(server) { 
       std::string thread_name = "";
       thread_name += request->uri;
       thread_name += " ";
@@ -54,7 +51,9 @@ namespace rikitiki {
     const char* ApacheConnContext::URI(){
       return request->uri;
     }
-
+    void ApacheConnContext::FillQueryString() {
+      assert(false);
+    }
     void ApacheConnContext::FillPost() {
       apr_array_header_t* p_data;
       int res = ap_parse_form_data(request, NULL, &p_data, -1, HUGE_STRING_LEN);      

@@ -31,7 +31,7 @@ template <typename P, typename... T>
   typedef void (P::*F)(ConnContext& ctx, typename sane_ref_type<T>::type...);
   P* parent;
   F f;
-  
+  virtual bool visible() const { return false; }
   Route_(P* p, const std::string& _route, F _f, ConnContext::Method method);
   
   int Scan(ConnContext& ctx, T&... t);
@@ -43,6 +43,7 @@ template <typename P>
   typedef void (P::*F)(ConnContext& ctx);
   P* parent;
   F f;    
+  virtual bool visible() const { return method == ConnContext::GET || method == ConnContext::ANY; }
   Route_(P* p, const std::string& _route, F _f, ConnContext::Method method);
   virtual bool Handle(ConnContext& ctx);
 };

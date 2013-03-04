@@ -4,37 +4,12 @@
 #pragma once
 #include "connContext.h"
 #include "../routing.h"
+#include <apache/server.h>
 
 namespace rikitiki {
   namespace apache {
     template <typename T>
-      struct ApacheModule {
-	T t;
-	std::vector<Handler*> handlers;
-	ApacheModule() {
-	  t.Register(handlers);
-	}
-	bool Handle(ConnContext& ctx){
-	  foreach(it, handlers){
-	    if( (*it)->Handle(ctx) )
-	      return true;
-	  }
-	  return false;
-	}
-      };
-
-
-    template <typename T>
-      static int handler(request_rec *r){
-      static ApacheModule<T> _handler;
-      ApacheConnContext ctx(r);
-      bool handled = _handler.Handle(ctx);
-      if(handled){
-	ctx.writeResponse();
-	return DONE;
-      }
-      return DECLINED;
-    }
+      static int handler(request_rec *r);
 
     template <typename T>
       static void register_hooks(apr_pool_t *p){
@@ -42,6 +17,9 @@ namespace rikitiki {
     }
   }
 }
+
+#include "register.tcc"
+
 #define RegisterApacheHandler(name, handler_t)		\
   module AP_MODULE_DECLARE_DATA name ##_module  = {	\
     STANDARD20_MODULE_STUFF,				\

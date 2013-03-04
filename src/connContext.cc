@@ -15,6 +15,14 @@ namespace rikitiki {
     return _method;
   }
 
+  std::map<std::string, std::string>& ConnContext::QueryString() {
+    if(!mappedQs){
+      this->FillQueryString();
+      assert(mappedQs);
+    }
+    return _qs;
+  }
+
   std::map<std::string, std::string>& ConnContext::Post() {
     if(!mappedPost){
       this->FillPost();

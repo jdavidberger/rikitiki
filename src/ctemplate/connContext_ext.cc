@@ -8,9 +8,9 @@ rikitiki::Response& operator <<(rikitiki::Response& response,  const ctemplate::
 
 rikitiki::ConnContext& operator<<(rikitiki::ConnContext& ctx, ctemplate::TemplateDictionary& td){
   ctx.handled = true;
-  /*  if(ctx.server)
+  if(ctx.server)
     foreach(it, ctx.server->templatePreprocessors)
-    (*it)->Process(ctx, td);*/
+    (*it)->Process(ctx, td);
   ctx.response << td;
   return ctx;
 }

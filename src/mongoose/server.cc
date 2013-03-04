@@ -3,30 +3,38 @@
 
 #include "server.h"
 #include <sstream>
+#include "connContext.h"
 
 namespace rikitiki {
   namespace mongoose {
 
-MongooseServer::MongooseServer(int _port) : Server(_port)  { 
-  ctx = 0;
-}
+    MongooseServer::MongooseServer(int _port) : port(_port)  { 
+      ctx = 0;
+    }
 
-static void* _handler(enum mg_event event, struct mg_connection *conn) {
-  const struct mg_request_info *request_info = mg_get_request_info(conn);
-  return ((Server*)(request_info->user_data))->Handle(event, conn);
-}
+    static void* _handler(enum mg_event event, struct mg_connection *conn) {
+      const struct mg_request_info *request_info = mg_get_request_info(conn);
 
-void MongooseServer::Start() {  
-  std::stringstream _port;
-  _port << port;
-  std::string __port = _port.str();
-  const char *options[] = {"listening_ports", __port.c_str(), NULL};
-  ctx = mg_start(_handler, this, options);
-}
+      MongooseServer* server = ((MongooseServer*)(request_info->user_data));
 
-void MongooseServer::Stop() {
-  mg_stop(ctx);
-  ctx = 0;
-}
+      if(event != MG_NEW_REQUEST)
+	return (void*)0;
+      
+      mongoose::MongooseConnContext ctx(server, event, conn);
+      return server->Handle(ctx) ? (void*)1 : (void*)0;
+    }
+
+    void MongooseServer::Start() {  
+      std::stringstream _port;
+      _port << port;
+      std::string __port = _port.str();
+      const char *options[] = {"listening_ports", __port.c_str(), NULL};
+      ctx = mg_start(_handler, this, options);
+    }
+
+    void MongooseServer::Stop() {
+      mg_stop(ctx);
+      ctx = 0;
+    }
   }
 }

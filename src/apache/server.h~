@@ -3,20 +3,11 @@
 
 #include "../server.h"
 
-#ifdef _Win32
-#include <Windows.h>
-#define Sleep usleep
-#else
-#include <unistd.h>
-#endif
-
 namespace rikitiki {
   namespace mongoose {
     class MongooseServer : public Server {
       mg_context *ctx;
-      int port;
     public:
-      int Port() { return port; }
       MongooseServer(int _port);
       void Start();
       void Stop();

@@ -49,7 +49,9 @@ namespace rikitiki {
     const char* MongooseConnContext::URI(){
       return request.uri;
     }
-
+    void MongooseConnContext::FillQueryString() {
+      assert(false);
+    }
     void MongooseConnContext::FillPost() {
       std::string p_data;
       p_data.resize(512);

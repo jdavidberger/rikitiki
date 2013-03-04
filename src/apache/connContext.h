@@ -12,14 +12,15 @@
 namespace rikitiki {
   namespace apache {
     class ApacheConnContext : public ConnContext {  
-    private:
+    private:      
     protected:
       virtual void FillPost();
+      virtual void FillQueryString();
       virtual void FillRequestMethod();
-    public:
+    public:      
       request_rec *request;
       virtual const char* URI();
-      ApacheConnContext(request_rec* r);
+      ApacheConnContext(Server* server, request_rec* r);
       virtual void writeResponse();
     };
 

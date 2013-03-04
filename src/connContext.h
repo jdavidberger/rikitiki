@@ -13,17 +13,11 @@ namespace rikitiki {
   struct Response {
     web::ContentType::t ResponseType;
     int status;
-
     std::stringstream response;
-
     Response();
-
     template <class T>
     std::ostream& operator <<(const T& obj){ return response << obj; }
-
     std::ostream& operator <<(web::ContentType::t t);
-    //std::ostream& operator <<(const ctemplate::TemplateDictionary& td);
-    //std::ostream& operator ()(const std::string& fn, const ctemplate::TemplateDictionary& td);
   };
 
   struct Request {
@@ -33,31 +27,32 @@ namespace rikitiki {
   class ConnContext : public Request {  
   public:
     enum Method {
-      ANY = 0,
-      GET = 1,
-      POST = 2,
-      OTHER = 3
+      ANY = 0, GET = 1, POST = 2, HEAD = 3, PUT = 4, DELETE = 5, TRACE = 6, OPTIONS = 7, CONNECT = 8, PATCH = 9, OTHER
     };
-  private:
   protected:
-    bool mappedPost; 
+    bool mappedPost, mappedQs; 
     std::map<std::string, std::string> _post;
+    std::map<std::string, std::string> _qs;
+
     Method _method;
 
+    virtual void FillQueryString() = 0;
     virtual void FillPost() = 0;
     virtual void FillRequestMethod() = 0;  
+    
+    friend class Server;
     virtual void writeResponse() = 0;
     ConnContext(const Server*);
     ConnContext();
   public:
     const Server* server;
     std::map<std::string, std::string>& Post();
+    std::map<std::string, std::string>& QueryString();
 
     Method RequestMethod();
 
     bool handled;  
-    template <class T>
-      std::ostream& operator <<(const T& obj);
+    template <class T> std::ostream& operator <<(const T& obj);
 
     Response response;
   };

@@ -13,6 +13,7 @@ namespace rikitiki {
 
     protected:
       virtual void FillPost();
+      virtual void FillQueryString();
       virtual void FillRequestMethod();
     public:
       const mg_request_info& request;
