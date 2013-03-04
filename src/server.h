@@ -11,8 +11,7 @@
 #include <tuple>
 #include "utils/tuple_ext.h"
 #include "utils/log.h"
-#include "template.h"
-#include <httpd/httpd.h>
+//#include "template.h"
 
 namespace rikitiki {
   class ConnContext;
@@ -39,12 +38,12 @@ namespace rikitiki {
   public:
     int Port() { return port; }
     std::vector<Handler*> handlers;
-    std::vector<TemplatePreprocessor*> templatePreprocessors;
+    //std::vector<TemplatePreprocessor*> templatePreprocessors;
     void* Handle(enum mg_event event, struct mg_connection *conn);
     typedef bool (*handle_t)(ConnContext& ctx);
  
     void Process(ConnContext& ctx);
-    void AddPreprocessor( TemplatePreprocessor*);
+    //    void AddPreprocessor( TemplatePreprocessor*);
     void AddHandler( Handler& handler);
     void AddHandler( Handler* handler);
     void AddHandler( handle_t handler );

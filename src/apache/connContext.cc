@@ -9,6 +9,7 @@
 #include <httpd/http_protocol.h>
 #include <httpd/ap_config.h>
 #include <apr_tables.h>
+#include <assert.h>
 
 namespace rikitiki {
   namespace apache {
@@ -19,6 +20,8 @@ namespace rikitiki {
       } else if(strcmp(request->method, "GET") == 0){
 	_method = GET;
       }
+
+
     }
     
 

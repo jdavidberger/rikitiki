@@ -7,10 +7,11 @@
 #include <pthread.h>
 #include "connContext.h"
 #include "mongoose/connContext.h"
-#include <config.h>
+#include <utils/config.h>
+#include <cstring>
 
 namespace rikitiki {
-  struct HeaderFooterPreprocessor : public TemplatePreprocessor {
+  /*  struct HeaderFooterPreprocessor : public TemplatePreprocessor {
     virtual void Process(const ConnContext& ctx, 
 			 ctemplate::TemplateDictionary& td){    
       auto header = td.AddIncludeDictionary("HEADER");
@@ -30,7 +31,7 @@ namespace rikitiki {
       auto page_footer = td.AddIncludeDictionary("PAGE_FOOTER");
       page_footer->SetFilename("page_footer.tpl");
     }
-  };
+    };*/
 
   std::string Handler::desc() const {
     return "";
@@ -76,19 +77,19 @@ namespace rikitiki {
       handleChildren = false;
     }
     void Process(ConnContext& ctx) {
-      ctemplate::TemplateDictionary td("commands.tpl");
+      /*ctemplate::TemplateDictionary td("commands.tpl");
       for(unsigned int i = 0;i < server->handlers.size();i++){
 	ctemplate::TemplateDictionary* row = td.AddSectionDictionary("HANDLER");
 	row->SetValue("name", server->handlers[i]->name());
 	row->SetValue("description", server->handlers[i]->desc());
       }
-      ctx << td;  
+      ctx << td;  */
     }
   };
 
   Server::Server(int _port) : port(_port) {
     //    AddHandler(new IndexPage(this) );
-    AddPreprocessor(new HeaderFooterPreprocessor());
+    //    AddPreprocessor(new HeaderFooterPreprocessor());
   }
 
   void* Server::Handle(enum mg_event event, struct mg_connection *conn) {
@@ -106,9 +107,9 @@ namespace rikitiki {
     return (void*)0;
   }
 
-  void Server::AddPreprocessor( TemplatePreprocessor* tp){
+  /*  void Server::AddPreprocessor( TemplatePreprocessor* tp){
     templatePreprocessors.push_back(tp);
-  }
+    }*/
 
   void Server::AddHandler( Handler* handler) {
     handlers.push_back(handler);
@@ -122,15 +123,4 @@ namespace rikitiki {
     AddHandler( new GHandler( handler ) );
   }
 
-  static bool _setCTemplateRoot() {
-    std::string root;
-    bool rtn = Configuration::Global().lookupValue("ctemplate_root", root);
-    LOG(Server, Verbose) << "Set ctemplate root to " << root << std::endl;
-    if(rtn)
-      ctemplate::Template::SetTemplateRootDirectory(root);
-    else
-      LOG(Server, Error) << "Could not find configuration for 'ctemplate_root'" << std::endl;
-    return rtn;
-  };
-  static bool setCTemplateRoot = _setCTemplateRoot();
 }

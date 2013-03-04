@@ -1,7 +1,11 @@
 #include <rikitiki.h>
 #include <mongoose/server.h>
-#include <apache/register.h>
-#include <config.h>
+#include <utils/config.h>
+
+#ifdef USE_CTEMPLATE
+#include <ctemplate/connContext_ext.h>
+#endif
+
 using namespace rikitiki;
 using namespace rikitiki::mongoose;
 
@@ -26,13 +30,19 @@ struct HelloWorldModule {
   }  
 
   void ctemplate(ConnContext& ctx, const std::string& bg){
+    #ifdef USE_CTEMPLATE
     ctemplate::TemplateDictionary td("example.tpl");
     td.SetValue("bg", bg);
     const std::string& content = ctx.Post()["textarea"];
     td.SetValue("content", content.size() == 0 ? "Hello world!" : content);
     ctx << td;
+    #else    
+    ctx << "Rikitiki compiled to not use ctemplates; change this option in the root CMakeLists.txt file";
+    #endif
   }  
 };
+
+#ifdef USE_MONGOOSE
 
 int main(){
   MongooseServer server(5000);
@@ -45,4 +55,6 @@ int main(){
   }
   return 0;
 }
+
+#endif
 

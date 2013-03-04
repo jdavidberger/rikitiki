@@ -1,8 +1,6 @@
-include_directories(	
+include_directories(
 			${CMAKE_SOURCE_DIR}/src
 			${THIRD_PARTY_DIR}/curl-7.28.1/include
-			${THIRD_PARTY_DIR}/ctemplate-2.2/src
-			/usr/include/apr-1/
 		)
 
 link_directories(
@@ -13,19 +11,36 @@ link_directories(
 
 add_subdirectory(utils)
 
-add_definitions(-DCTEMPLATE_ROOT_DIRECTORY="${CMAKE_SOURCE_DIR}/html/ctemplate")
-add_library(rikitiki 
-		   server.cc 
-		   connContext.cc 
-		   content_types.cc 
-		   routing.cc
-		   apache/connContext.cc
-		   mongoose/connContext.cc 
-		   mongoose/server.cc
-		   mongoose/mongoose.c
-		   config.cc 
-		   ctemplate/connContext_ext.cc
-		   )
-target_link_libraries(rikitiki ctemplate dl pthread curl utils config++)
+set (RT_SRC
+    server.cc 
+    connContext.cc 
+    content_types.cc 
+    routing.cc
+)
 
-add_subdirectory(examples)
+set (RT_LIBS
+    dl pthread curl utils
+)
+
+IF(${USE_MONGOOSE})
+	add_subdirectory(mongoose)
+ENDIF()
+
+IF(${USE_CTEMPLATE})
+	include_directories(${THIRD_PARTY_DIR}/ctemplate-2.2/src)
+	add_subdirectory(ctemplate)
+ENDIF()
+
+IF(${USE_APACHE})
+	include_directories(/usr/include/apr-1/)	
+	add_subdirectory(apache)
+ENDIF()
+
+add_library(rikitiki ${RT_SRC})
+target_link_libraries(rikitiki ${RT_LIBS})		     
+
+if(${MAKE_EXAMPLES})
+	add_subdirectory(examples)
+ENDIF()
+
+

@@ -4,6 +4,7 @@
 #include "connContext.h"
 #include <algorithm>
 #include <curl/curl.h>
+#include <assert.h>
 
 namespace rikitiki { 
   ConnContext::Method ConnContext::RequestMethod() {

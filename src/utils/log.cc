@@ -4,7 +4,7 @@
 #include "log.h"
 #include <fstream>
 #include <iostream>
-#include <config.h>
+#include <utils/config.h>
 
 static std::ostream* defaultStream = &std::cerr;
 

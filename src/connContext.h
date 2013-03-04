@@ -3,7 +3,7 @@
 
 #pragma once
 #include "mongoose/mongoose.h"
-#include "ctemplate/template_emitter_ext.h"
+//#include "ctemplate/template_emitter_ext.h"
 #include <string>
 #include "server.h"
 
@@ -67,4 +67,4 @@ void mapContents(std::string& raw_content, std::map<std::string, std::string>& p
 
 
 
-#include "ctemplate/connContext_ext.h"
+//#include "ctemplate/connContext_ext.h"

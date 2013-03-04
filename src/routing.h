@@ -4,7 +4,7 @@
 #pragma once
 #include "server.h"
 #include "connContext.h"
-
+#include <cstring>
 namespace rikitiki {
 
 struct Route : public Handler { 
