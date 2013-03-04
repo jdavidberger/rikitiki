@@ -1,4 +1,4 @@
-#include <server.h>
+#include <rikitiki/server.h>
 using namespace rikitiki;
 using namespace rikitiki::ctemplates;
 void Server::AddPreprocessor( TemplatePreprocessor* tp){

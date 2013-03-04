@@ -1,8 +1,8 @@
-#include <rikitiki.h>
-#include <mongoose/server.h>
+#include <rikitiki/rikitiki.h>
+#include <rikitiki/mongoose/server.h>
 #include <utils/config.h>
-#include <ctemplate/connContext_ext.h>
-#include <ctemplate/HeaderFooterPreprocessor.h>
+#include <rikitiki/ctemplate/connContext_ext.h>
+#include <rikitiki/ctemplate/headerFooterPreprocessor.h>
 using namespace rikitiki;
 using namespace rikitiki::mongoose;
 using namespace rikitiki::ctemplates;

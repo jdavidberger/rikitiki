@@ -1,5 +1,5 @@
-#include <rikitiki.h>
-#include <mongoose/server.h>
+#include <rikitiki/rikitiki.h>
+#include <rikitiki/mongoose/server.h>
 #include <utils/config.h>
 
 using namespace rikitiki;

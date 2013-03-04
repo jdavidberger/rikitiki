@@ -13,7 +13,7 @@
 #include "utils/log.h"
 
 #if USE_CTEMPLATE
-#include <ctemplate/templatePreprocessor.h>
+#include <rikitiki/ctemplate/templatePreprocessor.h>
 #endif
 
 namespace rikitiki {

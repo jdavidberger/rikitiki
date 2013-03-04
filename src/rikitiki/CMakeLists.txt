@@ -1,5 +1,4 @@
 include_directories(
-			${CMAKE_SOURCE_DIR}/src
 			${THIRD_PARTY_DIR}/curl-7.28.1/include
 		)
 
@@ -7,9 +6,6 @@ link_directories(
 		${THIRD_PARTY_DIR}/curl-7.28.1/bin/lib
 		${THIRD_PARTY_DIR}/ctemplate-2.2
 	)
-
-
-add_subdirectory(utils)
 
 set (RT_SRC
     server.cc 

@@ -2,7 +2,7 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
 #pragma once
-#include <rikitiki.h>
+#include <rikitiki/rikitiki.h>
 #include <httpd/httpd.h>
 #include <httpd/http_protocol.h>
 #include <httpd/http_config.h>

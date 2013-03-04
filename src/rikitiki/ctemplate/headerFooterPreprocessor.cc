@@ -1,8 +1,8 @@
 /* Copyright (C) 2012-2013 Justin Berger 
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
-#include "HeaderFooterPreprocessor.h"
-#include <rikitiki.h>
+#include "headerFooterPreprocessor.h"
+#include <rikitiki/rikitiki.h>
 
 using namespace rikitiki;
 namespace rikitiki {
