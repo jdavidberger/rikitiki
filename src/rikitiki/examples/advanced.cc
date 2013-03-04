@@ -15,6 +15,7 @@ struct CTemplateExampleModule {
     server.AddHandler( CreateRoute<>::With(this, "/", &T::Index) );
     server.AddHandler( CreateRoute<>::With(this, "/post", &T::Get,  ConnContext::GET ) );
     server.AddHandler( CreateRoute<>::With(this, "/post", &T::Post, ConnContext::POST ));
+    server.AddHandler( CreateRoute<>::With(this, "/qs", &T::QueryString));
   }
 
   void Index(ConnContext& ctx){
@@ -34,12 +35,23 @@ struct CTemplateExampleModule {
     td.SetValue("message", message.size() ? message : "You didn't enter anything!");    
     ctx << td;      
   }
+
   void Post(ConnContext& ctx){
     makePage(ctx, ctx.Post()["message"]);
   }  
+
   void Get(ConnContext& ctx){
     makePage(ctx, "Please enter a message below");
   }  
+  
+  void QueryString(ConnContext& ctx){
+    ctx << ContentType::application_javascript 
+	<< "{";
+    foreach(it, ctx.QueryString()){
+      ctx << "\t '" << it->first << "': '" << it->second << "', \n";
+    }
+    ctx << "}";
+  }
 };
 
 #ifdef USE_MONGOOSE
@@ -47,6 +59,7 @@ struct CTemplateExampleModule {
 int main(){
   MongooseServer server(5000);
   CTemplateExampleModule module;
+  LOG(Main, Info) << "Remember to run this from the html directory if you want styles to work!" << std::endl;
   server.Register(module);
   server.Start();
   while(true){

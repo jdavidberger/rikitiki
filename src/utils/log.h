@@ -47,8 +47,9 @@ namespace logging {
     std::string buffer;
     buffer.resize(32);
     pthread_getname_np(pthread_self(), &buffer[0], 32);
+    
     return buffer;
   }
 }
 
-#define LOG(CAT, LEVEL) if(ShouldLog(#CAT, logging::LEVEL) ) logging::LogStream(#CAT) << "[" << #CAT << ", " << #LEVEL << " (" << logging::getCurrThreadName() << ")] "
+#define LOG(CAT, LEVEL) if(ShouldLog(#CAT, logging::LEVEL) ) logging::LogStream(#CAT) << "[" << #CAT << ", " << #LEVEL << " (" << logging::getCurrThreadName().c_str() << ")] "

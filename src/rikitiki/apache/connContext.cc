@@ -15,11 +15,7 @@ namespace rikitiki {
   namespace apache {
 
     void ApacheConnContext::FillRequestMethod() {
-      if(strcmp(request->method, "POST") == 0){
-	_method = POST;
-      } else if(strcmp(request->method, "GET") == 0){
-	_method = GET;
-      }
+      _method = strToMethod(request->method);
     }    
 
     void ApacheConnContext::writeResponse(){
@@ -34,7 +30,6 @@ namespace rikitiki {
       ap_rputs(resp.c_str(), request);
       LOG(Server, Info) << request->status << std::endl;
     }
-
 
     ApacheConnContext::ApacheConnContext(Server* server, request_rec* _r) : request(_r), ConnContext(server) { 
       std::string thread_name = "";

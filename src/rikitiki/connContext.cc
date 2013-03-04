@@ -31,16 +31,59 @@ namespace rikitiki {
     return _post;
   }
 
-  Response::Response() : ResponseType(web::ContentType::text_html){}
+  Response::Response() : ResponseType(rikitiki::ContentType::text_html){}
 
-  std::ostream& Response::operator <<(web::ContentType::t t){   
+  Response& Response::operator <<(rikitiki::ContentType::t t){   
     ResponseType = t;
-    return response;
+    return *this;
   }
 
   ConnContext::ConnContext(const Server* _server) : handled(false),_method(ANY), mappedPost(false), server(_server) {}
 
   ConnContext::ConnContext() : handled(false),_method(ANY), mappedPost(false), server(NULL) {}
+
+#define MATCH_METHOD_ENUM(eval)	do{if(strcmp(method, #eval) == 0) return ConnContext::eval;}while(false);
+				     
+  ConnContext::Method strToMethod(const char* method){
+    MATCH_METHOD_ENUM(GET);
+    MATCH_METHOD_ENUM(POST);
+    MATCH_METHOD_ENUM(HEAD);
+    MATCH_METHOD_ENUM(PUT);
+    MATCH_METHOD_ENUM(DELETE);
+    MATCH_METHOD_ENUM(TRACE);
+    MATCH_METHOD_ENUM(OPTIONS);
+    MATCH_METHOD_ENUM(CONNECT);
+    MATCH_METHOD_ENUM(PATCH);
+    LOG(Server, Error) << "strToMethod failed on method '" << method << "'" << std::endl;
+    return ConnContext::ANY;
+  }
+  void mapQueryString(const char* _qs, std::map<std::string, std::string>& qs){
+    if(_qs == NULL) return;
+    std::string name;
+    std::string* val = 0;
+    bool nameMode = true;
+    while(*_qs != '\0'){
+      if(nameMode){
+	if(*_qs == '='){
+	  nameMode = false;
+	  val = &qs[name];
+	} else if(*_qs == '&'){
+	  qs[name] = "";
+	  name.clear();
+	} else {
+	  name += *_qs;
+	}
+      } else {
+	if(*_qs == '&'){
+	  nameMode = true;
+	  name.clear();
+	} else {
+	  *val += *_qs;
+	}
+      }
+      _qs++;
+    }
+  }
 
   void mapContents(std::string& raw_content, std::map<std::string, std::string>& post){
     if(raw_content.back() != '&')
@@ -48,7 +91,6 @@ namespace rikitiki {
     
     std::replace(raw_content.begin(), raw_content.end(), '+', ' ');
     auto l_it = raw_content.begin();
-    
     std::string name, value;
     foreach(it, raw_content){
       switch(*it){

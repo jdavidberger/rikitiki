@@ -5,7 +5,7 @@
 
 #define CASE_RET(X,Y) case X ## _ ## Y: return #X "/" #Y;
 
-namespace web {
+namespace rikitiki {
   namespace ContentType {
     std::string ToString(t type){
       switch(type){

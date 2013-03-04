@@ -4,7 +4,7 @@
 #pragma once 
 #include <string>
 
-namespace web {
+namespace rikitiki {
   namespace ContentType {
     enum t {
       application_pdf,

@@ -11,13 +11,13 @@ namespace rikitiki {
   class Server;
   class ConnContext;
   struct Response {
-    web::ContentType::t ResponseType;
+    ContentType::t ResponseType;
     int status;
     std::stringstream response;
     Response();
     template <class T>
-    std::ostream& operator <<(const T& obj){ return response << obj; }
-    std::ostream& operator <<(web::ContentType::t t);
+    Response& operator <<(const T& obj){ response << obj; return *this;}
+    Response& operator <<(rikitiki::ContentType::t t);
   };
 
   struct Request {
@@ -52,11 +52,12 @@ namespace rikitiki {
     Method RequestMethod();
 
     bool handled;  
-    template <class T> std::ostream& operator <<(const T& obj);
-
+    template <class T> ConnContext& operator <<(const T& obj);
     Response response;
   };
-void mapContents(std::string& raw_content, std::map<std::string, std::string>& post);
+  void mapContents(std::string& raw_content, std::map<std::string, std::string>& post);
+  void mapQueryString(const char* _qs, std::map<std::string, std::string>& qs);
+  ConnContext::Method strToMethod(const char* method);
 #include "connContext.tcc"
 }
 

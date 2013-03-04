@@ -8,11 +8,7 @@ namespace rikitiki {
   namespace mongoose {
 
     void MongooseConnContext::FillRequestMethod() {
-      if(strcmp(request.request_method, "POST") == 0){
-	_method = POST;
-      } else if(strcmp(request.request_method, "GET") == 0){
-	_method = GET;
-      }
+      _method = strToMethod(request.request_method);
     }
 
     void MongooseConnContext::writeResponse(){
@@ -50,7 +46,8 @@ namespace rikitiki {
       return request.uri;
     }
     void MongooseConnContext::FillQueryString() {
-      assert(false);
+      mapQueryString(request.query_string, _qs);
+      mappedQs = true;
     }
     void MongooseConnContext::FillPost() {
       std::string p_data;
