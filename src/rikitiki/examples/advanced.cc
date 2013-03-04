@@ -1,8 +1,11 @@
+/* Copyright (C) 2012-2013 Justin Berger 
+   The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
+
 #include <rikitiki/rikitiki.h>
 #include <rikitiki/mongoose/server.h>
-#include <utils/config.h>
 #include <rikitiki/ctemplate/connContext_ext.h>
 #include <rikitiki/ctemplate/headerFooterPreprocessor.h>
+#include <utils/config.h>
 using namespace rikitiki;
 using namespace rikitiki::mongoose;
 using namespace rikitiki::ctemplates;
