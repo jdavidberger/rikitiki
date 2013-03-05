@@ -6,12 +6,13 @@
 
 // ----------- Parse format string -----------------
 inline bool skip_to_format(std::stringstream& b, const char*& format){
+  LOG(Server, Debug) << "Comparing '" << &b.str()[b.tellg()] << "' to '" << format << "'" << std::endl;
   while( *format != '{' ){
     if(b.peek() != *format) return false;    
     if(b.peek() == '\0') return false;
     b.get();
     format++;
-  } 
+  }     
   return true;
 }
 
@@ -24,13 +25,9 @@ inline bool skip_to_unformat(const char*& format){
   return true;
 }
 
-static inline int modern_sscanf(std::stringstream& b, const char*& format){
-  return 0;
-} 
-
 template <typename T>
 inline static bool extract(std::stringstream& b, T& t){
-  b >> t;
+  b >> t;  
   return !b.fail();
 }
 
@@ -46,16 +43,29 @@ inline bool extract(std::stringstream& b, std::string& t){
       (v == '-');
     if(accept)
       t += v;
-    else 
-      return t.size() > 0;     
+    else {
+      b.unget();
+      break;
+    }
   }
+  LOG(Server, Debug) << t << std::endl;
   return t.size() > 0;
 }
 
 
+static inline int modern_sscanf(std::stringstream& b, const char*& format){
+  while( *format != '\0' && !b.eof() ){
+    if(b.peek() != *format) return false;    
+    b.get(); if(!b.good()) return 0;
+    format++;
+  }       
+  return *format == '\0' && EOF == b.peek() ? 1 : 0;
+} 
+
 template <typename H, typename... T>
-static int modern_sscanf(std::stringstream& b, const char*& format, H& h, T&... t){
+static int modern_sscanf(std::stringstream& b, const char*& format, H& h, T&... t){  
   if(!skip_to_format(b, format)) return 0;
+  LOG(Server, Debug) << "Comparing '" << b.str() << "' to '" << format << "'" << std::endl;
   skip_to_unformat(format);
   return extract(b, h) ? 
     1 + modern_sscanf(b, format, t...) :
@@ -64,6 +74,7 @@ static int modern_sscanf(std::stringstream& b, const char*& format, H& h, T&... 
 
 template <typename... T>
 static int modern_sscanf(const char* b, const char* format, T&... t){
+  LOG(Server, Debug) << "Trying to pull " << b << " from " << format << std::endl;
   std::stringstream ss(b);
   return modern_sscanf(ss, format, t...);
 }
@@ -87,7 +98,7 @@ bool Route_<P,T...>::Handle(ConnContext& ctx){
 			      std::tuple<T...>());
   
     int matched = applyTuple(this, &Route_<P, T...>::Scan, args);
-    if(matched == sizeof...(T)){
+    if(matched == sizeof...(T) + 1){
       LOG(Web, Verbose) << "Using route " << route << ", " << method << std::endl;
       applyTuple(parent, f, args);
       return true;

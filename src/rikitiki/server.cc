@@ -55,7 +55,8 @@ namespace rikitiki {
 
   bool Server::Handle(ConnContext& ctx) {
     for(size_t i = 0;i < handlers.size();i++){
-      handlers[i]->Handle(ctx);
+      LOG(Server, Debug) << "Trying handler " << handlers[i]->name() << std::endl;
+      handlers[i]->Handle(ctx);      
       if(ctx.handled){
 	ctx.writeResponse();
 	return true;

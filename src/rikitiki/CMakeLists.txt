@@ -12,6 +12,7 @@ set (RT_SRC
     connContext.cc 
     content_types.cc 
     routing.cc
+    http_statuses.cc
 )
 
 set (RT_LIBS

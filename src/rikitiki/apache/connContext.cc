@@ -66,7 +66,7 @@ namespace rikitiki {
         apr_brigade_flatten(pair->value, &value[0], &size);
 
 	name = std::string(pair->name);
-	_post[name] = value;
+	_post.insert(PostContent(name, value));
       }
 
       mappedPost = true;

@@ -5,7 +5,15 @@
 template <class T>
 ConnContext& ConnContext::operator <<(const T& obj){
   handled = true;
-  response.status = true;	
   response << obj;
   return *this;
+}
+
+template <typename T1, typename T2>
+T2& rikitiki::multimap<T1,T2>::operator[](const T1& key){
+  typename rikitiki::multimap<T1,T2>::iterator it = this->find(key);
+  if(it != this->end() )
+    return it->second;
+  it = this->insert(std::pair<T1, T2>(key, T2()));
+  return it->second;
 }

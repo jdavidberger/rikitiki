@@ -6,57 +6,87 @@
 //#include "ctemplate/template_emitter_ext.h"
 #include <string>
 #include "server.h"
-
+#include "http_statuses.h"
 namespace rikitiki {
   class Server;
   class ConnContext;
+
+  typedef std::pair<std::string,std::string> stringpair;
+  struct Header : public stringpair {
+  Header(const std::string& name, const std::string& value) : stringpair(name, value){}
+  };
+  struct PostContent : public stringpair {
+  PostContent(const std::string& name, const std::string& value) : stringpair(name, value){}
+  };
+  struct Cookie : public stringpair {
+  Cookie(const std::string& name, const std::string& value) : stringpair(name, value){}
+  };
+
   struct Response {
     ContentType::t ResponseType;
-    int status;
+    
+    std::vector<Header> headers;
+    const HttpStatus* status;
     std::stringstream response;
     Response();
     template <class T>
     Response& operator <<(const T& obj){ response << obj; return *this;}
     Response& operator <<(rikitiki::ContentType::t t);
+    Response& operator <<(const rikitiki::Cookie& t);
+    Response& operator <<(const rikitiki::HttpStatus& t);
+    Response& operator <<(const rikitiki::Header& t);
   };
 
-  struct Request {
-    virtual const char* URI() = 0;
+  template <typename T1, typename T2> 
+    struct multimap : public std::multimap<T1, T2> {
+    T2& operator[](const T1&);
   };
 
-  class ConnContext : public Request {  
+  typedef multimap<std::string, std::string> HeaderCollection;
+  typedef std::map<std::string, std::string> QueryStringCollection;
+  typedef multimap<std::string, std::string> PostCollection;
+  typedef std::map<std::string, std::string> CookieCollection;
+
+  class ConnContext {  
   public:
     enum Method {
       ANY = 0, GET = 1, POST = 2, HEAD = 3, PUT = 4, DELETE = 5, TRACE = 6, OPTIONS = 7, CONNECT = 8, PATCH = 9, OTHER
     };
   protected:
-    bool mappedPost, mappedQs; 
-    std::map<std::string, std::string> _post;
-    std::map<std::string, std::string> _qs;
+    bool mappedPost, mappedQs, mappedHeaders, mappedCookies; 
+    PostCollection _post;
+    QueryStringCollection _qs;
+    HeaderCollection _headers;
+    CookieCollection _cookies;
 
     Method _method;
 
     virtual void FillQueryString() = 0;
     virtual void FillPost() = 0;
+    virtual void FillHeaders() = 0;
     virtual void FillRequestMethod() = 0;  
-    
+    virtual void FillCookies();  
+
     friend class Server;
     virtual void writeResponse() = 0;
     ConnContext(const Server*);
     ConnContext();
   public:
     const Server* server;
-    std::map<std::string, std::string>& Post();
-    std::map<std::string, std::string>& QueryString();
+    PostCollection& Post();
+    QueryStringCollection& QueryString();
+    HeaderCollection& Headers();
+    CookieCollection& Cookies();
 
+    virtual const char* URI() = 0;
+    bool handled;  
     Method RequestMethod();
 
-    bool handled;  
     template <class T> ConnContext& operator <<(const T& obj);
     Response response;
   };
-  void mapContents(std::string& raw_content, std::map<std::string, std::string>& post);
-  void mapQueryString(const char* _qs, std::map<std::string, std::string>& qs);
+  void mapContents(std::string& raw_content, PostCollection& post);
+  void mapQueryString(const char* _qs, QueryStringCollection& qs);
   ConnContext::Method strToMethod(const char* method);
 #include "connContext.tcc"
 }

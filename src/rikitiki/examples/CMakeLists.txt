@@ -2,10 +2,15 @@ IF(${USE_MONGOOSE})
 	add_executable(helloWorld helloWorld.cc)
 	target_link_libraries(helloWorld rikitiki)
 
+	add_executable(headers headers.cc)
+	target_link_libraries(headers rikitiki)
+
 	IF(${USE_CTEMPLATE})
 		add_executable(advanced advanced.cc)
 		target_link_libraries(advanced rikitiki)
 	ENDIF()
+
+	
 ENDIF()
 
 IF(${USE_APACHE})

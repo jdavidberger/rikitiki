@@ -14,9 +14,13 @@ namespace rikitiki {
     void MongooseConnContext::writeResponse(){
       std::stringstream ss;
       std::string resp = response.response.str();
-      ss << "HTTP/1.1 200 OK\r\n";
+
+      ss << "HTTP/1.1 " << response.status->status << " " << response.status->name << "\r\n";
       ss << "Content-Type: " << ToString(response.ResponseType) << "\r\n";
       ss << "Content-Length: " << resp.size() << "\r\n";
+      foreach(it, response.headers){
+	ss << it->first << ": " << it->second << "\r\n";
+      }
       ss << "\r\n";
       ss << resp;
       std::string buffer = ss.str();
@@ -45,10 +49,21 @@ namespace rikitiki {
     const char* MongooseConnContext::URI(){
       return request.uri;
     }
+
     void MongooseConnContext::FillQueryString() {
       mapQueryString(request.query_string, _qs);
       mappedQs = true;
     }
+
+    void MongooseConnContext::FillHeaders() {      
+      std::string name, value;
+      for(int i = 0;i < request.num_headers;i++)
+	_headers.insert( std::make_pair(std::string(request.http_headers[i].name),
+					std::string(request.http_headers[i].value)));
+
+      mappedHeaders = true;
+    }
+
     void MongooseConnContext::FillPost() {
       std::string p_data;
       p_data.resize(512);

@@ -17,6 +17,8 @@ namespace rikitiki {
       virtual void FillPost();
       virtual void FillQueryString();
       virtual void FillRequestMethod();
+      virtual void FillHeaders();
+
     public:      
       request_rec *request;
       virtual const char* URI();

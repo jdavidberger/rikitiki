@@ -11,12 +11,15 @@
 static void getAssemblyName(std::string& name){
     Dl_info info;
     dladdr( (void*)&getAssemblyName, &info);
+    std::cerr << info.dli_fname << std::endl;
     std::string exePath(info.dli_fname);
     auto start = exePath.find_last_of('/');
     auto end = exePath.find_last_of('.');
 
     start = start == std::string::npos ? 0 : start + 1;
-    end = end == std::string::npos ? exePath.size() : end;    
+    end = end == std::string::npos ? exePath.size() : 
+      end <= start ? exePath.size() : end;    
+
     name = std::string(&exePath[start], &exePath[end]);
 }
 

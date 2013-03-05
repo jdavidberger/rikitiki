@@ -7,6 +7,7 @@
 #include <assert.h>
 
 namespace rikitiki { 
+  
   ConnContext::Method ConnContext::RequestMethod() {
     if(_method == ANY){
       this->FillRequestMethod();
@@ -15,7 +16,53 @@ namespace rikitiki {
     return _method;
   }
 
-  std::map<std::string, std::string>& ConnContext::QueryString() {
+  static inline const char* read_name(const char* b){
+    while(*b == ' ') b++;
+    while(*b != '=' && *b != '\0') b++;
+    return b;
+  }
+
+  static inline const char* read_value(const char* b){
+    while(*b != ';' && *b != '\0') b++;
+    return b;
+  }
+
+  void ConnContext::FillCookies(){
+    auto range = Headers().equal_range("Cookie");
+    for(auto it = range.first;it != range.second;it++){
+      LOG(Server, Debug) << "Req. cookie: " << it->first << " = " << it->second << std::endl;
+      if(it->second.size() == 0) continue;
+      const char* n =  &it->second[0];
+      const char *ne, *ve;
+      do {
+	ne = read_name(n);
+	ve = read_value(ne);
+	_cookies[std::string(n, ne)] = 
+	  ne >= ve ? std::string() : std::string(ne+1, ve); 
+	n = ve;
+	while(*n == ';' || *n == ' ') n++;	
+      } while(*n != 0);
+    }
+    mappedCookies = true;
+  }
+
+  HeaderCollection& ConnContext::Headers(){
+    if(!mappedHeaders){
+      this->FillHeaders();
+      assert(mappedHeaders);
+    }
+    return _headers;
+  }
+
+  CookieCollection& ConnContext::Cookies(){
+    if(!mappedCookies){
+      this->FillCookies();
+      assert(mappedCookies);
+    }
+    return _cookies;
+  }
+
+  QueryStringCollection& ConnContext::QueryString() {
     if(!mappedQs){
       this->FillQueryString();
       assert(mappedQs);
@@ -23,7 +70,7 @@ namespace rikitiki {
     return _qs;
   }
 
-  std::map<std::string, std::string>& ConnContext::Post() {
+  PostCollection& ConnContext::Post() {
     if(!mappedPost){
       this->FillPost();
       assert(mappedPost);
@@ -31,16 +78,31 @@ namespace rikitiki {
     return _post;
   }
 
-  Response::Response() : ResponseType(rikitiki::ContentType::text_html){}
+  Response::Response() : ResponseType(rikitiki::ContentType::text_html), status(&HttpStatus::OK){}
+
+  Response& Response::operator <<(const rikitiki::HttpStatus& t){
+    status = &t;
+    return *this;
+  }
 
   Response& Response::operator <<(rikitiki::ContentType::t t){   
     ResponseType = t;
     return *this;
   }
 
-  ConnContext::ConnContext(const Server* _server) : handled(false),_method(ANY), mappedPost(false), server(_server) {}
+  Response& Response::operator <<(const rikitiki::Cookie& cookie){
+    return *this << Header("Set-Cookie", cookie.first + "=" + cookie.second);
+  }
 
-  ConnContext::ConnContext() : handled(false),_method(ANY), mappedPost(false), server(NULL) {}
+  Response& Response::operator <<(const rikitiki::Header& header){   
+    headers.push_back(header);
+    return *this;
+  }
+
+
+
+  ConnContext::ConnContext(const Server* _server) : ConnContext() { server = _server; }
+  ConnContext::ConnContext() : handled(false), server(NULL), mappedPost(false), mappedQs(false), mappedHeaders(false), mappedCookies(false)  {}
 
 #define MATCH_METHOD_ENUM(eval)	do{if(strcmp(method, #eval) == 0) return ConnContext::eval;}while(false);
 				     
@@ -85,7 +147,7 @@ namespace rikitiki {
     }
   }
 
-  void mapContents(std::string& raw_content, std::map<std::string, std::string>& post){
+  void mapContents(std::string& raw_content, PostCollection& post){
     if(raw_content.back() != '&')
       raw_content.push_back('&');
     
@@ -100,8 +162,7 @@ namespace rikitiki {
 	break; 
       case '&': 
 	char* value = curl_unescape(&*l_it, it - l_it);
-      
-	post[name] = value;
+	post.insert(PostContent(name, value));
 	curl_free(value);
 	l_it = it+1;
 	break;
