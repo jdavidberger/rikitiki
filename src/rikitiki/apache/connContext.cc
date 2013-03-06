@@ -62,6 +62,12 @@ namespace rikitiki {
       ap_set_content_type(request, apr_pstrdup(request->pool, &responseType[0]));
       ap_set_content_length(request, resp.size());
 
+      apr_table_t *h_table = request->headers_out;
+      foreach(it, response.headers){
+	LOG(Server, Debug) << "Setting header " << it->first << ": " << it->second << std::endl;
+	apr_table_addn(h_table, &it->first[0], &it->second[0]);
+      }
+
       if(request->header_only) return;
       ap_rputs(resp.c_str(), request);
     }

@@ -5,8 +5,8 @@ SET(rikitiki_major_version v0.1)
 EXEC_PROGRAM(hg ARGS tip OUTPUT_VARIABLE hg_tip)
 SET(rikitiki_minor_version "unknown")
 STRING(REGEX REPLACE "changeset:[ \t]*([0-9]+):(.*)" "\\1" rikitiki_minor_version "${hg_tip}")
-
-SET(rikitiki_version "${rikitiki_major_version}.${rikitiki_minor_version}")
+FILE(WRITE ${CMAKE_BINARY_DIR}/VERSION "${rikitiki_major_version}.${rikitiki_minor_version}")
+FILE(READ ${CMAKE_BINARY_DIR}/VERSION rikitiki_version)
 
 set(THIRD_PARTY_DIR ${CMAKE_SOURCE_DIR}/third)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -41,7 +41,8 @@ find_package(Doxygen)
 if(DOXYGEN_FOUND)	
 	configure_file(${CMAKE_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 add_custom_target(doc
-	${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+	COMMAND	${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+	COMMAND	tar -cf ${CMAKE_BINARY_DIR}/doc-${rikitiki_version}.tar.gz -C ${CMAKE_BINARY_DIR}/doc .
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 	COMMENT "Generating API documentation with Doxygen" VERBATIM
 )

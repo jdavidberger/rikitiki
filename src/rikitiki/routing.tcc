@@ -6,7 +6,6 @@
 
 // ----------- Parse format string -----------------
 inline bool skip_to_format(std::stringstream& b, const char*& format){
-  LOG(Server, Debug) << "Comparing '" << &b.str()[b.tellg()] << "' to '" << format << "'" << std::endl;
   while( *format != '{' ){
     if(b.peek() != *format) return false;    
     if(b.peek() == '\0') return false;
@@ -48,7 +47,6 @@ inline bool extract(std::stringstream& b, std::string& t){
       break;
     }
   }
-  LOG(Server, Debug) << t << std::endl;
   return t.size() > 0;
 }
 
@@ -65,7 +63,6 @@ static inline int modern_sscanf(std::stringstream& b, const char*& format){
 template <typename H, typename... T>
 static int modern_sscanf(std::stringstream& b, const char*& format, H& h, T&... t){  
   if(!skip_to_format(b, format)) return 0;
-  LOG(Server, Debug) << "Comparing '" << b.str() << "' to '" << format << "'" << std::endl;
   skip_to_unformat(format);
   return extract(b, h) ? 
     1 + modern_sscanf(b, format, t...) :
@@ -74,7 +71,6 @@ static int modern_sscanf(std::stringstream& b, const char*& format, H& h, T&... 
 
 template <typename... T>
 static int modern_sscanf(const char* b, const char* format, T&... t){
-  LOG(Server, Debug) << "Trying to pull " << b << " from " << format << std::endl;
   std::stringstream ss(b);
   return modern_sscanf(ss, format, t...);
 }
@@ -91,7 +87,6 @@ int Route_<P,T...>::Scan(ConnContext& ctx, T&... t){
 template <typename P, typename... T> 
 bool Route_<P,T...>::Handle(ConnContext& ctx){
   if( method != ConnContext::ANY && method != ctx.RequestMethod() ) {
-    LOG(Web, Verbose) << "Not using route " << route << ", " << method << " for method failure." << std::endl;
     return false;
   }
   auto args = std::tuple_cat( std::tuple<ConnContext&>(ctx),

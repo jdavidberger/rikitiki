@@ -34,6 +34,13 @@ namespace rikitiki {
     virtual std::string name() const;
   };
 
+  /**
+    \brief The main interface file between modules and a given server
+
+    Server is the rikitiki component that stores handlers and interfaces with the 
+    choosen server module to fire them off. It also is the object that provides
+    information about the current server -- IP, Port, etc. 
+   */
   class Server {
   protected:
   public:
