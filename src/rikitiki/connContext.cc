@@ -102,7 +102,7 @@ namespace rikitiki {
 
 
   ConnContext::ConnContext(const Server* _server) : ConnContext() { server = _server; }
-  ConnContext::ConnContext() : handled(false), server(NULL), mappedPost(false), mappedQs(false), mappedHeaders(false), mappedCookies(false)  {}
+  ConnContext::ConnContext() : _method(ANY), handled(false), server(NULL), mappedPost(false), mappedQs(false), mappedHeaders(false), mappedCookies(false)  {}
 
 #define MATCH_METHOD_ENUM(eval)	do{if(strcmp(method, #eval) == 0) return ConnContext::eval;}while(false);
 				     

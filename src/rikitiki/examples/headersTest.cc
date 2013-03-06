@@ -10,11 +10,10 @@ using namespace rikitiki;
 using namespace rikitiki::mongoose;
 using namespace rikitiki::ctemplates;
 
-struct HeaderTestModule {
-
+struct HeadersTestModule {
   void Register(Server& server){
     server.AddPreprocessor( new HeaderFooterPreprocessor() );
-    typedef HeaderTestModule T;
+    typedef HeadersTestModule T;
     server.AddHandler( CreateRoute<>::With(this, "/headers", &T::headers) );
     server.AddHandler( CreateRoute<std::string, std::string>::With(this, "/cookies/{name}/{value}", &T::set_cookie) );
     server.AddHandler( CreateRoute<>::With(this, "/cookies", &T::cookies) );
@@ -48,7 +47,7 @@ struct HeaderTestModule {
 
 int main(){
   MongooseServer server(5000);
-  HeaderTestModule module;
+  HeadersTestModule module;
 
   server.Register(module);
   server.Start();

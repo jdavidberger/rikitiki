@@ -18,6 +18,43 @@ namespace rikitiki {
       _method = strToMethod(request->method);
     }    
 
+    void ApacheConnContext::FillQueryString() {
+      mapQueryString(request->args, _qs);
+      mappedQs = true;
+    }
+    static int header_add(void* rec, const char*key, const char*value){
+      HeaderCollection* _headers = (HeaderCollection *)rec;
+     _headers->insert(make_pair(std::string(key), std::string(value)));
+     return 1;
+    }
+    void ApacheConnContext::FillHeaders() {
+      /*ap_get_mime_headers(request);*/
+      apr_table_t *h_table = request->headers_in;
+      apr_table_do(header_add, &_headers, h_table, NULL);
+      mappedHeaders = true;
+    }
+    void ApacheConnContext::FillPost() {
+      apr_array_header_t* p_data;
+      int res = ap_parse_form_data(request, NULL, &p_data, -1, HUGE_STRING_LEN);      
+      if(res != OK || !p_data) assert(false);
+      apr_off_t len;
+      apr_size_t size;
+      std::string name, value;
+      while(p_data && !apr_is_empty_array(p_data)){
+	ap_form_pair_t *pair = (ap_form_pair_t*) apr_array_pop(p_data);
+
+	apr_brigade_length(pair->value, 1, &len);	
+	size = (apr_size_t) len;	
+	value.resize(size);
+        apr_brigade_flatten(pair->value, &value[0], &size);
+
+	name = std::string(pair->name);
+	_post.insert(PostContent(name, value));
+      }
+
+      mappedPost = true;
+    }
+
     void ApacheConnContext::writeResponse(){
       std::string resp = response.response.str();
       std::string responseType = ToString(response.ResponseType);
@@ -43,33 +80,6 @@ namespace rikitiki {
 
     const char* ApacheConnContext::URI(){
       return request->uri;
-    }
-
-    void ApacheConnContext::FillQueryString() {
-      mapQueryString(request->args, _qs);
-      mappedQs = true;
-    }
-
-    void ApacheConnContext::FillPost() {
-      apr_array_header_t* p_data;
-      int res = ap_parse_form_data(request, NULL, &p_data, -1, HUGE_STRING_LEN);      
-      if(res != OK || !p_data) assert(false);
-      apr_off_t len;
-      apr_size_t size;
-      std::string name, value;
-      while(p_data && !apr_is_empty_array(p_data)){
-	ap_form_pair_t *pair = (ap_form_pair_t*) apr_array_pop(p_data);
-
-	apr_brigade_length(pair->value, 1, &len);	
-	size = (apr_size_t) len;	
-	value.resize(size);
-        apr_brigade_flatten(pair->value, &value[0], &size);
-
-	name = std::string(pair->name);
-	_post.insert(PostContent(name, value));
-      }
-
-      mappedPost = true;
     }
   }
 }

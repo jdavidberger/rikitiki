@@ -10,9 +10,9 @@ using namespace rikitiki::mongoose;
 
 struct HelloWorldModule {
   void Register(Server& server){
-    server.AddHandler( CreateRoute<>::With(this, "/hello") );
-    server.AddHandler( CreateRoute<int>::With(this, "/{number}") );
-    server.AddHandler( CreateRoute<std::string>::With(this, "/{word}") );
+    server.AddHandler( CreateRoute<>::With(this, "/hw/hello") );
+    server.AddHandler( CreateRoute<int>::With(this, "/hw/{number}") );
+    server.AddHandler( CreateRoute<std::string>::With(this, "/hw/{word}") );
   }
 
   void operator()(ConnContext& ctx){

@@ -6,6 +6,7 @@
 
 namespace rikitiki {
   namespace apache {
-    ApacheServer::ApacheServer(server_rec* _server) : server(_server)  {  }
+    ApacheServer::ApacheServer(server_rec* _server) : server(_server)  {  
+    }
   }
 }

@@ -7,9 +7,11 @@
 #include <assert.h>
 #include <vector>
 #include <stdio.h>
+#include <string.h>
 
 static void getAssemblyName(std::string& name){
     Dl_info info;
+    memset(&info, 0, sizeof(Dl_info));
     dladdr( (void*)&getAssemblyName, &info);
     std::cerr << info.dli_fname << std::endl;
     std::string exePath(info.dli_fname);
