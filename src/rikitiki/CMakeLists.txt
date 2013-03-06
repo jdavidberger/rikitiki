@@ -43,6 +43,7 @@ set (RT_LIBS
 )
 
 IF(${USE_MONGOOSE})
+	include_directories(${THIRD_PARTY_DIR}/mongoose)
 	add_subdirectory(mongoose)
 ENDIF()
 

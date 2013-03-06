@@ -4,7 +4,6 @@
 #pragma once 
 
 #include <vector>
-#include "mongoose/mongoose.h"
 #include <sstream>
 #include "content_types.h"
 #include "utils/macros.h"

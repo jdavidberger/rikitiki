@@ -10,6 +10,8 @@ using namespace rikitiki;
 using namespace rikitiki::mongoose;
 using namespace rikitiki::ctemplates;
 
+namespace rikitiki {
+  namespace examples {
 struct HeadersTestModule {
   void Register(Server& server){
     server.AddPreprocessor( new HeaderFooterPreprocessor() );
@@ -42,7 +44,10 @@ struct HeadersTestModule {
 	<< "<a href='/cookies/test/test'>test</a>\n";
   }
 };
+  }
+}
 
+using namespace rikitiki::examples;
 #ifdef USE_MONGOOSE
 
 int main(){

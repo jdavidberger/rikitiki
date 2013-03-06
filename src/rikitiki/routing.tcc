@@ -97,10 +97,10 @@ bool Route_<P,T...>::Handle(ConnContext& ctx){
   auto args = std::tuple_cat( std::tuple<ConnContext&>(ctx),
 			      std::tuple<T...>());
   
-    int matched = applyTuple(this, &Route_<P, T...>::Scan, args);
+  int matched = tuple_ext::applyTuple(this, &Route_<P, T...>::Scan, args);
     if(matched == sizeof...(T) + 1){
       LOG(Web, Verbose) << "Using route " << route << ", " << method << std::endl;
-      applyTuple(parent, f, args);
+      tuple_ext::applyTuple(parent, f, args);
       return true;
     }
     return false;

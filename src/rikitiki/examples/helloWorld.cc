@@ -8,25 +8,30 @@
 using namespace rikitiki;
 using namespace rikitiki::mongoose;
 
-struct HelloWorldModule {
-  void Register(Server& server){
-    server.AddHandler( CreateRoute<>::With(this, "/hw/hello") );
-    server.AddHandler( CreateRoute<int>::With(this, "/hw/{number}") );
-    server.AddHandler( CreateRoute<std::string>::With(this, "/hw/{word}") );
-  }
+namespace rikitiki {
+  namespace examples {
+    struct HelloWorldModule {
+      void Register(Server& server){
+	server.AddHandler( CreateRoute<>::With(this, "/hw/hello") );
+	server.AddHandler( CreateRoute<int>::With(this, "/hw/{number}") );
+	server.AddHandler( CreateRoute<std::string>::With(this, "/hw/{word}") );
+      }
 
-  void operator()(ConnContext& ctx){
-    ctx << "Hello world!";
-  }
+      void operator()(ConnContext& ctx){
+	ctx << "Hello world!";
+      }
 
-   void operator()(ConnContext& ctx, int number){
-     ctx << "Number: " << number;
-  }
+      void operator()(ConnContext& ctx, int number){
+	ctx << "Number: " << number;
+      }
 
-  void operator()(ConnContext& ctx, const std::string& word){
-    ctx << "Word: " << word;
-  }  
-};
+      void operator()(ConnContext& ctx, const std::string& word){
+	ctx << "Word: " << word;
+      }  
+    };
+  }
+}
+using namespace rikitiki::examples;
 #ifdef USE_MONGOOSE
 
 int main(){

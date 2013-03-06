@@ -6,6 +6,8 @@
 #pragma once
 #include <tuple>
 
+namespace tuple_ext {
+
 template < uint N >
 struct apply {
   template < typename T, typename... ArgsF, typename... ArgsT, typename... Args >
@@ -75,3 +77,4 @@ template < typename T, typename retF, typename... ArgsF, typename... ArgsT >
   return apply<sizeof...(ArgsT)>::applyTuple_obj_ret(pObj, f, t );
 }
 
+};

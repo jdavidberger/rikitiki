@@ -2,7 +2,7 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
 #pragma once
-#include "mongoose/mongoose.h"
+
 //#include "ctemplate/template_emitter_ext.h"
 #include <string>
 #include "server.h"

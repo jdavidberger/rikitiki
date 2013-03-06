@@ -2,7 +2,7 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
 #include "../server.h"
-
+#include <mongoose.h>
 #ifdef _Win32
 #include <Windows.h>
 #define Sleep usleep

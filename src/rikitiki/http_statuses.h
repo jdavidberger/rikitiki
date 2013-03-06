@@ -1,10 +1,10 @@
 namespace rikitiki {
-  struct HttpStatus { 
-    int status; 
-    const char* name;
+  class HttpStatus { 
   HttpStatus(int s, const char* n) : status(s), name(n){} 
   HttpStatus(int s) : status(s), name(0){} 
-
+  public:
+    int status; 
+    const char* name;
     static const HttpStatus Continue;
     static const HttpStatus Switching_Protocols;
     static const HttpStatus Processing;

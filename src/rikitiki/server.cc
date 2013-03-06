@@ -2,7 +2,6 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
 #include "server.h"
-#include "mongoose/mongoose.h"
 #include <sstream>
 #include <pthread.h>
 #include "connContext.h"
