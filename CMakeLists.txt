@@ -36,7 +36,7 @@ ENABLE_FEATURE(jsoncpp)
 set(MAKE_EXAMPLES 1)
 
 add_subdirectory (src)
-
+add_subdirectory(test)
 
 find_package(Doxygen)
 if(DOXYGEN_FOUND)	
@@ -54,3 +54,4 @@ add_custom_target(release
 	COMMAND hg archive -t tgz ${CMAKE_BINARY_DIR}/rikitiki-${rikitiki_version}-src.tar.gz
 	COMMENT "Generating release tar" VERBATIM
 )
+

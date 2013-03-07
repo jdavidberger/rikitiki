@@ -1,0 +1,30 @@
+Server: Apache/2.4.4 (Unix)
+Content-Length: 472
+Content-Type: text/html
+
+
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="/styles/site.css" />
+	</head>
+<body>
+	<ol class='menu'>
+		<li><a href="/adv">/adv</a></li><li><a href="/adv/post">/adv/post</a></li><li><a href="/adv/qs">/adv/qs</a></li>
+	</ol>
+	<div id="content">
+		<ul>
+		
+			<li><a href="/adv">/adv</a> 
+			<p></p></li>
+		
+			<li><a href="/adv/post">/adv/post</a> 
+			<p></p></li>
+		
+			<li><a href="/adv/qs">/adv/qs</a> 
+			<p></p></li>
+		
+		</ul>
+	</div>
+</body>
+</html>
+

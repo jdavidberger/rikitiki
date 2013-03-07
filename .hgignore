@@ -13,3 +13,4 @@ syntax: glob
 *.md5
 .svn/*
 bin/*
+test/output/*
