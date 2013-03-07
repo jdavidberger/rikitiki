@@ -18,7 +18,6 @@ namespace rikitiki {
      */
     struct HeadersTestModule {
       void Register(Server& server){
-	server.AddPreprocessor( new HeaderFooterPreprocessor() );
 	typedef HeadersTestModule T;
 	server.AddHandler( CreateRoute<>::With(this, "/headers", &T::headers) );
 	server.AddHandler( CreateRoute<std::string, std::string>::With(this, "/cookies/{name}/{value}", &T::set_cookie) );
