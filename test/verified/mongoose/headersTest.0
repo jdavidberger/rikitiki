@@ -1,11 +1,9 @@
 200 OK
-Content-Length: 80
-Set-Cookie: asdf=1234
+Content-Length: 75
 Content-Type: text/plain
 
-Cookies: 
 Headers: 
 Accept-Encoding: identity
 Content-Length: 0
-Host: localhost
+Host: localhost:5000
 

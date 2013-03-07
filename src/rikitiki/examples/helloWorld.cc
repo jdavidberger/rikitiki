@@ -31,19 +31,4 @@ namespace rikitiki {
     };
   }
 }
-using namespace rikitiki::examples;
-#ifdef USE_MONGOOSE
-
-int main(){
-  MongooseServer server(5000);
-  HelloWorldModule module;
-  server.Register(module);
-  server.Start();
-  while(true){
-    sleep(1000);
-  }
-  return 0;
-}
-
-#endif
 

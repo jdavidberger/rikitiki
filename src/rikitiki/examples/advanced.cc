@@ -2,13 +2,10 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
 #include <rikitiki/rikitiki.h>
-#include <rikitiki/mongoose/server.h>
-
 #include <rikitiki/ctemplate/connContext_ext.h>
 #include <rikitiki/ctemplate/headerFooterPreprocessor.h>
 #include <utils/config.h>
 using namespace rikitiki;
-using namespace rikitiki::mongoose;
 using namespace rikitiki::ctemplates;
 
 namespace rikitiki {
@@ -63,19 +60,4 @@ namespace rikitiki {
     
  }
 }
-#ifdef USE_MONGOOSE
-using namespace rikitiki::examples;
-int main(){
-  MongooseServer server(5000);
-  AdvancedModule module;
-  LOG(Main, Info) << "Remember to run this from the html directory if you want styles to work!" << std::endl;
-  server.Register(module);
-  server.Start();
-  while(true){
-    sleep(1000);
-  }
-  return 0;
-}
-
-#endif
 

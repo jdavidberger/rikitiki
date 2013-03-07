@@ -114,20 +114,3 @@ namespace rikitiki {
     const char* RestModule::select = "select id, name, author, isbn from books where id = ?;";
   }
 }
-
-
-using namespace rikitiki::examples;
-#ifdef USE_MONGOOSE
-
-int main(){
-  MongooseServer server(5000);
-  RestModule module;
-  server.Register(module);
-  server.Start();
-  while(true){
-    sleep(1000);
-  }
-  return 0;
-}
-#endif
-

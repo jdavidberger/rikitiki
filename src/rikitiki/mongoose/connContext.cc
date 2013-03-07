@@ -15,8 +15,8 @@ namespace rikitiki {
       std::stringstream ss;
       std::string resp = response.response.str();
       ss << "HTTP/1.1 " << response.status->status << " " << response.status->name << "\r\n";
-      ss << "Content-Type: " << ToString(response.ResponseType) << "\r\n";
       ss << "Content-Length: " << resp.size() << "\r\n";
+      ss << "Content-Type: " << ToString(response.ResponseType) << "\r\n";
       foreach(it, response.headers){
 	ss << it->first << ": " << it->second << "\r\n";
       }
@@ -41,8 +41,8 @@ namespace rikitiki {
       thread_name.resize(15);
       int retval = pthread_setname_np(pthread_self(), thread_name.c_str());
       if(retval != 0)
-	LOG(Web, Error) << "Couldn't set thread name, err: " << retval << std::endl;
-      LOG(Web, Verbose) << "Request for [" << request.request_method << "] " << request.uri << std::endl;
+	LOG(Mongoose, Error) << "Couldn't set thread name, err: " << retval << std::endl;
+      LOG(Mongoose, Verbose) << "Request for [" << request.request_method << "] " << request.uri << std::endl;
     }
 
     const char* MongooseConnContext::URI(){
