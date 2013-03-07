@@ -12,6 +12,10 @@ using namespace rikitiki::ctemplates;
 
 namespace rikitiki {
   namespace examples {
+
+    /**
+     * This example module exposes how to work with headers and cookies. 
+     */
     struct HeadersTestModule {
       void Register(Server& server){
 	server.AddPreprocessor( new HeaderFooterPreprocessor() );

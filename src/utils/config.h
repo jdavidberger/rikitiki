@@ -5,6 +5,12 @@
 #include <libconfig.h++>
 #include <map>
 
+/**
+   Wrap up libconfig's Config object for a few reasons.
+
+   - Expose a global configuration. Not a giant fan of singletons but this one is useful.
+   - Shadow all the 'lookupValue' methods for strings, so that we can do variable expansion.
+ */
 struct Configuration : public libconfig::Config {
  private:
   Configuration();

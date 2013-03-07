@@ -7,6 +7,10 @@
 namespace rikitiki {
 class ConnContext;
   namespace ctemplates {
+    /** 
+	Template preprocessors are ran directly prior to template expansion. 
+	Good place to add global elements like menus and other assets
+     */
     struct TemplatePreprocessor {
       virtual void Process(const ConnContext& ctx, 
 			   ::ctemplate::TemplateDictionary& td)=0;

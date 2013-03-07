@@ -10,6 +10,8 @@ using namespace rikitiki::mongoose;
 
 namespace rikitiki {
   namespace examples {
+    /** Simple example module of routing
+     */
     struct HelloWorldModule {
       void Register(Server& server){
 	server.AddHandler( CreateRoute<>::With(this, "/hw/hello") );

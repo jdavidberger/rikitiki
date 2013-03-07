@@ -12,6 +12,9 @@
 
 namespace rikitiki {
   namespace mongoose {
+    /**
+       Mongoose wrapper. Contains base server functionality, plus also exposes Start/Stop methods.
+     */
     class MongooseServer : public Server {
       mg_context *ctx;
       int port;

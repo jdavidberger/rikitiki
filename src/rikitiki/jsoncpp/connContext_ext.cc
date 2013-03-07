@@ -19,7 +19,7 @@ namespace rikitiki {
       {
 	ctx  << "Failed to parse configuration\n"
 	     << reader.getFormatedErrorMessages();
-	throw HandlerException{&HttpStatus::Bad_Request};
+	throw HandlerException(HttpStatus::Bad_Request);
       }  
     return ctx;
   }

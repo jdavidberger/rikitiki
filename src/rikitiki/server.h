@@ -18,6 +18,9 @@
 namespace rikitiki {
   class ConnContext;
 
+  /**
+     Base handler class. These are checked in order whenever there is a request. 
+   */ 
   struct Handler {
     virtual bool Handle(ConnContext& ctx) = 0;
     virtual bool visible() const = 0;
@@ -25,26 +28,26 @@ namespace rikitiki {
     virtual std::string desc() const;
   };
 
+  /** Thrown from within handlers to immediately stop handler execution.    
+      Note that throwing an exception will treat the request as handled, by design. 
+   */
   struct HandlerException {
-    const HttpStatus* status;
+  HandlerException() : status(0){}
+  HandlerException(const HttpStatus& s) : status(&s){}
+    /** Optionally specify the status to return.
+	If no status is set, Internal_Server_Error is returned. 
+     */
+    const HttpStatus* status; 
   };
   
-  struct CommandHandler : public Handler {
-    std::string command;
-    bool handleChildren;
-    CommandHandler(std::string _command, std::string _desc="");
-    virtual void Process(ConnContext& ctx) = 0;
-    virtual bool Handle(ConnContext& ctx);
-    virtual std::string name() const;
-  };
-
+  
   /**
-    \brief The main interface file between modules and a given server
-
-    Server is the rikitiki component that stores handlers and interfaces with the 
-    choosen server module to fire them off. It also is the object that provides
-    information about the current server -- IP, Port, etc. 
-   */
+     \brief The main interface file between modules and a given server
+   
+     Server is the rikitiki component that stores handlers and interfaces with the 
+     choosen server module to fire them off. It also is the object that provides
+     information about the current server -- IP, Port, etc. 
+  */
   class Server {
   protected:
   public:

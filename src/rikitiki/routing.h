@@ -7,6 +7,10 @@
 #include <cstring>
 namespace rikitiki {
 
+  /**
+     Specialization of handler which has a route (in the form of "/path/{variable}/{other-variable}") 
+     and also has a specification as to what http method it accepts. 
+   */
 struct Route : public Handler { 
   std::string route;
   ConnContext::Method method;
@@ -16,16 +20,29 @@ struct Route : public Handler {
   virtual std::string name() const;
 };
 
-template <typename T, bool Enable = std::is_fundamental<T>::value >
+/**
+   Maps compound types to 'const T&', others to 'T'. 
+ */
+template <typename T, bool Enable = std::is_compound<T>::value >
 struct sane_ref_type{
-  typedef const T& type;
-};
-
-template <typename T>
-struct sane_ref_type<T, true>{
   typedef T type;
 };
 
+/**
+   Maps compound types to 'const T&', others to 'T'. 
+ */
+template <typename T>
+struct sane_ref_type<T, true>{
+  typedef const T& type;
+};
+
+/**
+   A route incorporates the variadic logic needed to map the Handle(ConnContext&) call to 
+   the function type. 
+   \sa Route, Handler
+   \param P Usually the module type that the route is for. 
+   \param T... The argument types for the function to call
+ */
 template <typename P, typename... T> 
   struct Route_ : public Route {  
   typedef void (P::*F)(ConnContext& ctx, typename sane_ref_type<T>::type...);
@@ -38,6 +55,9 @@ template <typename P, typename... T>
   virtual bool Handle(ConnContext& ctx);
 };
 
+/** Specialization of Route_ for functions with no parameters. 
+    \sa Route_
+ */
 template <typename P> 
   struct Route_<P> : public Route {  
   typedef void (P::*F)(ConnContext& ctx);
@@ -48,6 +68,11 @@ template <typename P>
   virtual bool Handle(ConnContext& ctx);
 };
 
+/**
+   Convienence class, meant to alleviate having to type in the class that the 
+   route function works on in a similiar fasion to std::make_pair does for pairs.
+   \sa Route_, Route
+ */
 template <typename... T> 
   struct CreateRoute {
     template<typename P>

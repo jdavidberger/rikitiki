@@ -7,6 +7,11 @@
 #include <sstream>
 
 namespace ctemplate {
+  /**
+     Bizzarely not part of ctemplates. Defines how ctemplates should write data to stringstreams.
+
+     Possibly should expand to all streams. 
+   */
   class StringStreamEmitter : public ExpandEmitter {
     std::stringstream* const outbuf_;
   public:

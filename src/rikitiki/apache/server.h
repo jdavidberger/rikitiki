@@ -6,6 +6,9 @@
 
 namespace rikitiki {
   namespace apache {
+    /**
+       Apache server wrapper. Does not currently do much. 
+     */
     class ApacheServer : public Server {
     public:
       server_rec* server;

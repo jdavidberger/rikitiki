@@ -3,6 +3,9 @@
 
 #include <pthread.h>
 
+/**
+   Convienence class for thread lock/unlocking based on scope. 
+ */
 struct Guard {
   pthread_mutex_t* mut;
  Guard(pthread_mutex_t& _mut) : mut(&_mut){

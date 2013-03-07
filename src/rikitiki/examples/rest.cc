@@ -13,6 +13,12 @@ using namespace rikitiki::mongoose;
 
 namespace rikitiki {
   namespace examples {
+    /**
+       Example implementation of a REST module against sqlite. 
+       Demonstrates
+       - Rest Features
+       - Json Features
+     */
     struct RestModule  {
       static const char* create_table,*select_all,*select,*insert;
       sqlite3_stmt *insert_stmt, *select_all_stmt, *select_stmt;

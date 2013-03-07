@@ -1,6 +1,11 @@
 #pragma once
 
 namespace rikitiki {
+  /**
+     Basic HttpStatus information -- status code and name of status.
+
+     More usefully, holds static members for every standard status type. 
+   */
   class HttpStatus { 
   HttpStatus(int s, const char* n) : status(s), name(n){} 
   HttpStatus(int s) : status(s), name(0){} 

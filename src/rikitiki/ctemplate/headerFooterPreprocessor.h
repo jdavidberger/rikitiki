@@ -5,6 +5,9 @@
 
 namespace rikitiki {
   namespace ctemplates {
+    /**
+       Expands Header, Footer, PageHeader, PageFooter includes. 
+     */
     struct HeaderFooterPreprocessor : public TemplatePreprocessor {
       std::string header_tpl, footer_tpl, page_header_tpl, page_footer_tpl;
       HeaderFooterPreprocessor();

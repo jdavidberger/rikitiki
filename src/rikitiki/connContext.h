@@ -11,16 +11,34 @@ namespace rikitiki {
   class ConnContext;
 
   typedef std::pair<std::string,std::string> stringpair;
+  
+  /**
+     Headers are just string pairs
+     We can't just typedef it since we want to pass it around with stream operators
+   */
   struct Header : public stringpair {
   Header(const std::string& name, const std::string& value) : stringpair(name, value){}
   };
+
+  /**
+     Things parsed out of the response, ala forms
+     We can't just typedef it since we want to pass it around with stream operators
+   */
   struct PostContent : public stringpair {
   PostContent(const std::string& name, const std::string& value) : stringpair(name, value){}
   };
+
+  /**
+     Cookies are key value pairs too.
+     TODO: Add expiration, domain, etc
+   */
   struct Cookie : public stringpair {
   Cookie(const std::string& name, const std::string& value) : stringpair(name, value){}
   };
 
+  /**
+     Response class that handlers write to. Contains headers, response stream, status, etc.
+   */
   struct Response {
     ContentType::t ResponseType;
     
@@ -37,6 +55,9 @@ namespace rikitiki {
     Response& operator <<(const rikitiki::Header& t);
   };
 
+  /**
+     The normal multimap, but with an operator[] defined.
+   */
   template <typename T1, typename T2> 
     struct multimap : public std::multimap<T1, T2> {
     T2& operator[](const T1&);
@@ -47,6 +68,13 @@ namespace rikitiki {
   typedef multimap<std::string, std::string> PostCollection;
   typedef std::map<std::string, std::string> CookieCollection;
 
+  /**
+     Connection Context object. This is the main object in which handlers use both to read request data and
+     write response data. 
+
+     In general, you can just stream ('<<') whatever you want into it, and there should be an override that 
+     does the right thing. 
+   */
   class ConnContext {  
   public:
     enum Method {

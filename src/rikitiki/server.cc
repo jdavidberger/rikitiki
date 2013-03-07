@@ -15,29 +15,9 @@ namespace rikitiki {
     return "";
   }
 
-
-  std::string CommandHandler::name() const {
-    return command;
-  }
-  CommandHandler::CommandHandler(std::string _command, std::string _desc) : 
-    command(_command),
-    handleChildren(true)
-  {
-  
-  } 
-
-  bool CommandHandler::Handle(ConnContext& ctx){
-    bool shouldAttempt = handleChildren ? 
-      strncmp(command.c_str(), ctx.URI(), command.length()) == 0 :
-      strcmp(command.c_str(), ctx.URI()) == 0;
-    
-    if(shouldAttempt){
-      Process(ctx);
-      return true;
-    }
-    return false;
-  }
-
+  /**
+     Wraps up a function into a handler
+   */
   struct GHandler : public Handler {
     Server::handle_t handlef;
     GHandler(  Server::handle_t _handlef) : handlef(_handlef) {}

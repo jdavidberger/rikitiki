@@ -11,6 +11,9 @@
 
 namespace rikitiki {
   namespace apache {
+    /**
+       Connection context which deals with apache request_recs
+     */
     class ApacheConnContext : public ConnContext {  
     private:      
     protected:
