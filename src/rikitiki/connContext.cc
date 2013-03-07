@@ -16,8 +16,11 @@ namespace rikitiki {
     return _method;
   }
 
+  static inline const char* read_to_name(const char* b){
+    while(*b == ' ' || *b == ';') b++;
+    return b;
+  }
   static inline const char* read_name(const char* b){
-    while(*b == ' ') b++;
     while(*b != '=' && *b != '\0') b++;
     return b;
   }
@@ -37,9 +40,11 @@ namespace rikitiki {
     for(auto it = range.first;it != range.second;it++){
       LOG(Server, Debug) << "Req. cookie: " << it->first << " = " << it->second << std::endl;
       if(it->second.size() == 0) continue;
-      const char* n =  &it->second[0];
+      const char* n =  &it->second[0];      
       const char *ne, *ve;
       do {
+	n = read_to_name(n);
+	LOG(Server, Error) << "?" <<  n; 
 	ne = read_name(n);
 	ve = read_value(ne);
 	_cookies[std::string(n, ne)] = 

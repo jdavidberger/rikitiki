@@ -29,9 +29,12 @@ struct HeadersTestModule {
   }
 
   void cookies(ConnContext& ctx){
+    if(ctx.QueryString()["name"].size())
+      ctx << Cookie(ctx.QueryString()["name"], ctx.QueryString()["value"]);
+    
     ctx << ContentType::text_plain
-        << Cookie(ctx.QueryString()["name"], ctx.QueryString()["value"])
         << "Cookies: \n";
+
     foreach(it, ctx.Cookies())
       ctx << it->first << ": " << it->second << "\n";
     ctx << "Headers: \n";
