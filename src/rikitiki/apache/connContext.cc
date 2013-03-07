@@ -77,7 +77,7 @@ namespace rikitiki {
     void ApacheConnContext::writeResponse(){
       std::string resp = response.response.str();
       std::string responseType = ToString(response.ResponseType);
-	
+      request->status = response.status->status;
       ap_set_content_type(request, apr_pstrdup(request->pool, &responseType[0]));
       ap_set_content_length(request, resp.size());
 

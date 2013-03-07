@@ -21,11 +21,13 @@ test_points = {
         "/cookies?name=asdf&value=1234"
         ],
     "rest": [
+        ("DELETE", "/book"),
         ("GET", "/book"),
-        ("POST", "/book", '{"name":"lotr",author:"tolkien","isbn":"123-456"}'),
+        ("POST", "/book", '{"name":"lotr","author":"tolkien","isbn":"123-456"}'),
         ("GET", "/book"),
         ("DELETE", "/book"),
-        ("GET", "/book")
+        ("GET", "/book"),
+        ("POST", "/book", '{"name":"lotr","author":"tolkien","isbn":"123-456}'),
         ]
 }
 
@@ -38,6 +40,7 @@ def make_dir(d):
 
 def resp_to_string(response):
     rtn = ""
+    rtn += str(response.status) + " " + str(response.reason) + "\r\n"
     for header in response.getheaders():
         if(not (header[0] == "Date")):
             rtn += header[0] + ": " + header[1] + "\r\n"
