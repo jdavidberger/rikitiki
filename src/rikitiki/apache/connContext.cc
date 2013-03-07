@@ -28,11 +28,30 @@ namespace rikitiki {
      return 1;
     }
     void ApacheConnContext::FillHeaders() {
-      /*ap_get_mime_headers(request);*/
       apr_table_t *h_table = request->headers_in;
       apr_table_do(header_add, &_headers, h_table, NULL);
       mappedHeaders = true;
     }
+
+    void ApacheConnContext::FillPayload() {
+      ap_setup_client_block(request, REQUEST_CHUNKED_DECHUNK);
+      //      ap_get_client_block(request, 
+      _payload.resize(512);
+      int nth = 0;
+      do{
+	_payload.resize( _payload.size() * 2);
+	long inc_size = ap_get_client_block(request, &_payload[nth], _payload.size() - nth);
+	if(inc_size == -1){
+	  response.reset();
+	  *this << "Exception while trying to read apache request payload.";
+	  throw HandlerException{};
+	}
+	nth += inc_size;
+      } while(nth == (int)_payload.size());
+      _payload.resize(nth);
+      mappedPayload = true;			  
+    }		  
+    /*
     void ApacheConnContext::FillPost() {
       apr_array_header_t* p_data;
       int res = ap_parse_form_data(request, NULL, &p_data, -1, HUGE_STRING_LEN);      
@@ -54,7 +73,7 @@ namespace rikitiki {
 
       mappedPost = true;
     }
-
+    */
     void ApacheConnContext::writeResponse(){
       std::string resp = response.response.str();
       std::string responseType = ToString(response.ResponseType);

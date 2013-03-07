@@ -3,7 +3,6 @@
 
 #pragma once
 
-//#include "ctemplate/template_emitter_ext.h"
 #include <string>
 #include "server.h"
 #include "http_statuses.h"
@@ -28,6 +27,7 @@ namespace rikitiki {
     std::vector<Header> headers;
     const HttpStatus* status;
     std::stringstream response;
+    void reset();
     Response();
     template <class T>
     Response& operator <<(const T& obj){ response << obj; return *this;}

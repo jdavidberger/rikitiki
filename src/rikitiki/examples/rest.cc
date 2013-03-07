@@ -22,6 +22,15 @@ namespace rikitiki {
       sqlite3* handle; 
       sqlite3_stmt *insert_stmt, *select_all_stmt, *select_stmt;
 
+      void throwNQ(ConnContext& ctx, int retval, int desired_retval){
+	if(retval != desired_retval){
+	  ctx.response.reset();
+	  ctx << "Sqlite3 err code: " << retval << "\n"
+	      << sqlite3_errmsg(handle);
+	  throw HandlerException();
+	}
+      }
+
       Json::Value readRow(sqlite3_stmt* stmt){
 	Json::Value row;
 	row["id"]   = sqlite3_column_int(stmt, 0);
@@ -37,17 +46,21 @@ namespace rikitiki {
 	std::string name = val["name"].asString();
 	std::string author = val["author"].asString();
 	std::string isbn = val["isbn"].asString();
-	sqlite3_bind_text(insert_stmt, 1, &name[0], name.size(), SQLITE_TRANSIENT);
-	sqlite3_bind_text(insert_stmt, 2, &author[0], author.size(), SQLITE_TRANSIENT);
-	sqlite3_bind_text(insert_stmt, 3, &isbn[0], isbn.size(), SQLITE_TRANSIENT);
-	sqlite3_step(insert_stmt);
+
 	sqlite3_reset(insert_stmt);
+	throwNQ(ctx, sqlite3_bind_text(insert_stmt, 1, &name[0], name.size(), SQLITE_TRANSIENT), SQLITE_OK);
+	throwNQ(ctx, sqlite3_bind_text(insert_stmt, 2, &author[0], author.size(), SQLITE_TRANSIENT), SQLITE_OK);
+	throwNQ(ctx, sqlite3_bind_text(insert_stmt, 3, &isbn[0], isbn.size(), SQLITE_TRANSIENT), SQLITE_OK);
+	throwNQ(ctx, sqlite3_step(insert_stmt), SQLITE_DONE);
 	ctx << sqlite3_last_insert_rowid(handle);
       }
 
       void GET(ConnContext& ctx){
 	Json::Value val(Json::arrayValue);
 	int retval;
+
+	sqlite3_reset(select_all_stmt);
+
 	while((retval = sqlite3_step(select_all_stmt)) == SQLITE_ROW)
 	  val.append(readRow(select_all_stmt));
 	
@@ -56,7 +69,7 @@ namespace rikitiki {
 	      << sqlite3_errmsg(handle);
 	  throw HandlerException();
 	}
-	sqlite3_reset(select_all_stmt);
+
 	ctx << val;
       }
 
@@ -81,15 +94,19 @@ namespace rikitiki {
 
       void init_db(){
 	sqlite3_exec(handle,create_table,0,0,0);
-	sqlite3_prepare(handle, insert, strlen(insert), &insert_stmt, NULL);
-	sqlite3_prepare(handle, select_all, strlen(select_all), &select_all_stmt, NULL);
-	sqlite3_prepare(handle, select, strlen(select), &select_stmt, NULL);
+	sqlite3_prepare_v2(handle, insert, strlen(insert), &insert_stmt, NULL);
+	sqlite3_prepare_v2(handle, select_all, strlen(select_all), &select_all_stmt, NULL);
+	sqlite3_prepare_v2(handle, select, strlen(select), &select_stmt, NULL);
       }
       
       RestModule() {
-	int retval = sqlite3_open("restModule.sqlite3", &handle);
-	assert(!retval);
-	init_db();
+	int retval = sqlite3_open_v2(":memory:", &handle, SQLITE_OPEN_READWRITE, 0);
+	if(retval){
+	  LOG(Rest, Error) << "Sqlite3 err code: " << retval << "\n"
+			   << sqlite3_errmsg(handle);
+	} else {
+	  init_db();
+	}
       }      
 
       void Register(Server& server){

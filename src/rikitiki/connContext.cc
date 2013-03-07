@@ -104,6 +104,11 @@ namespace rikitiki {
     return *this;
   }
 
+  void Response::reset(){
+    response.clear();
+    headers.clear();
+  }
+  
   Response& Response::operator <<(rikitiki::ContentType::t t){   
     ResponseType = t;
     return *this;

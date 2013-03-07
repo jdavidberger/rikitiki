@@ -14,7 +14,6 @@ namespace rikitiki {
     class ApacheConnContext : public ConnContext {  
     private:      
     protected:
-      virtual void FillPost();
       virtual void FillPayload();
       virtual void FillQueryString();
       virtual void FillRequestMethod();
