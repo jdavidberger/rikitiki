@@ -80,7 +80,7 @@ namespace rikitiki {
 	sqlite3_exec(handle,"DELETE from books", 0, 0, &error);
 	if(error){	  
 	  ctx << error;
-	  throw HandlerException(){};
+	  throw HandlerException{};
 	}
 	sqlite3_exec(handle,create_table,0,0,0);
 	ctx.handled = true; // If we don't write anything to ctx, it doesn't count as handled. 
