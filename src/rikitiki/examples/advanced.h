@@ -13,15 +13,15 @@ namespace rikitiki {
     /**
        This demonstrates some of the advanced features of rikitiki. Namely, 
        - Look at '/adv' for an example of ctemplates, plus how you can interrogate 
-         ctx.server to figure out all the existing handlers.
+       ctx.server to figure out all the existing handlers.
 
        - Two handlers for "/adv/post" which show how to mark a function to
-         response only to a certain response type. Really useful for form
-	 pages. Also ctemplates. 
+       response only to a certain response type. Really useful for form
+       pages. Also ctemplates. 
 	 
        - /qs is query string interrogation. Also demonstrates changing a response
-         type via the '<<' operator
-     */
+       type via the '<<' operator
+    */
     struct AdvancedModule {
 
       void Register(Server& server){
@@ -69,6 +69,6 @@ namespace rikitiki {
       }
     };
     
- }
+  }
 }
 
