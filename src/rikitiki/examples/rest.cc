@@ -14,14 +14,11 @@ using namespace rikitiki::mongoose;
 namespace rikitiki {
   namespace examples {
     struct RestModule  {
-      static const char* create_table,
-	* select_all,
-	* select,
-	* insert;
-
-      sqlite3* handle; 
+      static const char* create_table,*select_all,*select,*insert;
       sqlite3_stmt *insert_stmt, *select_all_stmt, *select_stmt;
+      sqlite3* handle; 
 
+      /// Throw an exception if a sqlite operation returns an unexpected return value
       void throwNQ(ConnContext& ctx, int retval, int desired_retval){
 	if(retval != desired_retval){
 	  ctx.response.reset();
@@ -31,6 +28,7 @@ namespace rikitiki {
 	}
       }
 
+      /// Read a single row from a result set
       Json::Value readRow(sqlite3_stmt* stmt){
 	Json::Value row;
 	row["id"]   = sqlite3_column_int(stmt, 0);
@@ -40,6 +38,7 @@ namespace rikitiki {
 	return row;
       }
 
+      /// Post operations add items to the DB
       void POST(ConnContext& ctx){
 	Json::Value val;
 	ctx >> val;
@@ -55,6 +54,7 @@ namespace rikitiki {
 	ctx << sqlite3_last_insert_rowid(handle);
       }
 
+      /// Get operations without an ID return a list of all books
       void GET(ConnContext& ctx){
 	Json::Value val(Json::arrayValue);
 	int retval;
@@ -63,33 +63,27 @@ namespace rikitiki {
 
 	while((retval = sqlite3_step(select_all_stmt)) == SQLITE_ROW)
 	  val.append(readRow(select_all_stmt));
-	
-	if(retval != SQLITE_DONE){
-	  ctx << "Sqlite3 err code: " << retval << "\n"
-	      << sqlite3_errmsg(handle);
-	  throw HandlerException();
-	}
 
+	throwNQ(ctx, retval, SQLITE_DONE);
 	ctx << val;
       }
 
       void GET(ConnContext& ctx, int id){
 	sqlite3_bind_int(select_stmt, 1, id);
 	sqlite3_step(select_stmt);
-	Json::Value val = readRow(select_stmt);
+	ctx << readRow(select_stmt);
 	sqlite3_reset(select_stmt);
-	ctx << val;
       }
 
       void DELETE(ConnContext& ctx){
 	char* error;
 	sqlite3_exec(handle,"DELETE from books", 0, 0, &error);
-	if(error){
-	  ctx << HttpStatus::Internal_Server_Error 
-	      << error;
+	if(error){	  
+	  ctx << error;
+	  throw HandlerException(){};
 	}
 	sqlite3_exec(handle,create_table,0,0,0);
-	ctx.handled = true;
+	ctx.handled = true; // If we don't write anything to ctx, it doesn't count as handled. 
       }
 
       void init_db(){
@@ -102,8 +96,7 @@ namespace rikitiki {
       RestModule() {
 	int retval = sqlite3_open_v2(":memory:", &handle, SQLITE_OPEN_READWRITE, 0);
 	if(retval){
-	  LOG(Rest, Error) << "Sqlite3 err code: " << retval << "\n"
-			   << sqlite3_errmsg(handle);
+	  LOG(Rest, Error) << "Sqlite3 err code: " << retval << std::endl << sqlite3_errmsg(handle) << std::endl;
 	} else {
 	  init_db();
 	}
@@ -129,7 +122,6 @@ using namespace rikitiki::examples;
 int main(){
   MongooseServer server(5000);
   RestModule module;
-
   server.Register(module);
   server.Start();
   while(true){
@@ -137,6 +129,5 @@ int main(){
   }
   return 0;
 }
-
 #endif
 
