@@ -10,7 +10,7 @@
 #include <tuple>
 #include "utils/tuple_ext.h"
 #include "utils/log.h"
-
+#include <rikitiki/http_statuses.h>
 #if USE_CTEMPLATE
 #include <rikitiki/ctemplate/templatePreprocessor.h>
 #endif
@@ -25,6 +25,10 @@ namespace rikitiki {
     virtual std::string desc() const;
   };
 
+  struct HandlerException {
+    const HttpStatus* status;
+  };
+  
   struct CommandHandler : public Handler {
     std::string command;
     bool handleChildren;

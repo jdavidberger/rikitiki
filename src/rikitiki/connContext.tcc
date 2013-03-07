@@ -17,3 +17,4 @@ T2& rikitiki::multimap<T1,T2>::operator[](const T1& key){
   it = this->insert(std::pair<T1, T2>(key, T2()));
   return it->second;
 }
+

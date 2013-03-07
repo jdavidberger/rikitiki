@@ -16,23 +16,24 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11 -Wno-reorder")
 
-set(USE_APACHE 1)
-set(USE_MONGOOSE 1)
+# Not super useful, except for self documentation purposes
+MACRO( disable_feature feature_)
+       STRING(TOUPPER ${feature_} feature)
+       SET(USE_${feature} 0) 
+ENDMACRO(disable_feature)
 
-set(USE_CTEMPLATE 1)
+MACRO( enable_feature feature_)
+       STRING(TOUPPER ${feature_} feature)       
+       SET("USE_${feature}" 1)
+       ADD_DEFINITIONS(-DUSE_${feature})
+ENDMACRO(enable_feature)
+
+ENABLE_FEATURE(apache)
+ENABLE_FEATURE(mongoose)
+ENABLE_FEATURE(ctemplate)
+ENABLE_FEATURE(jsoncpp)
+
 set(MAKE_EXAMPLES 1)
-
-IF(${USE_CTEMPLATE})
-	ADD_DEFINITIONS(-DUSE_CTEMPLATE)
-ENDIF()
-
-IF(${USE_APACHE})
-	ADD_DEFINITIONS(-DUSE_APACHE)
-ENDIF()
-
-IF(${USE_MONGOOSE})
-	ADD_DEFINITIONS(-DUSE_MONGOOSE)
-ENDIF()
 
 add_subdirectory (src)
 
@@ -42,8 +43,14 @@ if(DOXYGEN_FOUND)
 	configure_file(${CMAKE_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 add_custom_target(doc
 	COMMAND	${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-	COMMAND	tar -cf ${CMAKE_BINARY_DIR}/doc-${rikitiki_version}.tar.gz -C ${CMAKE_BINARY_DIR}/doc .
+	COMMAND	tar -cf ${CMAKE_BINARY_DIR}/rikitiki-${rikitiki_version}-doc.tar.gz -C ${CMAKE_BINARY_DIR}/doc .
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 	COMMENT "Generating API documentation with Doxygen" VERBATIM
 )
 endif(DOXYGEN_FOUND)
+
+
+add_custom_target(release
+	COMMAND hg archive -t tgz ${CMAKE_BINARY_DIR}/rikitiki-${rikitiki_version}-src.tar.gz
+	COMMENT "Generating release tar" VERBATIM
+)

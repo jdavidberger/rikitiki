@@ -1,4 +1,3 @@
-
 macro( add_module module )
        	IF(${USE_MONGOOSE})
 		add_executable(${module} ${module}.cc)
@@ -21,26 +20,20 @@ macro( add_module module )
 endmacro(add_module )
 
 
-include_directories(
-			${THIRD_PARTY_DIR}/curl-7.28.1/include
-		)
+include_directories(${THIRD_PARTY_DIR}/curl-7.28.1/include)
 
 link_directories(
 		${THIRD_PARTY_DIR}/curl-7.28.1/bin/lib
-		${THIRD_PARTY_DIR}/ctemplate-2.2
-	)
+		${THIRD_PARTY_DIR}/ctemplate-2.2)
 
 set (RT_SRC
     server.cc 
     connContext.cc 
     content_types.cc 
     routing.cc
-    http_statuses.cc
-)
+    http_statuses.cc)
 
-set (RT_LIBS
-    dl pthread curl utils
-)
+set (RT_LIBS dl pthread curl utils)
 
 IF(${USE_MONGOOSE})
 	include_directories(${THIRD_PARTY_DIR}/mongoose)
@@ -55,6 +48,10 @@ ENDIF()
 IF(${USE_APACHE})
 	include_directories(/usr/include/apr-1/)	
 	add_subdirectory(apache)
+ENDIF()
+
+IF(${USE_JSONCPP})
+	add_subdirectory(jsoncpp)
 ENDIF()
 
 add_library(rikitiki ${RT_SRC})

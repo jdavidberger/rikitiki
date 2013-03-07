@@ -5,3 +5,6 @@ IF(${USE_CTEMPLATE})
 ENDIF()
 
 ADD_MODULE(headersTest)
+ADD_MODULE(rest)
+target_link_libraries(mod_rest sqlite3)	
+target_link_libraries(rest sqlite3)	

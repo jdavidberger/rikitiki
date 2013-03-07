@@ -27,6 +27,11 @@ namespace rikitiki {
     return b;
   }
 
+  void ConnContext::FillPost(){
+    mapContents(Payload(), _post);
+    mappedPost = true;
+  }
+
   void ConnContext::FillCookies(){
     auto range = Headers().equal_range("Cookie");
     for(auto it = range.first;it != range.second;it++){
@@ -44,6 +49,14 @@ namespace rikitiki {
       } while(*n != 0);
     }
     mappedCookies = true;
+  }
+  
+  std::string& ConnContext::Payload() {
+    if(!mappedPayload){
+      this->FillPayload();
+      assert(mappedPayload);
+    }
+    return _payload;
   }
 
   HeaderCollection& ConnContext::Headers(){
@@ -78,7 +91,8 @@ namespace rikitiki {
     return _post;
   }
 
-  Response::Response() : ResponseType(rikitiki::ContentType::text_html), status(&HttpStatus::OK){}
+  Response::Response() : ResponseType(rikitiki::ContentType::DEFAULT), 
+			 status(&HttpStatus::OK){}
 
   Response& Response::operator <<(const rikitiki::HttpStatus& t){
     status = &t;
@@ -99,10 +113,20 @@ namespace rikitiki {
     return *this;
   }
 
-
+  ConnContext& operator>>(ConnContext& ctx, std::string& t){
+    t = ctx.Payload();
+    return ctx;
+  }
 
   ConnContext::ConnContext(const Server* _server) : ConnContext() { server = _server; }
-  ConnContext::ConnContext() : _method(ANY), handled(false), server(NULL), mappedPost(false), mappedQs(false), mappedHeaders(false), mappedCookies(false)  {}
+  ConnContext::ConnContext() : _method(ANY), 
+			       handled(false), 
+			       server(NULL), 
+			       mappedPost(false), 
+			       mappedQs(false), 
+			       mappedHeaders(false), 
+			       mappedCookies(false), 
+			       mappedPayload(false)  {}
 
 #define MATCH_METHOD_ENUM(eval)	do{if(strcmp(method, #eval) == 0) return ConnContext::eval;}while(false);
 				     

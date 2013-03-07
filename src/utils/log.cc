@@ -5,7 +5,7 @@
 #include <fstream>
 #include <iostream>
 #include <utils/config.h>
-
+#include <cxxabi.h>
 static std::ostream* defaultStream = &std::cerr;
 
 #ifdef USE_TCLAP
@@ -93,4 +93,15 @@ namespace logging {
     if(_level == INVALID)
       LOG(Logging, Error) << "Invalid logging level('" << level << "') set for category '" << category << "'. Level set to highest verbosity." << std::endl; 
   }
+}
+
+std::ostream& operator<<(std::ostream& stream, const std::type_info& ti){
+  char buf[1024];
+  size_t size=1024;
+  int status;
+  char* res = abi::__cxa_demangle (ti.name(),
+				   buf,
+				   &size,
+				   &status);
+  return stream << res;
 }

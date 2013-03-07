@@ -3,6 +3,7 @@
 
 #include "connContext_ext.h"
 #include <utils/config.h>
+#include "template_emitter_ext.h"
 
 rikitiki::Response& operator <<(rikitiki::Response& response,  const ctemplate::TemplateDictionary& td){   
   ctemplate::ExpandTemplate(td.name(), ctemplate::DO_NOT_STRIP, &td, &response.response);

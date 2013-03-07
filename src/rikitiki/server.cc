@@ -55,7 +55,14 @@ namespace rikitiki {
   bool Server::Handle(ConnContext& ctx) {
     for(size_t i = 0;i < handlers.size();i++){
       LOG(Server, Debug) << "Trying handler " << handlers[i]->name() << std::endl;
-      handlers[i]->Handle(ctx);      
+      try {
+	handlers[i]->Handle(ctx);      
+      } catch(HandlerException& ex) {
+	LOG(Server, Error) << ctx.response.response.str() << std::endl;
+	ctx << (ex.status == 0 ? HttpStatus::Internal_Server_Error : *(ex.status));
+	ctx.writeResponse(); // Assumably the thrower cleared then wrote out a reason to throw. 
+	return true;
+      }
       if(ctx.handled){
 	ctx.writeResponse();
 	return true;

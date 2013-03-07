@@ -14,7 +14,6 @@ namespace rikitiki {
     void MongooseConnContext::writeResponse(){
       std::stringstream ss;
       std::string resp = response.response.str();
-
       ss << "HTTP/1.1 " << response.status->status << " " << response.status->name << "\r\n";
       ss << "Content-Type: " << ToString(response.ResponseType) << "\r\n";
       ss << "Content-Length: " << resp.size() << "\r\n";
@@ -64,19 +63,16 @@ namespace rikitiki {
       mappedHeaders = true;
     }
 
-    void MongooseConnContext::FillPost() {
-      std::string p_data;
-      p_data.resize(512);
+    void MongooseConnContext::FillPayload() {
+      
+      _payload.resize(512);
       int nth = 0;
       do{
-	p_data.resize( p_data.size() * 2);
-	nth += mg_read(conn, &p_data[nth], p_data.size() - nth);
-      } while(nth == (int)p_data.size());
-      p_data.resize(nth);
-
-      mapContents(p_data, _post);
-
-      mappedPost = true;
+	_payload.resize( _payload.size() * 2);
+	nth += mg_read(conn, &_payload[nth], _payload.size() - nth);
+      } while(nth == (int)_payload.size());
+      _payload.resize(nth);
+      mappedPayload = true;
     }
 
   }

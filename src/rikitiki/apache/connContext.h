@@ -15,6 +15,7 @@ namespace rikitiki {
     private:      
     protected:
       virtual void FillPost();
+      virtual void FillPayload();
       virtual void FillQueryString();
       virtual void FillRequestMethod();
       virtual void FillHeaders();

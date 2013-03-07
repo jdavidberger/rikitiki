@@ -1,3 +1,5 @@
+#pragma once
+
 namespace rikitiki {
   class HttpStatus { 
   HttpStatus(int s, const char* n) : status(s), name(n){} 

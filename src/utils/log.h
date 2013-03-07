@@ -8,6 +8,7 @@
 #include <string>
 #include <stdlib.h>
 #include <pthread.h>
+#include <typeinfo>
 
 namespace logging {
 
@@ -51,5 +52,7 @@ namespace logging {
     return buffer;
   }
 }
+
+std::ostream& operator<<(std::ostream&, const std::type_info&);
 
 #define LOG(CAT, LEVEL) if(ShouldLog(#CAT, logging::LEVEL) ) logging::LogStream(#CAT) << "[" << #CAT << ", " << #LEVEL << " (" << logging::getCurrThreadName().c_str() << ")] "
