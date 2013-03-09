@@ -4,6 +4,7 @@
 #include "server.h"
 #include <sstream>
 #include "connContext.h"
+#include <signal.h>
 
 namespace rikitiki {
   namespace mongoose {
@@ -22,6 +23,25 @@ namespace rikitiki {
       
       mongoose::MongooseConnContext ctx(server, event, conn);
       return server->Handle(ctx) ? (void*)1 : (void*)0;
+    }
+
+    static volatile sig_atomic_t quit;
+    static void signal_handler(int sig){      
+      quit=1;
+      signal(SIGINT, SIG_DFL); // Don't trap the signal forever; the next SIGINT should abort. 
+    }
+
+    void MongooseServer::Run(){
+      quit = 0;
+      signal(SIGINT, signal_handler);
+      Start();
+
+      // Possible race condition -- If we catch sigint and then a new server
+      // starts up within the sleep window, this server will not stop. 
+      // Won't address until a use case for that comes up though. 
+      while(!quit){ sleep(1000); }
+      LOG(Mongoose, Debug) << "Caught sigint, shutting down server " << (void*)this << std::endl;
+      Stop();
     }
 
     void MongooseServer::Start() {  

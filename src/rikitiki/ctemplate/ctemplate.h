@@ -1,0 +1,30 @@
+/* Copyright (C) 2012-2013 Justin Berger 
+   The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
+
+#include "connContext_ext.h"
+#include "templatePreprocessor.h"
+#include "headerFooterPreprocessor.h"
+
+/** \page ctemplates CTemplate 
+rikitiki comes packaged with [ctemplate](http://code.google.com/p/ctemplate/) support by default, and it is useful as a template engine to separate the presentation layer from the logic layer. 
+
+When compiling with ctemplate support, an overloaded operator is provided for ConnContext and ctemplate::TemplateDictionary which will expand that template into the response. The stream operator is equivalent to calling:
+
+~~~~~~
+ctemplate::ExpandTemplate(temlateDictionary.name(), ctemplate::DO_NOT_STRIP, &td, &ctx.response.response);
+~~~~~~
+
+For more information on ctemplate, see their [website](http://code.google.com/p/ctemplate/)
+
+By default, ctemplates looks for it's template files in the working directory of whichever executable is running. You can change this behavior by having a 'ctemplate_root' setting in your [configuration](Configuration.html) file. 
+
+\section templatepreprocessors Template Preprocessors
+
+If you want to define things like headers and footers, or include site-wide content such as dynamic menus, you can define template preprocessors that will manipulate a dictionary right before it is expanded into the response. A default preprocessor is provided that expands headers, footers, page headers, and page footers. 
+
+Preprocessors are added to the server module with 'Server::AddPreprocessor'. This should be done in the register function for a given module. 
+
+Look at the 'advanced' example for an implementation of this feature. 
+
+\sa examples/advanced.h, rikitiki::Server
+*/

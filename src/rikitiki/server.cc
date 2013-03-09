@@ -14,7 +14,10 @@ namespace rikitiki {
   std::string Handler::desc() const {
     return "";
   }
+  
+  Handler::~Handler() {
 
+  }
   /**
      Wraps up a function into a handler
    */
@@ -31,6 +34,22 @@ namespace rikitiki {
       return "anonymous";
     }
   };
+
+  Server::~Server(){
+    for(size_t i = 0;i < handlers.size();i++){
+      delete handlers[i];
+      handlers[i] = 0;
+    }
+
+#ifdef USE_CTEMPLATE
+    for(size_t i = 0;i < templatePreprocessors.size();i++){
+    delete templatePreprocessors[i];
+    templatePreprocessors[i] = 0;
+  }
+    ctemplate::mutable_default_template_cache()->ClearCache();
+#endif
+    
+  }
 
   bool Server::Handle(ConnContext& ctx) {
     for(size_t i = 0;i < handlers.size();i++){
@@ -61,5 +80,11 @@ namespace rikitiki {
   void Server::AddHandler( handle_t handler) {
     AddHandler( new GHandler( handler ) );
   }
+
+#ifdef USE_CTEMPLATE
+  void Server::AddPreprocessor( rikitiki::ctemplates::TemplatePreprocessor* tp){
+    templatePreprocessors.push_back(tp);
+  }
+#endif
 
 }

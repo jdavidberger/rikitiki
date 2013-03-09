@@ -25,6 +25,7 @@ ENDMACRO(disable_feature)
 MACRO( enable_feature feature_)
        STRING(TOUPPER ${feature_} feature)       
        SET("USE_${feature}" 1)
+       SET(DOXYFILE_DEFINED "${DOXYFILE_DEFINED} USE_${feature}")
        ADD_DEFINITIONS(-DUSE_${feature})
 ENDMACRO(enable_feature)
 
@@ -32,22 +33,24 @@ ENABLE_FEATURE(apache)
 ENABLE_FEATURE(mongoose)
 ENABLE_FEATURE(ctemplate)
 ENABLE_FEATURE(jsoncpp)
+ENABLE_FEATURE(rest)
 
 set(MAKE_EXAMPLES 1)
 
 add_subdirectory (src)
 add_subdirectory(test)
 
-find_package(Doxygen)
-if(DOXYGEN_FOUND)	
-	configure_file(${CMAKE_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-add_custom_target(doc
-	COMMAND	${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-	COMMAND	tar -cf ${CMAKE_BINARY_DIR}/rikitiki-${rikitiki_version}-doc.tar.gz -C ${CMAKE_BINARY_DIR}/doc .
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-	COMMENT "Generating API documentation with Doxygen" VERBATIM
+add_subdirectory(Doxygen)
+
+add_custom_target(memcheck
+	COMMAND GLIBCXX_FORCE_NEW=1 valgrind --tool=memcheck --leak-check=full --log-file=log ./examples
+	COMMENT "Started example server via valgrind" VERBATIM
 )
-endif(DOXYGEN_FOUND)
+
+add_custom_target(helgrind
+	COMMAND valgrind --tool=helgrind --log-file=log ./examples
+	COMMENT "Started example server via valgrind" VERBATIM
+)
 
 
 add_custom_target(release

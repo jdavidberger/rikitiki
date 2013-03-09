@@ -34,9 +34,10 @@ namespace logging {
     return logLevels;
   }
   using namespace libconfig;
-  static bool LoadFromConfig() {
+
+  static bool LoadFromConfig(Configuration& config) {
     try {
-      const Setting& logsettings = Configuration::Global().getRoot()["log"]["levels"];
+      const Setting& logsettings = config.getRoot()["log"]["levels"];
       std::string name, value;
       for(int i = 0;i < logsettings.getLength();i++){
 	const Setting& entry = logsettings[i];
@@ -51,24 +52,18 @@ namespace logging {
     }
   }
 
-  static std::map<std::string, std::ostream*>& logStreams(){
-    static std::map<std::string, std::ostream*>* logStreams = 0;
-    if(logStreams == 0){
-      logStreams = new std::map<std::string, std::ostream*>();
-      LoadFromConfig();
-    }
-    return *logStreams;
-  }
-  
-  static std::map<std::string, std::ostream*>& _logStreams = logStreams(); // force init
+
+  static std::map<std::string, std::ostream*> logStreams;
+
+  static bool config_loaded = LoadFromConfig(Configuration::Global());
 
   void SetLogStream(const std::string& category, std::ostream& stream){
-    logStreams()[category] = &stream;
+    logStreams[category] = &stream;
   }
 
   std::ostream& LogStream(const std::string& category){
-    std::ostream* s = logStreams()[category];
-    return s == 0 ? *defaultStream : *s;
+    auto it = logStreams.find(category);
+    return it == logStreams.end() ? *defaultStream : *(it->second);
   }
 
   void SetLogLevel(const std::string& category, int level){

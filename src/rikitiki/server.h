@@ -26,6 +26,7 @@ namespace rikitiki {
     virtual bool visible() const = 0;
     virtual std::string name() const = 0;
     virtual std::string desc() const;
+    virtual ~Handler(); 
   };
 
   /** Thrown from within handlers to immediately stop handler execution.    
@@ -41,9 +42,7 @@ namespace rikitiki {
   };
   
   
-  /**
-     \brief The main interface file between modules and a given server
-   
+  /**\brief The main interface file between modules and a given server
      Server is the rikitiki component that stores handlers and interfaces with the 
      choosen server module to fire them off. It also is the object that provides
      information about the current server -- IP, Port, etc. 
@@ -52,6 +51,7 @@ namespace rikitiki {
   protected:
   public:
     std::vector<Handler*> handlers;
+    virtual ~Server();
 
     #ifdef USE_CTEMPLATE
     void AddPreprocessor( rikitiki::ctemplates::TemplatePreprocessor*);

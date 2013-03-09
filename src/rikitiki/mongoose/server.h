@@ -21,7 +21,14 @@ namespace rikitiki {
     public:
       int Port() { return port; }
       MongooseServer(int _port);
+
+      /** Blocking call to start the mongoose server. Sets up an interrupt handler to stop the server with siginterrupt.
+	  If you have more than one server running, SIGINT shuts them all down.
+       */
+      void Run();
+      /** Non-blocking call to start the mongoose server.*/
       void Start();
+      /** Stop a running server */
       void Stop();
     };
   }

@@ -6,11 +6,17 @@
 /**
    Convienence class for thread lock/unlocking based on scope. 
  */
-struct Guard {
+class Guard {  
   pthread_mutex_t* mut;
+ public:
+  /** Construct a guard object. 
+      \param _mut mutex which is locked in the constructor and unlocked in the deconstructor
+   */
  Guard(pthread_mutex_t& _mut) : mut(&_mut){
     pthread_mutex_lock(mut);
   }
+  /** Releases the mutex
+   */
   ~Guard(){
     pthread_mutex_unlock(mut);
   }
