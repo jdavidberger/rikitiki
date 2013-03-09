@@ -5,7 +5,8 @@
 #include <rikitiki/mongoose/server.h>
 #include <rikitiki/ctemplate/connContext_ext.h>
 #include <rikitiki/ctemplate/headerFooterPreprocessor.h>
-#include <utils/config.h>
+#include <rikitiki/utils/config.h>
+
 using namespace rikitiki;
 using namespace rikitiki::mongoose;
 using namespace rikitiki::ctemplates;

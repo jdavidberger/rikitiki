@@ -2,7 +2,7 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
 #include <rikitiki/jsoncpp/jsoncpp.h>
-#include <utils/config.h>
+#include <rikitiki/utils/config.h>
 using namespace rikitiki;
 
 rikitiki::Response& operator <<(rikitiki::Response& response,  const Json::Value& json){   

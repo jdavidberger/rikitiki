@@ -5,7 +5,7 @@
 #include <rikitiki/mongoose/server.h>
 #include <rikitiki/rest/rest.h>
 #include <rikitiki/jsoncpp/jsoncpp.h>
-#include <utils/config.h>
+#include <rikitiki/utils/config.h>
 #include <sqlite3.h>
 
 using namespace rikitiki;

@@ -1,6 +1,6 @@
 macro( add_module module )
        SET(module ${module})
-       set(imodule ${CMAKE_CURRENT_SOURCE_DIR}/${module})
+       set(imodule "rikitiki/examples/${module}")
 
        STRING(SUBSTRING ${module} 0 1 f)
        STRING(TOUPPER ${f} f)
@@ -57,6 +57,7 @@ ENDIF()
 
 add_library(rikitiki ${RT_SRC})
 target_link_libraries(rikitiki ${RT_LIBS})		     
+install(TARGETS rikitiki DESTINATION lib)
 
 if(${MAKE_EXAMPLES})
 	add_subdirectory(examples)

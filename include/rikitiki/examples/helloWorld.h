@@ -3,7 +3,7 @@
 
 #include <rikitiki/rikitiki.h>
 #include <rikitiki/mongoose/server.h>
-#include <utils/config.h>
+#include <rikitiki/utils/config.h>
 
 using namespace rikitiki;
 using namespace rikitiki::mongoose;

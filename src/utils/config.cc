@@ -1,9 +1,9 @@
 /* Copyright (C) 2012-2013 Justin Berger 
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
-#include <utils/config.h>
+#include <rikitiki/utils/config.h>
 #include <dlfcn.h>
-#include <utils/log.h>
+#include <rikitiki/utils/log.h>
 #include <assert.h>
 #include <vector>
 #include <stdio.h>

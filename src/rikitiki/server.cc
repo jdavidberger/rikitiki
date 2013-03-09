@@ -4,7 +4,7 @@
 #include <rikitiki/rikitiki.h>
 #include <sstream>
 #include <pthread.h>
-#include <utils/config.h>
+#include <rikitiki/utils/config.h>
 #include <cstring>
 
 namespace rikitiki {
