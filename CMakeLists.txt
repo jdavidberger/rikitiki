@@ -37,6 +37,7 @@ ENABLE_FEATURE(rest)
 
 set(MAKE_EXAMPLES 1)
 
+include_directories(include)
 add_subdirectory (src)
 add_subdirectory(test)
 

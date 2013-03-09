@@ -1,7 +1,7 @@
 /* Copyright (C) 2012-2013 Justin Berger 
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
-#include "content_types.h"
+#include <rikitiki/content_types.h>
 
 #define CASE_RET(X,Y) case X ## _ ## Y: return #X "/" #Y;
 #define CASE_RET_PLUS(X,Y,Z) case X ## _ ## Y ## _ ## Z: return #X "/" #Y "+" #Z;

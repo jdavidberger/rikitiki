@@ -4,6 +4,7 @@
 #include "connContext_ext.h"
 #include "templatePreprocessor.h"
 #include "headerFooterPreprocessor.h"
+#include "template_emitter_ext.h"
 
 /** \page ctemplates CTemplate 
 rikitiki comes packaged with [ctemplate](http://code.google.com/p/ctemplate/) support by default, and it is useful as a template engine to separate the presentation layer from the logic layer. 
