@@ -8,7 +8,27 @@
 #include <cstring>
 
 namespace rikitiki { 
-  
+  Header::Header(const std::string& name, const std::string& value) : stringpair(name, value){}
+
+  PostContent::PostContent(const std::string& name, const std::string& value) : stringpair(name, value){}
+
+  Cookie::Cookie(const std::string& name, const std::string& value, 
+		 const std::string& Domain, const std::string& Path,
+		 const std::string& Expires, bool secure, bool httpOnly) {
+    first = name;
+    second = value + "; ";
+    if(Domain.size())
+      second += "Domain=" + Domain + "; ";
+    if(Path.size())
+      second += "Path=" + Path + "; ";
+    if(Expires.size())
+      second += "Expires=" + Expires + "; ";
+    if(secure)
+      second += "Secure; ";
+    if(httpOnly)
+      second += "HttpOnly";
+  }
+
   ConnContext::Method ConnContext::RequestMethod() {
     if(_method == ANY){
       this->FillRequestMethod();

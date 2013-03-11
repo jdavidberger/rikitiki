@@ -17,7 +17,7 @@ namespace rikitiki {
      We can't just typedef it since we want to pass it around with stream operators
    */
   struct Header : public stringpair {
-  Header(const std::string& name, const std::string& value) : stringpair(name, value){}
+    Header(const std::string& name, const std::string& value);
   };
 
   /**
@@ -25,7 +25,7 @@ namespace rikitiki {
      We can't just typedef it since we want to pass it around with stream operators
    */
   struct PostContent : public stringpair {
-  PostContent(const std::string& name, const std::string& value) : stringpair(name, value){}
+    PostContent(const std::string& name, const std::string& value);
   };
 
   /**
@@ -33,7 +33,9 @@ namespace rikitiki {
      TODO: Add expiration, domain, etc
    */
   struct Cookie : public stringpair {
-  Cookie(const std::string& name, const std::string& value) : stringpair(name, value){}
+    Cookie(const std::string& name, const std::string& value, 
+	   const std::string& Domain = "", const std::string& Path = "",
+	   const std::string& Expires = "", bool secure = false, bool httpOnly = false);
   };
 
   /**
