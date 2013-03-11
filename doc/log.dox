@@ -1,0 +1,37 @@
+/**\page log Logging
+Rikitiki uses a really basic logging mechnanism throughout the framework. 
+
+LOG is a macro which takes in a category and a log level. If the current log level for that category is set lower than the passed in level, it will print whatever follows the log macro. The default stream used is 'std::cerr'. 
+
+~~~~~~~
+LOG(Main, Verbose) << "This will only print if the main category" << std::endl;
+~~~~~~~
+
+Note that if the log level isn't set high enough, none of the data shifted towards it is evaluated. This is faster than other methods in that no needless computation is done; however you can not expect functions that have side effects to always execute. 
+
+The valid [log levels](rikitiki/log/log.h), in order, are:
+- Debug
+- Verbose
+- Info
+- Warning
+- Error
+
+Info is the default level for all categories. 
+
+\sa rikitiki/log/log.h for functions which allow you to change the log level and stream per category. 
+
+\section Configuration Configuration
+If the configuration extension is enabled, log levels are automatically populated from the found configuration file. 
+
+The valid section of the configuration file is
+
+~~~~~~~
+log = {
+      levels = (
+      	     [{ category = "<category>"; level = "<level>" },]*
+      )
+};
+~~~~~~~
+It is also intended, at some point, to allow you to set up which streams are used in this section.
+
+*/

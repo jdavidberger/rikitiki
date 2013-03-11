@@ -9,6 +9,7 @@
 #include <pthread.h>
 #include <typeinfo>
 #include <atomic>
+
 namespace rikitiki {
   namespace log {
     enum LogLevels {

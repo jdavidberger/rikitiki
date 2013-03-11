@@ -3,13 +3,13 @@
 
 To this end, functionality that is not absolutely core to routing and handling is packaged up in extensions that can be disabled from the build process. Remove the ENABLE_FEATURE line in the root CMakeLists.txt file to delete the feature you wish to remove. 
 
-
-
-Please note that removing features will remove any examples that depend on those features. 
+Please note that removing features will remove any examples that depend on those features.
    
    Provided Extensions:
    - \subpage ctemplates
    - \subpage jsoncpp
    - \subpage rest
+   - \subpage Configuration
+   - \subpage log
  */
 

@@ -1,5 +1,7 @@
 /**\mainpage Introduction
+rikitiki is a library which is meant to simplify and speed up development of web modules in C++. Its meant to offer some of the conveniences of web frameworks like Django and Asp.net MVC but with the speed and ecosystem of C++. It is meant to scale down to run effeciently on embedded systems, as well as to perform on par with any custom written apache module. 
 
+\sa [Basics](Basics.html), [Quick Start Guide](QuickStart.html)
 */
 
 

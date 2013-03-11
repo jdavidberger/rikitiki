@@ -29,4 +29,13 @@ cmake ..
 make
 ./helloWorld
 ~~~~~~~
+
+Additionally, you can do
+~~~~~~~
+make install
+~~~~~~~
+to install the headers and lib file for use for other projects. To do an uninstall,
+~~~~~~~
+xargs rm < install_manifest.txt
+~~~~~~~
 */
