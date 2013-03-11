@@ -1,0 +1,102 @@
+/**\page QuickStart QuickStart
+\section module Creating a module 
+
+The basic idea behind rikitiki is that each module that can push some information to a webpage should just be a collection of handlers. Modules are simply structs with a Register function:
+
+~~~~~~
+using namespace rikitiki;
+struct HelloWorldModule {
+   void Register(Server& h) { }
+};
+~~~~~~
+
+will define a functional, albeit useless, module. 
+
+To make it functional, we need to add handlers. Most of the time, you want to add routes, which you can do like so:
+
+~~~~~~
+using namespace rikitiki;
+struct HelloWorldModule {
+  void Register(Server& h){
+    h.AddHandle( CreateRoute<>::With(this, "/hello") );
+    h.AddHandle( CreateRoute<int>::With(this, "/{number}") );
+    h.AddHandle( CreateRoute<std::string>::With(this, "/{word}") );
+  }
+
+  void operator()(ConnContext& ctx){
+    ctx << "Hello world!";
+  }
+
+   void operator()(ConnContext& ctx, int number){
+     ctx << "Number: " << number;
+  }
+
+  void operator()(ConnContext& ctx, const std::string& word){
+    ctx << "Word: " << word;
+  }
+};
+~~~~~~
+
+This will create three entry points for your site. When called, they will simply display the text streamed to the ConnContext object. 
+
+\section runit Running a web server 
+
+A module on it's own, even with entry points, is still a little useless -- to make it run we have to incorporate it into either an apache module or create an executable for it on top of mongoose. Neither is particularly hard to do.
+
+\subsection mongoosesection Mongoose 
+
+We can instantiate and run a mongoose server against a module with:
+
+~~~~~~
+using namespace rikitiki::mongoose;
+int main(){
+  MongooseServer server(5000);
+  HelloWorldModule module;
+
+  server.Register(module);
+  server.Start();
+  while(true){
+    sleep(1000);
+  }
+  return 0;
+}
+~~~~~~
+
+Running this executable will start a server on port 5000. Test each entry point with:
+
+- http://localhost:5000/hello
+- http://localhost:5000/42
+- http://localhost:5000/testing
+
+\subsection apachesection Apache 
+
+Running the module in apache is more involved, but not by much. A macro does most of the code set-up for us:
+
+~~~~~~
+RegisterApacheHandler(helloWorld, HelloWorldModule);
+~~~~~~
+
+when compiled to a shared object, this will expose a 'helloWorld_module' to apache. Supposing we compiled a 'mod_helloWorld.so' shared object, we need to take that file and copy or link it to apaches modules directory. On most linux systems, that is going to be /etc/httpd/modules. 
+
+Then we need to add the following line to the httpd.conf file (usually at /etc/httpd/conf/httpd.conf on linux systems):
+
+~~~~~~
+LoadModule helloWorld_module modules/mod_helloWorld.so
+~~~~~~
+
+or 
+
+~~~~~~
+LoadModule helloWorld_module modules/mod_helloWorld.dll
+~~~~~~
+
+for windows. 
+
+Run or restart apache, and the module should be loaded and available:
+
+- http://localhost/hello
+- http://localhost/42
+- http://localhost/testing
+
+Clearly though, these addresses are dependent on the particular apache configuration.     
+ */

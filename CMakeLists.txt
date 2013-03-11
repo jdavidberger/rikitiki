@@ -9,6 +9,7 @@ STRING(REGEX REPLACE "changeset:[ \t]*([0-9]+):(.*)" "\\1" rikitiki_VERSION_MINO
 FILE(WRITE ${CMAKE_BINARY_DIR}/VERSION "v${rikitiki_VERSION_MAJOR}.${rikitiki_VERSION_MINOR}")
 FILE(READ ${CMAKE_BINARY_DIR}/VERSION rikitiki_version)
 message("Building ${rikitiki_version}")
+
 set(THIRD_PARTY_DIR ${CMAKE_SOURCE_DIR}/third)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -26,8 +27,11 @@ ENDMACRO(disable_feature)
 MACRO( enable_feature feature_)
        STRING(TOUPPER ${feature_} feature)       
        SET("USE_${feature}" 1)
-       SET(DOXYFILE_DEFINED "${DOXYFILE_DEFINED} USE_${feature}")
-       ADD_DEFINITIONS(-DUSE_${feature})
+       SET(DOXYFILE_DEFINED "${DOXYFILE_DEFINED} RT_USE_${feature}")
+       SET(CONFIG 
+"#define RT_USE_${feature} 1
+${CONFIG}")
+
 ENDMACRO(enable_feature)
 
 ENABLE_FEATURE(apache)
@@ -35,13 +39,15 @@ ENABLE_FEATURE(mongoose)
 ENABLE_FEATURE(ctemplate)
 ENABLE_FEATURE(jsoncpp)
 ENABLE_FEATURE(rest)
+ENABLE_FEATURE(configuration)
+DISABLE_FEATURE(log)
 
 set(MAKE_EXAMPLES 1)
 
 include_directories(include)
-add_subdirectory (src)
-add_subdirectory(test)
 
+add_subdirectory(src)
+add_subdirectory(test)
 add_subdirectory(Doxygen)
 
 add_custom_target(memcheck
@@ -54,11 +60,11 @@ add_custom_target(helgrind
 	COMMENT "Started example server via valgrind" VERBATIM
 )
 
-
 add_custom_target(release
 	COMMAND hg archive -t tgz ${CMAKE_BINARY_DIR}/rikitiki-${rikitiki_version}-src.tar.gz
 	COMMENT "Generating release tar" VERBATIM
 )
 
-install(DIRECTORY include/rikitiki DESTINATION include)
+export(PACKAGE rikitiki)
 
+install(DIRECTORY include/rikitiki DESTINATION include)

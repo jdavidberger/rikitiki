@@ -1,9 +1,4 @@
-/* Copyright (C) 2012-2013 Justin Berger 
-   The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
-
-#include "connContext_ext.h"
-
-/** \page jsoncpp JsonCPP
+/**\page jsoncpp JsonCPP
  
 The [JsonCPP](http://jsoncpp.sourceforge.net) extension lets you seamlessly write and read from connection contexts with overloads to the appropriate stream operators. 
 

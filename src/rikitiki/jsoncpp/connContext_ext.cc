@@ -1,8 +1,8 @@
 /* Copyright (C) 2012-2013 Justin Berger 
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
-#include <rikitiki/jsoncpp/jsoncpp.h>
-#include <rikitiki/utils/config.h>
+#include <rikitiki/jsoncpp/jsoncpp>
+#include <rikitiki/configuration/configuration>
 using namespace rikitiki;
 
 rikitiki::Response& operator <<(rikitiki::Response& response,  const Json::Value& json){   

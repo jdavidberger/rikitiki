@@ -32,13 +32,15 @@ set (RT_SRC
     connContext.cc 
     content_types.cc 
     routing.cc
-    http_statuses.cc)
+    http_statuses.cc
+    stream_helpers.cc
+    )
 
-set (RT_LIBS dl pthread curl utils)
+set (RT_LIBS curl pthread)
 
 IF(${USE_MONGOOSE})
 	include_directories(${THIRD_PARTY_DIR}/mongoose)
-	add_subdirectory(mongoose)
+	add_subdirectory(mongoose)	
 ENDIF()
 
 IF(${USE_CTEMPLATE})
@@ -55,6 +57,16 @@ IF(${USE_JSONCPP})
 	add_subdirectory(jsoncpp)
 ENDIF()
 
+IF(${USE_CONFIGURATION})
+	add_subdirectory(configuration)
+ENDIF()
+
+IF(${USE_LOG})
+	add_subdirectory(log)
+ENDIF()
+
+CONFIGURE_FILE(config.h.in ${CMAKE_SOURCE_DIR}/include/rikitiki/config.h)	
+
 add_library(rikitiki ${RT_SRC})
 target_link_libraries(rikitiki ${RT_LIBS})		     
 install(TARGETS rikitiki DESTINATION lib)
@@ -62,5 +74,3 @@ install(TARGETS rikitiki DESTINATION lib)
 if(${MAKE_EXAMPLES})
 	add_subdirectory(examples)
 ENDIF()
-
-

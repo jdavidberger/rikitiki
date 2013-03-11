@@ -1,10 +1,3 @@
-/* Copyright (C) 2012-2013 Justin Berger 
-   The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
-#pragma once
-#include "server.h"
-#include "connContext.h"
-#include "register.h"
-
 /**\page apache Apache Integration
    
 Apache integration works via apaches module system. You can create an apache module from a rikitiki module by using the RegisterApacheModule macro. Put this after your module definition:

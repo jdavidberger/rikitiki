@@ -3,3 +3,7 @@ set(RT_SRC ${RT_SRC}
 	   ${THIRD_PARTY_DIR}/mongoose/mongoose.c 
 	   mongoose/server.cc PARENT_SCOPE)
 
+set(RT_LIBS ${RT_LIBS} 		   
+	    dl
+PARENT_SCOPE)
+

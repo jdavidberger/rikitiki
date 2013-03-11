@@ -3,15 +3,16 @@
 
 #pragma once 
 
+#include <rikitiki/config.h>
 #include <vector>
 #include <sstream>
 #include "content_types.h"
 #include "utils/macros.h"
 #include <tuple>
 #include "utils/tuple_ext.h"
-#include "utils/log.h"
+#include <rikitiki/log/log>
 #include <rikitiki/http_statuses.h>
-#if USE_CTEMPLATE
+#if RT_USE_CTEMPLATE
 #include <rikitiki/ctemplate/templatePreprocessor.h>
 #endif
 
@@ -53,9 +54,9 @@ namespace rikitiki {
     std::vector<Handler*> handlers;
     virtual ~Server();
 
-    #ifdef USE_CTEMPLATE
-    void AddPreprocessor( rikitiki::ctemplates::TemplatePreprocessor*);
+    #ifdef RT_USE_CTEMPLATE
     std::vector<ctemplates::TemplatePreprocessor*> templatePreprocessors;
+    void AddPreprocessor( rikitiki::ctemplates::TemplatePreprocessor*);
     #endif
 
     typedef bool (*handle_t)(ConnContext& ctx);

@@ -1,0 +1,15 @@
+/**\page extensions Extensions
+   rikitiki trys to provide as hassle-free development experience as possible, but also at it's core wants to avoid large dependency requirements that a developer has no interest in. In particular, one of the core use cases that the project aims to address is providing a standalone webserver to embedded devices. Any device that has a compiler with C++11 support and can run mongoose can run a baseline rikitiki installation.
+
+To this end, functionality that is not absolutely core to routing and handling is packaged up in extensions that can be disabled from the build process. Remove the ENABLE_FEATURE line in the root CMakeLists.txt file to delete the feature you wish to remove. 
+
+
+
+Please note that removing features will remove any examples that depend on those features. 
+   
+   Provided Extensions:
+   - \subpage ctemplates
+   - \subpage jsoncpp
+   - \subpage rest
+ */
+

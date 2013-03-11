@@ -2,6 +2,7 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
 #include <rikitiki/server.h>
+#include <rikitiki/ctemplate/ctemplate>
 using namespace rikitiki;
 using namespace rikitiki::ctemplates;
 

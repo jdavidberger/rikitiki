@@ -1,9 +1,8 @@
 /* Copyright (C) 2012-2013 Justin Berger 
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
-#include <rikitiki/rikitiki.h>
-#include <rikitiki/mongoose/server.h>
-#include <rikitiki/utils/config.h>
+#include <rikitiki/rikitiki>
+#include <rikitiki/mongoose/mongoose>
 
 using namespace rikitiki;
 using namespace rikitiki::mongoose;

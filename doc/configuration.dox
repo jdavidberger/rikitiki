@@ -1,0 +1,43 @@
+/**\page Configuration Configuration
+rikitiki looks for and loads a configuration file that is available globally throughout the program. Among other things, this configuration file determines logging levels as well as setting the directory to look for ctemplate templates in. 
+
+\section configformat Config format 
+The config files look like this:
+
+~~~~~~~
+ctemplate_root = "$(CONFIG_PATH)/../html/ctemplates";
+
+log = {
+    levels = ( 
+       { category = "Logging"; level = "Error" },
+       { category = "Server"; level = "Verbose" } 
+    );
+};
+~~~~~~~
+
+See [the libconfig site](http://www.hyperrealm.com/libconfig/) for further documentation.
+
+\section loadorder Load order 
+
+Configuration files are looked for in the following order:
+
+- <assembly-path>/<assembly-name>.cfg
+- <assembly-path>/../conf/<assembly-name>.cfg
+- /etc/rikitiki/conf/<assembly-name>.cfg
+- <assembly-path>/default.cfg
+- <assembly-path>/../conf/default.cfg
+- /etc/rikitiki/conf/default.cfg
+
+It is recommended that you place yours in the '/etc/rikitiki/conf' directory so that it doesn't matter where the module is run from.
+
+\section variables Available variables 
+Values between '$(' and ')' are treated as variables and expanded out. 
+
+The configuration engine recognizes a few built-in variables:
+
+- CONFIG_PATH - The path the config file is found at. 
+- BIN_NAME    - The name of the executing library or executable. 
+- BIN_PATH    - The path to the executing library or executable. 
+
+\sa log.h, config.h, ctemplates.h
+*/

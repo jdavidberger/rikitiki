@@ -1,0 +1,32 @@
+/** \page installation Installation 
+
+Download the source:
+~~~~~~~
+hg clone http://hg.code.sf.net/p/rikitiki/code rikitiki-code
+~~~~~~~
+
+Build:
+~~~~~~~
+cd rikitiki-code
+mkdir bin
+cd bin
+cmake ..
+make
+~~~~~~~
+
+Run the example:
+~~~~~~~
+./helloWorld
+~~~~~~~
+
+Or copy-paste this:
+~~~~~~~
+hg clone http://hg.code.sf.net/p/rikitiki/code rikitiki-code
+cd rikitiki-code
+mkdir bin
+cd bin
+cmake ..
+make
+./helloWorld
+~~~~~~~
+*/

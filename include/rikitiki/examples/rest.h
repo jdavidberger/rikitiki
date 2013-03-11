@@ -1,11 +1,11 @@
 /* Copyright (C) 2012-2013 Justin Berger 
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
-
-#include <rikitiki/rikitiki.h>
-#include <rikitiki/mongoose/server.h>
-#include <rikitiki/rest/rest.h>
-#include <rikitiki/jsoncpp/jsoncpp.h>
-#include <rikitiki/utils/config.h>
+#pragma once
+#include <rikitiki/rikitiki>
+#include <rikitiki/mongoose/mongoose>
+#include <rikitiki/rest/rest>
+#include <rikitiki/jsoncpp/jsoncpp>
+#include <rikitiki/configuration/configuration>
 #include <sqlite3.h>
 
 using namespace rikitiki;

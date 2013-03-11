@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <curl/curl.h>
 #include <assert.h>
+#include <cstring>
 
 namespace rikitiki { 
   

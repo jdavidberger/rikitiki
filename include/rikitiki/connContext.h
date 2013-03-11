@@ -2,7 +2,7 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
 #pragma once
-
+#include <map>
 #include <string>
 #include "server.h"
 #include "http_statuses.h"

@@ -1,10 +1,10 @@
 /* Copyright (C) 2012-2013 Justin Berger 
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
-#include <rikitiki/rikitiki.h>
+#include <rikitiki/configuration/configuration>
+#include <rikitiki/rikitiki>
 #include <sstream>
 #include <pthread.h>
-#include <rikitiki/utils/config.h>
 #include <cstring>
 
 namespace rikitiki {
@@ -39,7 +39,7 @@ namespace rikitiki {
       handlers[i] = 0;
     }
 
-#ifdef USE_CTEMPLATE
+#ifdef RT_USE_CTEMPLATE
     for(size_t i = 0;i < templatePreprocessors.size();i++){
     delete templatePreprocessors[i];
     templatePreprocessors[i] = 0;
@@ -79,7 +79,7 @@ namespace rikitiki {
     AddHandler( new GHandler( handler ) );
   }
 
-#ifdef USE_CTEMPLATE
+#ifdef RT_USE_CTEMPLATE
   void Server::AddPreprocessor( rikitiki::ctemplates::TemplatePreprocessor* tp){
     templatePreprocessors.push_back(tp);
   }

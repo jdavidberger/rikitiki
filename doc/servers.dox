@@ -1,0 +1,7 @@
+/**\page servers Servers
+   Servers can be disabled like any other [extension](extensions.html).
+
+   Supported Servers:
+   - \subpage apache
+   - \subpage mongoose
+ */

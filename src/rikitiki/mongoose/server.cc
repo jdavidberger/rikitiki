@@ -1,7 +1,8 @@
 /* Copyright (C) 2012-2013 Justin Berger 
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
-#include <rikitiki/mongoose/mongoose.h>
+#include <rikitiki/mongoose/mongoose>
+#include <rikitiki/configuration/configuration>
 #include <sstream>
 #include <signal.h>
 
@@ -10,6 +11,11 @@ namespace rikitiki {
 
     MongooseServer::MongooseServer(int _port) : port(_port)  { 
       ctx = 0;
+#ifdef RT_USE_CONFIGURATION
+      if(Configuration::Global().exists("mongoose")){
+	Configuration::Global().getRoot()["mongoose"].lookupValue("document_root", DocumentRoot);
+      }
+#endif
     }
 
     static void* _handler(enum mg_event event, struct mg_connection *conn) {
@@ -47,8 +53,13 @@ namespace rikitiki {
       std::stringstream _port;
       _port << port;
       std::string __port = _port.str();
-      const char *options[] = {"listening_ports", __port.c_str(), NULL};
-      ctx = mg_start(_handler, this, options);
+      std::vector<const char*> options;
+      options.push_back("listening_ports"), options.push_back(__port.c_str());
+      if(DocumentRoot.size())
+	options.push_back("document_root"), options.push_back(&DocumentRoot[0]);
+      options.push_back(NULL);
+
+      ctx = mg_start(_handler, this, &options[0]);
     }
 
     void MongooseServer::Stop() {

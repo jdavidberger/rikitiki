@@ -1,0 +1,9 @@
+/**\page dependencies Dependencies
+- libconfig 1.49
+- curl (To be removed soon)
+- apache 2.4 (Can disable by setting USE_APACHE to 0 in the CMakeLists.txt file at the root)
+- Compiler with c++11 support
+    - Variadic templates
+    - decltype
+    - Tested on gcc 4.7.2, probably works on previous versions
+ */

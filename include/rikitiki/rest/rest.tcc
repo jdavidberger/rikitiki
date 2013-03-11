@@ -1,8 +1,6 @@
 // -*-c++-*-
 /* Copyright (C) 2012-2013 Justin Berger 
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
-#include <cxxabi.h>
-
 #define MakeCreateIfHandles(METHOD)					\
   template<typename T, typename... Args>				\
   static auto CreateIfHandles ## METHOD (T* t, const std::string& route, int) \
@@ -14,7 +12,11 @@
   }									\
   template<typename T, typename... Args>				\
   static rikitiki::Route* CreateIfHandles ## METHOD (T* t, const std::string& route, long) { \
-      return 0;								\
+    return 0;								\
+  }									\
+  template<typename T, typename... Args>				\
+  static rikitiki::Route* CreateIfHandles ## METHOD (T* t, const std::string& route) { \
+    return CreateIfHandles ## METHOD(t, route, 0);			\
   }									
 
   
@@ -24,6 +26,12 @@ namespace rikitiki {
     MakeCreateIfHandles(POST);
     MakeCreateIfHandles(PUT);
     MakeCreateIfHandles(DELETE);
+
+    MakeCreateIfHandles(HEAD);
+    MakeCreateIfHandles(TRACE);
+    MakeCreateIfHandles(OPTIONS);
+    MakeCreateIfHandles(CONNECT);
+    MakeCreateIfHandles(PATCH);
     
     static int addIfNotNull(Server& server, Route* r){
       if(r != 0){
@@ -36,14 +44,14 @@ namespace rikitiki {
     template <typename T>
     int Register(Server& server, const std::string& route, const std::string& routeWId, T* t){
       int rtn = 
-	addIfNotNull(server, CreateIfHandlesGET<T>(t, route,0)) + 
-	addIfNotNull(server, CreateIfHandlesPOST<T>(t, route,0)) +
-	addIfNotNull(server, CreateIfHandlesPUT<T>(t, route,0))+
-	addIfNotNull(server, CreateIfHandlesDELETE<T>(t, route,0))+      
-	addIfNotNull(server, CreateIfHandlesGET<T,int>(t, routeWId,0))+
-	addIfNotNull(server, CreateIfHandlesPOST<T,int>(t, routeWId,0))+
-	addIfNotNull(server, CreateIfHandlesPUT<T,int>(t, routeWId,0))+
-	addIfNotNull(server, CreateIfHandlesDELETE<T,int>(t, routeWId,0));
+	addIfNotNull(server, CreateIfHandlesGET<T>(t, route)) + 
+	addIfNotNull(server, CreateIfHandlesPOST<T>(t, route)) +
+	addIfNotNull(server, CreateIfHandlesPUT<T>(t, route))+
+	addIfNotNull(server, CreateIfHandlesDELETE<T>(t, route))+      
+	addIfNotNull(server, CreateIfHandlesGET<T,int>(t, routeWId))+
+	addIfNotNull(server, CreateIfHandlesPOST<T,int>(t, routeWId))+
+	addIfNotNull(server, CreateIfHandlesPUT<T,int>(t, routeWId))+
+	addIfNotNull(server, CreateIfHandlesDELETE<T,int>(t, routeWId));
 
       if(rtn == 0) {
 	LOG(Rest, Error) << typeid(T) << " has no rest functions defined." << std::endl;
