@@ -26,10 +26,11 @@ namespace rikitiki {
     void SetLogLevel(const std::string& category, int level);
     void SetLogLevel(const std::string& category, const std::string& level);
 
+    std::map<std::string, int>& logLevels();
     static inline bool ShouldLog(const std::string& category, int level){
-      extern std::map<std::string, int> logLevels;
-      auto it = logLevels.find(category);
-      int ll = it == logLevels.end() ? 0 : it->second;
+
+      auto it = logLevels().find(category);
+      int ll = it == logLevels().end() ? 0 : it->second;
       return ll <= level;
     }
 

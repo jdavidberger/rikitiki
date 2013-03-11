@@ -16,7 +16,7 @@
   }									\
   template<typename T, typename... Args>				\
   static rikitiki::Route* CreateIfHandles ## METHOD (T* t, const std::string& route) { \
-    return CreateIfHandles ## METHOD(t, route, 0);			\
+    return CreateIfHandles ## METHOD<T, Args...>(t, route, 0);		\
   }									
 
   
@@ -26,7 +26,6 @@ namespace rikitiki {
     MakeCreateIfHandles(POST);
     MakeCreateIfHandles(PUT);
     MakeCreateIfHandles(DELETE);
-
     MakeCreateIfHandles(HEAD);
     MakeCreateIfHandles(TRACE);
     MakeCreateIfHandles(OPTIONS);
@@ -48,6 +47,7 @@ namespace rikitiki {
 	addIfNotNull(server, CreateIfHandlesPOST<T>(t, route)) +
 	addIfNotNull(server, CreateIfHandlesPUT<T>(t, route))+
 	addIfNotNull(server, CreateIfHandlesDELETE<T>(t, route))+      
+
 	addIfNotNull(server, CreateIfHandlesGET<T,int>(t, routeWId))+
 	addIfNotNull(server, CreateIfHandlesPOST<T,int>(t, routeWId))+
 	addIfNotNull(server, CreateIfHandlesPUT<T,int>(t, routeWId))+

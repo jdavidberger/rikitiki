@@ -28,6 +28,9 @@ test_points = {
         ("DELETE", "/book"),
         ("GET", "/book"),
         ("POST", "/book", '{"name":"lotr","author":"tolkien","isbn":"123-456}'),
+        ("GEt", "/book/1"),
+        ("GEt", "/book/2"),
+        ("GEt", "/book/3")
         ]
 }
 

@@ -12,10 +12,14 @@
 using namespace rikitiki;
 using namespace rikitiki::mongoose;
 using namespace rikitiki::examples;
+
+extern bool log_config_loaded;
+
 int main(){
   MongooseServer server(5000);
 
   HelloWorldModule hw;
+  server.Register(hw);
 #ifdef RT_USE_CTEMPLATE
   AdvancedModule adv;
   server.Register(adv);
@@ -25,9 +29,8 @@ int main(){
   server.Register(rest);
 #endif
   HeadersTestModule headers;
-
-  server.Register(hw);
   server.Register(headers);
+
   server.Run();
   
   return 0;

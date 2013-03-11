@@ -14,7 +14,7 @@ static void getAssemblyName(std::string& name){
     Dl_info info;
     memset(&info, 0, sizeof(Dl_info));
     dladdr( (void*)&getAssemblyName, &info);
-    std::cerr << info.dli_fname << std::endl;
+
     std::string exePath(info.dli_fname);
     auto start = exePath.find_last_of('/');
     auto end = exePath.find_last_of('.');
@@ -133,7 +133,6 @@ std::map<std::string, std::string> variables;
     LOG(Config, Info) << "Exe path " << exePath << std::endl;
     LOG(Config, Info) << "Loaded config file " << filePath << std::endl;
   
-
     performSubstitutions(variables, getRoot());
 }
 
@@ -143,3 +142,4 @@ Configuration& Configuration::Global(){
   if(!loaded.exchange(true)) config.ReadGlobal();  
   return config;
 }
+
