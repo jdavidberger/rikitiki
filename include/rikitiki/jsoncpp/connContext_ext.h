@@ -3,14 +3,15 @@
 
 #include "../connContext.h"
 #include <jsoncpp/json/json.h>
-
+#include <array>
 namespace rikitiki{
   rikitiki::Response& operator <<(rikitiki::Response& response,  const Json::Value&); 
   rikitiki::ConnContext& operator>>(rikitiki::ConnContext& response, Json::Value& val);
 
   template <>
     struct ContentHandler_<Json::Value>  { 
-    static constexpr ContentType::t ContentType() { return ContentType::application_json; };
+    static constexpr std::array<ContentType::t,2> ContentTypes() { 
+      return { {ContentType::application_json, ContentType::application_javascript } }; };
   };
   
 

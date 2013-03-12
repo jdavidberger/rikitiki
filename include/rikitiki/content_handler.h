@@ -1,13 +1,14 @@
 #pragma once
 
 #include <map>
+#include <array>
 namespace rikitiki {
   struct ConnContext; 
   struct Response;
 
   template <typename T>
     struct ContentHandler_ { 
-    static constexpr ContentType::t ContentType() { return ContentType::DEFAULT; };
+      static constexpr std::array<ContentType::t,1> ContentTypes() { return { { ContentType::DEFAULT } }; };
   };
 
   struct OutProvider {
@@ -49,11 +50,12 @@ namespace rikitiki {
       template <typename Th>
       struct HandlerAdders<Th> {
 	static auto Add( thisType* _this) -> void {
-	  static_assert(ContentHandler_<Th>::ContentType() > ContentType::DEFAULT &&
-			ContentHandler_<Th>::ContentType() < ContentType::MAX, 
-			"Invalid content type value in specialized handler");
-	  _this->handlers[ContentHandler_<Th>::ContentType()] = 
-	    FProvider::template Make<S, Th> ();
+	  for(auto contentType : ContentHandler_<Th>::ContentTypes()){
+	    assert(contentType > ContentType::DEFAULT &&
+		   contentType < ContentType::MAX && 
+		   "Invalid content type value in specialized handler");	    
+	    _this->handlers[contentType] = FProvider::template Make<S, Th> ();
+	  }
 	}
       };
       

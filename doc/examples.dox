@@ -1,11 +1,17 @@
 /** \page examples Examples 
-- rikitiki::examples::HelloWorldModule - A simple, one page example which shows the basic idea behind routing.
-- rikitiki::examples::AdvancedModule - A more advanced example which shows how to use
+Note that a few of these examples expose race conditions due to not using mutexs. Namely, sqlite3 in RestModule isn't natively thread safe, and neither is the backing vector in RestAdvModule. The purpose of these examples is for clarity of concept, and the concern was that adding the proper mutex locks would be a distraction to understanding the underying principals.
+
+- rikitiki::examples::HelloWorldModule - helloWorld.h - A simple, one page example which shows the basic idea behind routing.
+- rikitiki::examples::AdvancedModule - advanced.h - A more advanced example which shows how to use
     - CTemplates
     - CTemplate preprocessors
     - GET/POST routes
     - Retrieving post and querystring data. 
-- rikitiki::examples::HeadersTestModule - Displays the headers and cookies of the page.
-- rikitiki::examples::RestModule - Example of RESTful service
+- rikitiki::examples::HeadersTestModule - headersTest.h - Displays the headers and cookies of the page.
+- rikitiki::examples::RestModule - rest.h - Example of RESTful service
+  - Reads from a sqlite3 db and returns [Json](jsoncpp.html)
+  - Demonstrates GET/POST/DELETE routes, as well as an overload of GET that accepts an id. 
+- rikitiki::examples::RestAdvModule - restAdv.h - Example of a RESTful service which demonstrates automatically using the content handler framework to enable stream overloads for a custom class. 
+- rikitiki::examples::MultiTypeModule - multiType.h - Test fixture which tests a range of different types to pass into routes. 
 */
 

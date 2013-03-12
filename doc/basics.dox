@@ -91,8 +91,16 @@ The 'ConnContext' object provides all the information about the request, as well
 
 The main way to populate the response is to use the stream operator '<<' into the ConnContext object. It supports all the data types that streams accept, as well as 'ContentType' and ctemplate dictionaries. 
 
+The '>>' operator provides access to the payload content of the request. Even with no extensions:
 
-\subsection conncontextstreamops Special ConnContext Stream Overloads
+~~~~~~~
+std::string payload;
+ctx >> payload;	   
+~~~~~~~
+
+will load the request contents into the payload variable.
+
+\subsection conncontextstreamops ConnContext Stream Overloads
 
 As well as normal outputs, you can also use the stream operator to pass in:
 
@@ -100,6 +108,98 @@ As well as normal outputs, you can also use the stream operator to pass in:
 - HttpStatus (See rikitiki/http_statuses.h for a list). It is automatically set to OK. 
     - NOTE: The constructor for HttpStatus is private since you are really recommended to use one of the standard statuses. I'd be curious to know why anyone would need a custom one, and will help add support for that use case if it presents itself. The Response just stores a pointer to a staticly initialized const HttpStatus, so there are definite object life concerns in creating ad-hoc status objects. 
 - Header Objects -- See headersTest example. In short, just do 'ctx << rikitiki::Header("Name", "Value")
-- Cookie Objects -- See headersTest example. In short, just do 'ctx << rikitiki::Cookie("Name", "Value"). Support for cookie attributes further than that (ie, expires, domain, etc) is forthcoming. 
-- CTemplateDictionary -- See the CTemplate section below. Not present if compiled without ctemplate support. 
+- Cookie Objects -- See headersTest example. In short, just do 'ctx << rikitiki::Cookie("Name", "Value"). Also supports common cookie attributes. See the constructor for all the overloads.
+
+\subsubsection relextensions Extensions which provide overloads
+- CTemplateDictionary -- See the [CTemplate](ctemplates.html) section. 
+- Json::Value -- See the [JsonCpp](jsoncpp.index) section.
+  - Bidirectional
+
+\subsubsection contenthandlers Content Type Handlers
+On top of the basic payload extraction mechanism is a more helpful system in place which allows you to automatically marshall from a raw context, into a custom class definition. You could overload the stream operators to ConnContext yourself, however then you have to either add support for reading the 'accept' header and adhering to that, as well as sending the appropriate content type header back. 
+
+The recommended approach is to seperate out the content that you are sending (ie, your custom class data) with the content type handler. To define a new content type handler, you must provide an input and output overload, as well as a type trait defining what content types it covers. JsonCpp is already set up with sensible defaults:
+
+From jsoncpp\connContext_ext.h:
+~~~~~~~
+namespace rikitiki {
+  rikitiki::Response& operator <<(rikitiki::Response& response,  const Json::Value&); 
+  rikitiki::ConnContext& operator>>(rikitiki::ConnContext& response, Json::Value& val);
+
+  template <>
+    struct ContentHandler_<Json::Value>  { 
+    static constexpr std::array<ContentType::t,2> ContentTypes() { 
+      return { {ContentType::application_json, ContentType::application_javascript } }; };
+  };
+}
+~~~~~~~
+
+Note that providing an overload for << to Response enables a useful overload to operator<< on ConnContext. This is the operator you should normally overload. This is enough to write and read the content type handler from the connection context.
+
+The other piece you need in place is a conversion from your custom class to all the content type handlers you want to support. For instance, from examples\restAdv.h:
+
+~~~~~~~
+namespace rikitiki {
+  struct Book {
+    std::string name; 
+    std::string author;
+    std::string isbn;
+  };
+  
+  static Json::Value& operator >>(Json::Value& jv, Book& b){
+    b.name = jv["name"].asString();
+    b.author = jv["author"].asString();
+    b.isbn = jv["isbn"].asString();
+    return jv;
+  }  
+
+  static Json::Value& operator <<(Json::Value& jv, Book& b){
+    jv["name"] = b.name;
+    jv["author"] = b.author;
+    jv["isbn"] = b.isbn;
+    return jv;
+  }  
+}
+~~~~~~~
+
+This is a fairly trivial implementation on how to convert back and forth from the Book class to a json object. We also need to provide a type trait to Book that specifies what handlers it supports:
+
+~~~~~~~
+template <>
+    struct valid_conversions<Book> {
+    typedef TypeConversions<Book, InProvider, Json::Value [,other_handlers... ]> In;
+    typedef TypeConversions<Book, OutProvider, Json::Value [,other_handlers... ]> Out;
+};
+~~~~~~~
+
+And from that you can do things like:
+~~~~~~~
+void operator()(ConnContext& ctx){
+     Book book;
+     ctx >> book;
+     ctx << book;
+}
+~~~~~~~
+
+Which reads in a book and immediately echos it back out. 
+
+This gives direction on both how to extract the book type as well as write it to the underlying stream.
+
+This has a number of benefits over just manually writing to the stream. First, since you can specify multiple content formats, rikitiki will check the request headers and send back the appropriate response based. If the request headers don't specify a request that your object supports, the proper error code is returned indicating that the types it asked for where unacceptable. 
+
+Secondly, it provides automatic support for container types if the output format supports it. For instance, 
+
+~~~~~~~
+void operator()(ConnContext& ctx){
+     std::vector<Book> books;
+     ctx >> books;
+     ctx << books;
+}
+~~~~~~~
+
+will echo out an inputed list of books. 
+
+It will also make the translation code more resistant to underlying interface changes in ConnContext. Some pseudo-reflection methods are currently being investigated so you can define a minimal metaclass for a given type, and different output formats will know how to process your type automatically; although these methods will likely only ever apply to simpler classes. 
+
+\sa restAdv.h, rikitiki::valid_conversions, rikitiki::ContentHandler_
 */
