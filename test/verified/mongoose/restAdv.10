@@ -1,0 +1,11 @@
+200 OK
+Content-Length: 67
+Content-Type: application/json
+
+
+{
+	"author" : "tolkien",
+	"isbn" : "123-4567",
+	"name" : "lotr"
+}
+

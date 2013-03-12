@@ -57,7 +57,7 @@ namespace rikitiki {
     void MongooseConnContext::FillHeaders() {      
       std::string name, value;
       for(int i = 0;i < request.num_headers;i++)
-	AddHeader(request.http_headers[i].name,
+	AddRequestHeader(request.http_headers[i].name,
 		  request.http_headers[i].value);
 
       mappedHeaders = true;

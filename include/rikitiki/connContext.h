@@ -106,7 +106,6 @@ namespace rikitiki {
 
     virtual void FillQueryString() = 0;
     virtual void FillHeaders() = 0;
-    HeaderCollection::value_type& AddHeader(const char*, const char*);
     virtual void FillRequestMethod() = 0;  
     virtual void FillCookies();  
 
@@ -115,6 +114,11 @@ namespace rikitiki {
     ConnContext(const Server*);
     ConnContext();
   public:
+    /**\brief This is a conv. function to add REQUEST headers, not response headers (use the stream operator for that). 
+       This function exists so the raw conncontext drivers can just kick down unsanitized header data and this function
+       does the right thing. Namely that means lower-casing it. 
+    */
+    HeaderCollection::value_type& AddRequestHeader(const char*, const char*);
     virtual ~ConnContext();
     const Server* server;
     std::multimap<double, ContentType::t>& Accepts();

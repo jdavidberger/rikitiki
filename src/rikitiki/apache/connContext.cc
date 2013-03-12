@@ -23,13 +23,13 @@ namespace rikitiki {
       mappedQs = true;
     }
     static int header_add(void* rec, const char*key, const char*value){
-      HeaderCollection* _headers = (HeaderCollection *)rec;
-     _headers->insert(make_pair(std::string(key), std::string(value)));
+      ApacheConnContext* ctx = (ApacheConnContext*)rec;     
+      ctx->AddRequestHeader(key, value);
      return 1;
     }
     void ApacheConnContext::FillHeaders() {
       apr_table_t *h_table = request->headers_in;
-      apr_table_do(header_add, &_headers, h_table, NULL);
+      apr_table_do(header_add, this, h_table, NULL);
       mappedHeaders = true;
     }
 

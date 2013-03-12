@@ -118,7 +118,7 @@ namespace rikitiki {
     mapContents(Payload(), _post);
     mappedPost = true;
   }
-  HeaderCollection::value_type& ConnContext::AddHeader(const char* _name, const char* value){
+  HeaderCollection::value_type& ConnContext::AddRequestHeader(const char* _name, const char* value){
     std::string name(_name);
     std::transform(name.begin(), name.end(), name.begin(), ::tolower);
     auto& newHeader = *_headers.insert( std::make_pair(name,
