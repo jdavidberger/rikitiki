@@ -6,6 +6,8 @@
 #include <string>
 #include "server.h"
 #include "http_statuses.h"
+#include "metaprogramming.h"
+#include "content_handler.h"
 namespace rikitiki {
   class Server;
   class ConnContext;
@@ -50,7 +52,10 @@ namespace rikitiki {
     void reset();
     Response();
     template <class T>
-    Response& operator <<(const T& obj){ response << obj; return *this;}
+
+    auto operator <<(const T& obj) -> decltype( instance_of<std::stringstream>::value << obj, instance_of<Response&>::value)
+    { response << obj; return *this;}
+
     Response& operator <<(rikitiki::ContentType::t t);
     Response& operator <<(const rikitiki::Cookie& t);
     Response& operator <<(const rikitiki::HttpStatus& t);
@@ -83,15 +88,19 @@ namespace rikitiki {
       ANY = 0, GET = 1, POST = 2, HEAD = 3, PUT = 4, DELETE = 5, TRACE = 6, OPTIONS = 7, CONNECT = 8, PATCH = 9, OTHER
     };
   protected:
-    bool mappedPost, mappedQs, mappedHeaders, mappedCookies, mappedPayload; 
+    bool mappedPost, mappedQs, mappedHeaders, mappedCookies, mappedPayload, mappedContentType; 
     PostCollection _post;
     QueryStringCollection _qs;
     HeaderCollection _headers;
     CookieCollection _cookies;
+    std::multimap<double, ContentType::t>* _accepts;
+    ContentType::t _contentType;
     std::string _payload;
 
     Method _method;
 
+    virtual void FillAccepts();
+    virtual void FillContentType();
     virtual void FillPayload() = 0;
     virtual void FillPost();
 
@@ -105,9 +114,11 @@ namespace rikitiki {
     ConnContext(const Server*);
     ConnContext();
   public:
-    
+    virtual ~ConnContext();
     const Server* server;
+    std::multimap<double, ContentType::t>& Accepts();
     PostCollection& Post();
+    ContentType::t ContentType();
     QueryStringCollection& QueryString();
     HeaderCollection& Headers();
     CookieCollection& Cookies();
@@ -117,7 +128,10 @@ namespace rikitiki {
     bool handled;  
     Method RequestMethod();
 
-    template <class T> ConnContext& operator <<(const T& obj);
+    template <class T> auto operator <<(const T& obj) -> decltype( instance_of<Response>::value << obj, (ConnContext&)*(ConnContext*)0) ;
+
+    template <class T> auto operator <<(T&) -> decltype(valid_conversions<T>::Out::Instance(), instance_of<ConnContext>::value);
+    template <class T> auto operator >>(T&) -> decltype(valid_conversions<T>::In ::Instance(), instance_of<ConnContext>::value);
     Response response;
   };
   void mapContents(std::string& raw_content, PostCollection& post);

@@ -17,8 +17,8 @@ namespace rikitiki {
       ss << "HTTP/1.1 " << response.status->status << " " << response.status->name << "\r\n";
       ss << "Content-Length: " << resp.size() << "\r\n";
       ss << "Content-Type: " << ToString(response.ResponseType) << "\r\n";
-      foreach(it, response.headers){
-	ss << it->first << ": " << it->second << "\r\n";
+      for(auto it : response.headers){
+	ss << it.first << ": " << it.second << "\r\n";
       }
       ss << "\r\n";
       ss << resp;

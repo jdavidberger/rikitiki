@@ -19,7 +19,8 @@
     return CreateIfHandles ## METHOD<T, Args...>(t, route, 0);		\
   }									
 
-  
+#include <rikitiki/stream_helpers.h>
+
 namespace rikitiki {
   namespace rest {
     MakeCreateIfHandles(GET);
@@ -54,9 +55,9 @@ namespace rikitiki {
 	addIfNotNull(server, CreateIfHandlesDELETE<T,int>(t, routeWId));
 
       if(rtn == 0) {
-	LOG(Rest, Error) << typeid(T) << " has no rest functions defined." << std::endl;
+	//	LOG(Rest, Error) << typeid(T) << " has no rest functions defined." << std::endl;
       } else {
-	LOG(Rest, Info) << typeid(T) << " has " << rtn << " functions defined." << std::endl;
+	//	LOG(Rest, Info) << typeid(T) << " has " << rtn << " functions defined." << std::endl;
       }
       return rtn;
     }

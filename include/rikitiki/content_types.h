@@ -7,7 +7,8 @@
 namespace rikitiki {
   namespace ContentType {
     enum t {
-      DEFAULT = -1,
+      DEFAULT = -2,
+      ALL = -1, 
       application_atom_xml,
       application_ecmascript,
       application_EDI_X12,
@@ -83,9 +84,11 @@ namespace rikitiki {
       video_webm,
       video_x_matroska,
       video_x_ms_wmv,
-      video_x_flv
+      video_x_flv,
+      MAX
     };
-    
+
+    t FromString(const std::string& type);
     std::string ToString(t type);
   }
 }

@@ -5,3 +5,4 @@
 #include <rikitiki/connContext.h>
 #include <rikitiki/routing.h>
 #include <rikitiki/stream_helpers.h>
+#include <rikitiki/content_handler.h>

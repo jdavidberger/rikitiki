@@ -1,5 +1,6 @@
 ADD_MODULE(helloWorld)
-
+ADD_MODULE(multiType)
+ADD_MODULE(restAdv)
 IF(${USE_CTEMPLATE})
 	ADD_MODULE(advanced)
 ENDIF()

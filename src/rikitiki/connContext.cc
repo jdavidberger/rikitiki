@@ -51,6 +51,67 @@ namespace rikitiki {
     return b;
   }
 
+  static inline const char* read_accept_entry(const char* b){
+    while(*b != 0 && *b != ',') b++;
+    return b;
+  }
+  static inline const char* read_accept_next_entryfield(const char* b, const char* be){
+    while(b != be && (*b == ' ' || *b == ';'))b++;
+    return b;
+  }
+  static inline const char* read_accept_entryfield(const char* b, const char* be){
+    while(b != be && *b != ';') b++;
+    return b;
+  }
+  static inline const char* read_double(double& v, const char* b) {
+    v = 0;
+    while(*b >= '0' && *b <= '9'){
+      v *= 10; 
+      v += (double)(*b - '0');
+      b++;
+    } 
+    if(*b == '.'){
+      b++;
+      double den = 1.0;
+      while(*b >= '0' && *b <= '9'){
+	den = den / 10.0;
+	v += (double)(*b - '0') * den;
+	b++;
+      }       
+    }
+    return b;
+  }
+  void ConnContext::FillAccepts() {
+    _accepts = new std::multimap<double, ContentType::t>();
+    const char* b;
+    b = &(Headers()["Accept"])[0];    
+    while(*b != 0){
+      const char* ee = read_accept_entry(b);
+      double q = 1.0;
+      const char* ct_begin, *ct_end;
+      while( (b = read_accept_next_entryfield(b, ee)) != ee){
+	const char* efe = read_accept_entryfield(b, ee);
+	if(strncmp(b, "q=",2) == 0) {
+	  b += 3;
+	  b = read_double(q, b);
+	} else {
+	  ct_begin = b;
+	  ct_end = efe;
+	}
+	b = efe;
+      }
+      _accepts->insert(std::make_pair(-q, ContentType::FromString(std::string(ct_begin, ct_end - ct_begin))));
+      b = ee;
+      while(*b == ',' || *b == ' ') b++;
+    }
+    mappedContentType = true;
+  }
+
+  void ConnContext::FillContentType() {
+    _contentType = ContentType::FromString(Headers()["Content-Type"]);
+    mappedContentType = true;
+  }
+
   void ConnContext::FillPost(){
     mapContents(Payload(), _post);
     mappedPost = true;
@@ -76,7 +137,22 @@ namespace rikitiki {
     }
     mappedCookies = true;
   }
-  
+
+  std::multimap<double, ContentType::t>& ConnContext::Accepts(){
+    if(_accepts == 0){
+      FillAccepts();
+      assert(_accepts);
+    }
+    return *_accepts;
+  }
+
+  ContentType::t ConnContext::ContentType() {
+    if(!mappedContentType){
+      this->FillContentType();
+      assert(mappedContentType);
+    }
+    return _contentType;
+  }
   std::string& ConnContext::Payload() {
     if(!mappedPayload){
       this->FillPayload();
@@ -157,8 +233,14 @@ namespace rikitiki {
 			       mappedQs(false), 
 			       mappedHeaders(false), 
 			       mappedCookies(false), 
-			       mappedPayload(false)  {}
+			       mappedPayload(false),
+			       mappedContentType(false),
+			       _accepts(0) {}
 
+  ConnContext::~ConnContext(){
+    delete _accepts; 
+  }
+  
 #define MATCH_METHOD_ENUM(eval)	do{if(strcmp(method, #eval) == 0) return ConnContext::eval;}while(false);
 				     
   ConnContext::Method strToMethod(const char* method){
@@ -209,7 +291,7 @@ namespace rikitiki {
     std::replace(raw_content.begin(), raw_content.end(), '+', ' ');
     auto l_it = raw_content.begin();
     std::string name, value;
-    foreach(it, raw_content){
+    for(auto it = raw_content.begin(); it != raw_content.end();it++){
       switch(*it){
       case '=': 
 	name = std::string(l_it, it);	  

@@ -18,7 +18,7 @@ namespace rikitiki {
        Demonstrates
        - Rest Features
        - Json Features
-     */
+     */    
     struct RestModule  {
       static const char* create_table,*select_all,*select,*insert;
       sqlite3_stmt *insert_stmt, *select_all_stmt, *select_stmt;

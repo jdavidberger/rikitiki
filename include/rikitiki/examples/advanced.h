@@ -62,8 +62,8 @@ namespace rikitiki {
       void QueryString(ConnContext& ctx){
 	ctx << ContentType::application_javascript 
 	    << "{";
-	foreach(it, ctx.QueryString()){
-	  ctx << "\t '" << it->first << "': '" << it->second << "', \n";
+	for(auto param : ctx.QueryString()){
+	  ctx << "\t '" << param.first << "': '" << param.second << "', \n";
 	}
 	ctx << "}";
       }

@@ -2,6 +2,7 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
 #include <rikitiki/content_types.h>
+#include <map>
 
 #define CASE_RET(X,Y) case X ## _ ## Y: return #X "/" #Y;
 #define CASE_RET_PLUS(X,Y,Z) case X ## _ ## Y ## _ ## Z: return #X "/" #Y "+" #Z;
@@ -11,6 +12,17 @@
 
 namespace rikitiki {
   namespace ContentType {
+    t FromString(const std::string& type){
+      static std::map<std::string, t> types;
+      if(type == "")
+	return DEFAULT;
+      if(types.size() == 0){
+	for(auto _type = (int)ALL; _type < (int)MAX; _type++)
+	  types[ ToString((t)_type) ] = (t)_type;
+      }
+      return types[type];
+    }
+
     std::string ToString(t type){
       switch(type){
 	CASE_RET_PLUS(application, atom, xml);
@@ -85,6 +97,8 @@ namespace rikitiki {
 	CASE_RET_DASH(video, x, matroska);
 	CASE_RET_DASH_DASH(video, x, ms, wmv);
 	CASE_RET_DASH(video, x, flv);
+      case ALL:
+	return "*/*";
       case DEFAULT:
 	CASE_RET     (text, html);
       default:

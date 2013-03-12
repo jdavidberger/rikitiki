@@ -26,8 +26,8 @@ namespace rikitiki {
       void headers(ConnContext& ctx){
 	ctx << ContentType::text_plain
 	    << "Headers: \n";
-	foreach(it, ctx.Headers())
-	  ctx << it->first << ": " << it->second << "\n";
+	for(auto header : ctx.Headers())
+	  ctx << header.first << ": " << header.second << "\n";
       }
 
       void cookies(ConnContext& ctx){
@@ -37,11 +37,11 @@ namespace rikitiki {
 	ctx << ContentType::text_plain
 	    << "Cookies: \n";
 
-	foreach(it, ctx.Cookies())
-	  ctx << it->first << ": " << it->second << "\n";
+	for(auto cook : ctx.Cookies())
+	  ctx << cook.first << ": " << cook.second << "\n";
 	ctx << "Headers: \n";
-	foreach(it, ctx.Headers())
-	  ctx << it->first << ": " << it->second << "\n";
+	for(auto header : ctx.Headers())
+	  ctx << header.first << ": " << header.second << "\n";
       }
 
       void set_cookie(ConnContext& ctx, const std::string& name, const std::string& value){
