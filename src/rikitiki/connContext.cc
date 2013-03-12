@@ -84,7 +84,7 @@ namespace rikitiki {
   void ConnContext::FillAccepts() {
     _accepts = new std::multimap<double, ContentType::t>();
     const char* b;
-    b = &(Headers()["Accept"])[0];    
+    b = &(Headers()["accept"])[0];    
     while(*b != 0){
       const char* ee = read_accept_entry(b);
       double q = 1.0;
@@ -104,11 +104,13 @@ namespace rikitiki {
       b = ee;
       while(*b == ',' || *b == ' ') b++;
     }
+    if(_accepts->size() == 0)
+      _accepts->insert(std::make_pair(-1, ContentType::ALL));
     mappedContentType = true;
   }
 
   void ConnContext::FillContentType() {
-    _contentType = ContentType::FromString(Headers()["Content-Type"]);
+    _contentType = ContentType::FromString(Headers()["content-type"]);
     mappedContentType = true;
   }
 
@@ -116,9 +118,16 @@ namespace rikitiki {
     mapContents(Payload(), _post);
     mappedPost = true;
   }
+  HeaderCollection::value_type& ConnContext::AddHeader(const char* _name, const char* value){
+    std::string name(_name);
+    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+    auto& newHeader = *_headers.insert( std::make_pair(name,
+						      std::string(value)));
 
+    return newHeader;
+  }
   void ConnContext::FillCookies(){
-    auto range = Headers().equal_range("Cookie");
+    auto range = Headers().equal_range("cookie");
     for(auto it = range.first;it != range.second;it++){
       LOG(Server, Debug) << "Req. cookie: " << it->first << " = " << it->second << std::endl;
       if(it->second.size() == 0) continue;

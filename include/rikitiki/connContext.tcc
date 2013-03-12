@@ -42,7 +42,7 @@ auto ConnContext::operator <<(T& obj) -> decltype(valid_conversions<T>::Out::Ins
       if(i < (int)handlers.size()){	  
 	auto handler = handlers[i];
 	if(handler){
-	  *this << t.second;
+	  *this << (ContentType::t)i;
 	  handler(*this, obj);
 	  return *this;
 	}

@@ -34,7 +34,28 @@ test_points = {
         ("GET", "/book/1"),
         ("GET", "/book/2"),
         ("GET", "/book/3")
+        ],
+    "restAdv": [
+        ("DELETE", "/book-adv"),
+        ("GET", "/book-adv"),
+        ("POST", "/book-adv", '{"name":"lotr","author":"tolkien","isbn":"123-456"}'),
+        ("GET", "/book-adv"),
+        ("DELETE", "/book-adv"),
+        ("GET", "/book-adv"),
+        ("POST", "/book-adv", '{"name":"lotr","author":"tolkien","isbn":"123-456}'),
+        ("POST", "/book-adv", '{"name":"lotr","author":"tolkien","isbn":"123-4568"}'),
+        ("POST", "/book-adv", '{"name":"lotr","author":"tolkien","isbn":"123-4567"}'),
+        ("GET", "/book-adv"),
+        ("GET", "/book-adv/1"),
+        ("GET", "/book-adv/2"),
+        ("GET", "/book-adv/3")
+        ],
+    "multiType": [
+        "/mt/test/1.23/1231.2123/10/a/testing/matchthistoo",
+        "/mt/test/1.23/1231.2123/10/a/testing/matchthis",
+        "/mt/test/0.000000000000000000000000001/-1231.2123/-10/_/testing/matchthistoo",
         ]
+
 }
 
 def make_dir(d):
@@ -66,14 +87,16 @@ def create_response( conn, tp ):
     method = "GET"
     data = ""
     url = ""
+    headers = {'content-type': 'application/json'}
     if isinstance(tp, tuple):
         method = tp[0]
         url = tp[1]
         if len(tp) == 3:
-            data = tp[2]
+            data = tp[2]        
     else:
         url = tp
-    conn.request(method, url, body=data)
+    conn.request(method, url, body=data, headers=headers)
+
     return conn.getresponse()
 
 def test_server(server, port):

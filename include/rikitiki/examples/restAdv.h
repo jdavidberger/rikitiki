@@ -63,7 +63,8 @@ namespace rikitiki {
       void GET(ConnContext& ctx, int id){
 	if(id < 0 || id >= (int)books.size())
 	  ctx << HttpStatus::Bad_Request;
-	ctx << books[id];
+	else 
+	  ctx << books[id];
       }
 
       void DELETE(ConnContext& ctx){

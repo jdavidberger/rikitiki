@@ -54,7 +54,7 @@ namespace rikitiki {
       try {
 	handlers[i]->Handle(ctx);      
       } catch(HandlerException& ex) {
-	LOG(Server, Verbose) << "Error encountered: " << ctx.response.response.str() << std::endl;
+	LOG(Server, Debug) << "Error encountered: " << ctx.response.response.str() << std::endl;
 	ctx << (ex.status == 0 ? HttpStatus::Internal_Server_Error : *(ex.status));
 	ctx.writeResponse(); // Assumably the thrower cleared then wrote out a reason to throw. 
 	return true;

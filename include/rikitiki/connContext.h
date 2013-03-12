@@ -106,6 +106,7 @@ namespace rikitiki {
 
     virtual void FillQueryString() = 0;
     virtual void FillHeaders() = 0;
+    HeaderCollection::value_type& AddHeader(const char*, const char*);
     virtual void FillRequestMethod() = 0;  
     virtual void FillCookies();  
 

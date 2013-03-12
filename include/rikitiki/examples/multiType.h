@@ -13,14 +13,14 @@ namespace rikitiki {
 	  valgrind --tool=callgrind --dump-instr=yes ./multiType 
 	  ~~~~~~~
 	  and then viewing the resulting call graphs from a url like:
-	  http://localhost:5000/mt/test/1.23/1231.2123/10/a/testing
+	  http://localhost:5000/mt/test/1.23/1231.2123/10/a/testing/matchthistoo
 	  
 	  Verified to behave as expected in v0.1.38. 
      */
     struct MultiTypeModule {
       void Register(Server& server){
 	server.AddHandler( CreateRoute<std::string, float, double, int, char, std::string>::
-			   With(this, "/mt/{string}/{floa}/{doubl}/{in}/{ch}/{string}", &MultiTypeModule::zigzag) );
+			   With(this, "/mt/{string}/{floa}/{doubl}/{in}/{ch}/{string}/matchthistoo", &MultiTypeModule::zigzag) );
       }
       void zigzag(ConnContext& ctx, const std::string& a, float b, double c, int d, char e, const std::string& f){
 	ctx << a << " "

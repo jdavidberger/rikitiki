@@ -1,5 +1,5 @@
 200 OK
-Content-Length: 860
+Content-Length: 963
 Content-Type: text/html
 
 
@@ -9,7 +9,7 @@ Content-Type: text/html
 	</head>
 <body>
 	<ol class='menu'>
-		<li><a href="/hw/hello">/hw/hello</a></li><li><a href="/adv">/adv</a></li><li><a href="/adv/post">/adv/post</a></li><li><a href="/adv/qs">/adv/qs</a></li><li><a href="/book">/book</a></li><li><a href="/headers">/headers</a></li><li><a href="/cookies">/cookies</a></li>
+		<li><a href="/hw/hello">/hw/hello</a></li><li><a href="/adv">/adv</a></li><li><a href="/adv/post">/adv/post</a></li><li><a href="/adv/qs">/adv/qs</a></li><li><a href="/book">/book</a></li><li><a href="/book-adv">/book-adv</a></li><li><a href="/headers">/headers</a></li><li><a href="/cookies">/cookies</a></li>
 	</ol>
 	<div id="content">
 		<ul>
@@ -27,6 +27,9 @@ Content-Type: text/html
 			<p></p></li>
 		
 			<li><a href="/book">/book</a> 
+			<p></p></li>
+		
+			<li><a href="/book-adv">/book-adv</a> 
 			<p></p></li>
 		
 			<li><a href="/headers">/headers</a> 

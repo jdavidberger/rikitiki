@@ -6,8 +6,10 @@
 #endif
 #ifdef RT_USE_REST
 #include <rikitiki/examples/rest.h>
+#include <rikitiki/examples/restAdv.h>
 #endif
 #include <rikitiki/examples/headersTest.h>
+#include <rikitiki/examples/multiType.h>
 
 using namespace rikitiki;
 using namespace rikitiki::mongoose;
@@ -27,7 +29,11 @@ int main(){
 #ifdef RT_USE_REST
   RestModule rest;
   server.Register(rest);
+  RestAdvModule restAdv;
+  server.Register(restAdv);
 #endif
+  MultiTypeModule mtm;
+  server.Register(mtm);
   HeadersTestModule headers;
   server.Register(headers);
 
