@@ -75,10 +75,12 @@ namespace rikitiki {
       }
 
       void GET(ConnContext& ctx, int id){
-	sqlite3_bind_int(select_stmt, 1, id);
-	sqlite3_step(select_stmt);
-	ctx << readRow(select_stmt);
 	sqlite3_reset(select_stmt);
+	sqlite3_bind_int(select_stmt, 1, id);
+	if(sqlite3_step(select_stmt) ==  SQLITE_ROW)
+	  ctx << readRow(select_stmt);
+	else 
+	  ctx << Json::Value();
       }
 
       void DELETE(ConnContext& ctx){

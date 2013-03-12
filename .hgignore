@@ -11,6 +11,7 @@ syntax: glob
 *.dll
 *.lib
 *.md5
+*.orig
 .svn/*
 bin/*
 test/output/*

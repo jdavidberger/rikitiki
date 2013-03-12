@@ -28,9 +28,12 @@ test_points = {
         ("DELETE", "/book"),
         ("GET", "/book"),
         ("POST", "/book", '{"name":"lotr","author":"tolkien","isbn":"123-456}'),
-        ("GEt", "/book/1"),
-        ("GEt", "/book/2"),
-        ("GEt", "/book/3")
+        ("POST", "/book", '{"name":"lotr","author":"tolkien","isbn":"123-4568"}'),
+        ("POST", "/book", '{"name":"lotr","author":"tolkien","isbn":"123-4567"}'),
+        ("GET", "/book"),
+        ("GET", "/book/1"),
+        ("GET", "/book/2"),
+        ("GET", "/book/3")
         ]
 }
 
@@ -96,7 +99,7 @@ def test_server(server, port):
                 else:
                     print("\t\t\033[91mFailed\033[0m " + str(tp))
             except Exception as e:
-                print("\t\t\033[91mFailed\033[0m with exception " + str(type(e)))
+                print("\t\t\033[91mFailed\033[0m " + str(tp) + " with exception " + str(type(e)))
                 ferr = open( 'output/' + server + '/' + module + "." + str(i) + ".err",'w')                
                 traceback.print_exc(file=ferr)
                 ferr.close()

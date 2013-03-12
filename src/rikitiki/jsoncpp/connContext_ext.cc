@@ -5,13 +5,14 @@
 #include <rikitiki/configuration/configuration>
 using namespace rikitiki;
 
-rikitiki::Response& operator <<(rikitiki::Response& response,  const Json::Value& json){   
-  if(response.ResponseType == ContentType::DEFAULT)
-    response << ContentType::application_json; 
-  response.response << json;
-  return response;
-}
 namespace rikitiki {
+  rikitiki::Response& operator <<(rikitiki::Response& response,  const Json::Value& json){   
+    if(response.ResponseType == ContentType::DEFAULT)
+      response << ContentType::application_json; 
+    response.response << json;
+    return response;
+  }
+
   rikitiki::ConnContext& operator>>(rikitiki::ConnContext& ctx, Json::Value& val){
     Json::Reader reader;
     bool parsingSuccessful = reader.parse( ctx.Payload(), val);

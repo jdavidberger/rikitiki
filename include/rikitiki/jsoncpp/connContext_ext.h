@@ -4,9 +4,8 @@
 #include "../connContext.h"
 #include <jsoncpp/json/json.h>
 
-rikitiki::Response& operator <<(rikitiki::Response& response,  const Json::Value&); 
-
 namespace rikitiki{
+  rikitiki::Response& operator <<(rikitiki::Response& response,  const Json::Value&); 
   rikitiki::ConnContext& operator>>(rikitiki::ConnContext& response, Json::Value& val);
 
   template <>
@@ -14,6 +13,7 @@ namespace rikitiki{
     static constexpr ContentType::t ContentType() { return ContentType::application_json; };
   };
   
+
   template <typename T>
     static Json::Value& operator >>(Json::Value& jv, std::vector<T>& t){
     assert(jv.isArray());
@@ -24,12 +24,13 @@ namespace rikitiki{
   }
 
   template <typename T>
-    static Json::Value& operator <<(Json::Value& jv, std::vector<T>& t){
+    static Json::Value& operator<<(Json::Value& jv, std::vector<T>& t){
     jv = Json::Value(Json::arrayValue);
     jv.resize(t.size());
     for(unsigned int i = 0;i < t.size();i++)
       jv[i] << t[i];
     return jv;
   }
-  
 }
+
+

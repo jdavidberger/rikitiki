@@ -73,7 +73,7 @@ namespace rikitiki {
       
       void Register(Server& server){
 	typedef RestAdvModule T;
-	rikitiki::rest::Register(server, "/book", this);
+	rikitiki::rest::Register(server, "/book-adv", this);
 	books.push_back(Book{"Test","This","thing"});
 	books.push_back(Book{"A", "B", "C"});
       }
