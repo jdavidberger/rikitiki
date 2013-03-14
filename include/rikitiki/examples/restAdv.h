@@ -6,7 +6,7 @@
 #include <rikitiki/rest/rest>
 #include <rikitiki/jsoncpp/jsoncpp>
 #include <rikitiki/configuration/configuration>
-
+#include <tuple>
 #include <sqlite3.h>
 
 using namespace rikitiki;
@@ -14,8 +14,14 @@ using namespace rikitiki::mongoose;
 
 namespace rikitiki {
 
-  struct ISBN {
+  struct Test {};
+
+  struct ISBN  : Test{
+    ISBN(){}
+  ISBN(std::string _isbn) : isbn(_isbn){}
     std::string isbn;
+    std::string toString() { return "ISBN: " + isbn; }
+    void test(int i) { }
   };
 
   struct Book {
@@ -26,19 +32,20 @@ namespace rikitiki {
     ISBN isbn;
     Book() {}
   Book(int _id, double _cost, const std::string& _name, const std::string& _author, const std::string& _isbn) :
-    id(_id), cost(_cost), name(_name), author(_author), isbn{_isbn} {}
+    id(_id), cost(_cost), name(_name), author(_author), isbn(_isbn) {}
   };
 
   template <> struct MetaClass_<ISBN> { 
-    static auto fields() RETURN(make_fields(make_field("isbn", &ISBN::isbn)))
+    static auto fields() 
+      STATIC_RETURN(make_fields(make_field("isbn", &ISBN::isbn)));
       };
   
   template <> struct MetaClass_<Book> { 
-    static auto fields() RETURN(make_fields(make_field("id", &Book::id),
-					    make_field("cost", &Book::cost),
-					    make_field("name", &Book::name),
-					    make_field("author", &Book::author),
-					    make_field("isbn", &Book::isbn)))
+    static auto fields() STATIC_RETURN(make_fields(make_field("id", &Book::id),
+						   make_field("cost", &Book::cost),
+						   make_field("name", &Book::name),
+						   make_field("author", &Book::author),
+						   make_field("isbn", &Book::isbn)))
       };
 
   template <>
@@ -63,7 +70,6 @@ namespace rikitiki {
 	books.push_back(newBook);
 	ctx << books.size() - 1;
       }
-
       /// Get operations without an ID return a list of all books
       void GET(ConnContext& ctx){
 	ctx << books;
