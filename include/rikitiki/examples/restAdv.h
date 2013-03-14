@@ -32,7 +32,7 @@ namespace rikitiki {
   template <> struct MetaClass_<ISBN> { 
     static auto fields() RETURN(make_fields(make_field("isbn", &ISBN::isbn)))
       };
-
+  
   template <> struct MetaClass_<Book> { 
     static auto fields() RETURN(make_fields(make_field("id", &Book::id),
 					    make_field("cost", &Book::cost),
@@ -40,21 +40,6 @@ namespace rikitiki {
 					    make_field("author", &Book::author),
 					    make_field("isbn", &Book::isbn)))
       };
-  /*
-  static Json::Value& operator >>(Json::Value& jv, Book& b){
-    b.name = jv["name"].asString();
-    b.author = jv["author"].asString();
-    b.isbn = jv["isbn"].asString();
-    return jv;
-  }  
-
-  static Json::Value& operator <<(Json::Value& jv, Book& b){
-    jv["name"] = b.name;
-    jv["author"] = b.author;
-    jv["isbn"] = b.isbn;
-    return jv;
-  }  
-  */
 
   template <>
     struct valid_conversions<Book> {
@@ -64,7 +49,7 @@ namespace rikitiki {
 
   namespace examples {
     /**
-       Example implementation of a REST module against sqlite. 
+       Example implementation of a REST module with object reflection
        Demonstrates
        - Rest Features
        - Json Features
