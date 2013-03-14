@@ -75,8 +75,13 @@ auto ConnContext::operator >>(T&s) -> decltype(valid_conversions<T>::In ::Instan
     type_conversion_error(*this, (void**)&handlers[0]);
   }  
 
-  handler(*this, s);
-  
+  try {
+    handler(*this, s);
+  } catch (std::exception& e) {
+    *this << "Couldn't read content due to parser exception: " 
+	 << e.what();
+    throw HandlerException(HttpStatus::Bad_Request);
+  }
   return *this;
 }
 

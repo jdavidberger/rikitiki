@@ -6,18 +6,41 @@
 #include <rikitiki/rest/rest>
 #include <rikitiki/jsoncpp/jsoncpp>
 #include <rikitiki/configuration/configuration>
+
 #include <sqlite3.h>
 
 using namespace rikitiki;
 using namespace rikitiki::mongoose;
 
 namespace rikitiki {
-  struct Book {
-    std::string name; 
-    std::string author;
+
+  struct ISBN {
     std::string isbn;
   };
-  
+
+  struct Book {
+    int id;
+    double cost; 
+    std::string name;
+    std::string author;
+    ISBN isbn;
+    Book() {}
+  Book(int _id, double _cost, const std::string& _name, const std::string& _author, const std::string& _isbn) :
+    id(_id), cost(_cost), name(_name), author(_author), isbn{_isbn} {}
+  };
+
+  template <> struct MetaClass_<ISBN> { 
+    static auto fields() RETURN(make_fields(make_field("isbn", &ISBN::isbn)))
+      };
+
+  template <> struct MetaClass_<Book> { 
+    static auto fields() RETURN(make_fields(make_field("id", &Book::id),
+					    make_field("cost", &Book::cost),
+					    make_field("name", &Book::name),
+					    make_field("author", &Book::author),
+					    make_field("isbn", &Book::isbn)))
+      };
+  /*
   static Json::Value& operator >>(Json::Value& jv, Book& b){
     b.name = jv["name"].asString();
     b.author = jv["author"].asString();
@@ -31,6 +54,7 @@ namespace rikitiki {
     jv["isbn"] = b.isbn;
     return jv;
   }  
+  */
 
   template <>
     struct valid_conversions<Book> {
@@ -75,8 +99,8 @@ namespace rikitiki {
       void Register(Server& server){
 	typedef RestAdvModule T;
 	rikitiki::rest::Register(server, "/book-adv", this);
-	books.push_back(Book{"Test","This","thing"});
-	books.push_back(Book{"A", "B", "C"});
+	books.push_back(Book{0, 1.0, "Test","This","thing"});
+	books.push_back(Book{1, 3.0, "A", "B", "C"});
       }
     };
 
