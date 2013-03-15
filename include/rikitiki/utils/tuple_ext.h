@@ -3,8 +3,7 @@
 #pragma once
 #include <tuple>
 
-namespace tuple_ext {
-
+namespace tupleExt {
   /** 
       The original concept for the tuple functionality below was largely found at http://stackoverflow.com/a/1547118. 
       
@@ -20,9 +19,7 @@ namespace tuple_ext {
       There are a few variations below, namely for return types and static functions. This should all probably 
       be part of the standard. 
 
-      The modifications from the original posting were to change all the types to reference types. 
-
-      TODO: Verify that the g++ boils this down into one function call. 
+      The modifications from the original posting were to change all the types to reference types, and add some overloads. 
   */
 template < uint N >
 struct apply {
@@ -90,11 +87,43 @@ template < typename... ArgsF, typename... ArgsT >
    apply<sizeof...(ArgsT)>::applyTuple_obj(pObj, f, t );
  }
 
-template < typename T, typename retF, typename... ArgsF, typename... ArgsT >
-  static inline retF applyTuple( T* pObj, retF (T::*f)(ArgsF...),
-		   std::tuple<ArgsT...>& t )
-{
-  return apply<sizeof...(ArgsT)>::applyTuple_obj_ret(pObj, f, t );
+ template < typename T, typename retF, typename... ArgsF, typename... ArgsT >
+   static inline retF applyTuple( T* pObj, retF (T::*f)(ArgsF...),
+				  std::tuple<ArgsT...>& t )
+ {
+   return apply<sizeof...(ArgsT)>::applyTuple_obj_ret(pObj, f, t );
+ }
+
+ /** Tuple operations against a static functor wih a function named 'operate'. */
+ template <typename F>
+   struct With {
+     /** iterate through, rely on side effects of evaluate to get things done */
+     template <std::size_t N = 0, typename... Args, typename... FArgs>
+       static inline typename std::enable_if<N < sizeof...(Args), void>::type
+       iterate(const std::tuple<Args...>& t, FArgs&... fargs){
+       F::evaluate( std::get<N>(t), fargs... );
+       iterate<N+1, Args...>(t, fargs...);
+     }
+	
+       template <std::size_t N = 0, typename... Args, typename... FArgs>
+       static inline typename std::enable_if<N == sizeof...(Args), void>::type
+       iterate(const std::tuple<Args...>& t, FArgs&...){ }
+   };
+  
+ template <std::size_t N = 0, typename F, typename... Args>
+   inline auto iterate(const F& , const std::tuple<Args...>&) -> typename std::enable_if<N == sizeof...(Args), void>::type { }
+
+ template <std::size_t N = 0, typename F, typename... Args>
+   inline auto iterate(F& f, const std::tuple<Args...>& t) -> typename std::enable_if<N < sizeof...(Args), void>::type{
+   f( std::get<N>(t) );
+   iterate<N+1, F, Args...>(f, t);
+ }
+
+ /** Exists so you can make the functor in place. */
+ template <std::size_t N = 0, typename F, typename... Args>
+   inline auto iterate(const F& _f, const std::tuple<Args...>& t) -> typename std::enable_if<N == 0, void>::type {
+   F f(_f);
+   iterate<N, F, Args...>(f, t);
+ }
 }
 
-};

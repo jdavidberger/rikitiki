@@ -44,8 +44,16 @@ namespace rikitiki {
     
   };
 
+template <typename T>
   struct Set {
-    template <typename T, typename S>
+      Json::Value& jv; T& t; 
+    Set(Json::Value& _jv, T& _t) : jv(_jv), t(_t) {}
+    template <typename S>
+      inline void operator()( const Field_<T, S>& field) {
+      //      try {
+	json_value<T>::set(jv, t, field);
+    }
+    template <typename S>
     static Json::Value& evaluate( const Field_<T, S>& field, Json::Value& jv, T& t){
       try {
 	json_value<T>::set(jv, t, field);
@@ -55,8 +63,22 @@ namespace rikitiki {
       return jv;
     }
   };
-  struct Get {
-    template <typename T, typename S>
+
+  template <typename T>
+    struct Get {
+      Json::Value& jv; T& t; 
+    Get(Json::Value& _jv, T& _t) : jv(_jv), t(_t) {}
+
+    template <typename S>
+      inline void operator()( const Field_<T, S>& field) {
+      //      try {
+	json_value<T>::get(jv, t, field);
+	//      } catch(std::exception& ex){
+	//	throw std::runtime_error("Error in getting field '" + std::string(field.name) + "': " + ex.what());
+	//      }    
+    }
+
+    template <typename S>
       static Json::Value& evaluate( const Field_<T, S>& field, Json::Value& jv, T& t){
       try {
 	json_value<T>::get(jv, t, field);
@@ -69,13 +91,14 @@ namespace rikitiki {
 
   template <typename T>
     static auto operator>>(Json::Value& jv, T& t) -> decltype(MetaClass_<T>::fields(), jv) {
-    tupleExt::With<Get>::iterate( MetaClass_<T>::fields(), jv, t);
+    tupleExt::iterate(Get<T>(jv, t), MetaClass_<T>::fields() );
     return jv;
   }
 
   template <typename T>
     static auto operator<<(Json::Value& jv, T& t) -> decltype(MetaClass_<T>::fields(), jv) {
-    tupleExt::With<Set>::iterate(MetaClass_<T>::fields(), jv, t);
+    tupleExt::iterate(Set<T>(jv, t), MetaClass_<T>::fields());
+    //    tupleExt::With<Set>::iterate(MetaClass_<T>::fields(), jv, t);
     return jv;
   };
 }

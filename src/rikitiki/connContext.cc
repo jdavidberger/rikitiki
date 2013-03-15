@@ -89,6 +89,7 @@ namespace rikitiki {
       const char* ee = read_accept_entry(b);
       double q = 1.0;
       const char* ct_begin, *ct_end;
+      ct_begin = ct_end = 0;
       while( (b = read_accept_next_entryfield(b, ee)) != ee){
 	const char* efe = read_accept_entryfield(b, ee);
 	if(strncmp(b, "q=",2) == 0) {

@@ -95,10 +95,10 @@ int Route_<P,T...>::Scan(ConnContext& ctx, T&... t){
     // If anyone can tell me why this applyTuple expands out completely,
     // but the one below [applyTuple(parent, f, args)] doesn't, I'd be 
     // super interested to hear it. 
-    int matched = tuple_ext::applyTuple(this, &Route_<P, T...>::Scan, args);
+    int matched = tupleExt::applyTuple(this, &Route_<P, T...>::Scan, args);
     if(matched == sizeof...(T) + 1){
       LOG(Web, Verbose) << "Using route " << route << ", " << method << std::endl;
-      tuple_ext::applyTuple(parent, f, args);
+      tupleExt::applyTuple(parent, f, args);
       return true;
     }
     return false;
