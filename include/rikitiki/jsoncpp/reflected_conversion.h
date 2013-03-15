@@ -68,14 +68,14 @@ namespace rikitiki {
   };
 
   template <typename T>
-    static Json::Value& operator>>(Json::Value& jv, T& t) {
+    static auto operator>>(Json::Value& jv, T& t) -> decltype(MetaClass_<T>::fields(), jv) {
     tupleExt::With<Get>::iterate( MetaClass_<T>::fields(), jv, t);
     return jv;
   }
 
   template <typename T>
-    static Json::Value& operator<<(Json::Value& jv, T& ) {
-    tupleExt::With<Set>::iterate(MetaClass_<T>::fields();, jv, t);
+    static auto operator<<(Json::Value& jv, T& t) -> decltype(MetaClass_<T>::fields(), jv) {
+    tupleExt::With<Set>::iterate(MetaClass_<T>::fields(), jv, t);
     return jv;
   };
 }
