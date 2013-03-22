@@ -1,7 +1,10 @@
 #pragma once
 
+#include "content_types.h"
+#include <vector>
 #include <map>
 #include <array>
+#include "reflection/reflection.h"
 namespace rikitiki {
   struct ConnContext; 
   struct Response;
@@ -73,15 +76,24 @@ namespace rikitiki {
       }
   };
 
-  template<typename S>
-    struct valid_conversions {
-      
+  template<typename T, typename enable = void >
+    struct valid_conversions { };
+
+}
+#include <rikitiki/jsoncpp/jsoncpp>
+namespace rikitiki {
+
+  template<typename T>
+    struct valid_conversions<T, typename std::enable_if< std::is_function <decltype(MetaClass_<T>::fields)>::value >::type > {
+      typedef TypeConversions<T, InProvider, Json::Value> In;
+      typedef TypeConversions<T, OutProvider, Json::Value> Out;      
     };
 
   template <typename T>
-    struct valid_conversions<std::vector<T>> {
+    struct valid_conversions<std::vector<T>, typename std::enable_if< std::is_class<valid_conversions<T> >::value >::type > {
     typedef typename valid_conversions<T>::In::VectorType In;
     typedef typename valid_conversions<T>::Out::VectorType Out;
   };
+
 
 }

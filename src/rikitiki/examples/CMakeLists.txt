@@ -21,3 +21,4 @@ IF(${USE_MONGOOSE})
 	add_executable(examples examples.cc)
 	target_link_libraries(examples sqlite3 rikitiki)
 ENDIF()
+

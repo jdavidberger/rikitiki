@@ -5,6 +5,7 @@
 
 #include <rikitiki/config.h>
 #ifdef RT_USE_JSONCPP
+#include <jsoncpp/json/json.h>
 #include "connContext_ext.h"
 #include "reflected_conversion.h"
 #endif

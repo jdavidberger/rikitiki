@@ -1,13 +1,22 @@
+#pragma once
+
 #include "../metaprogramming.h"
 #include <type_traits>
-
+#include <tuple>
+#include <rikitiki/utils/tuple_ext.h>
 namespace rikitiki {
   template <typename T> struct MetaClass_{    };
 
-  template <typename T> 
-    struct Member_ {
-    Member_(const std::string& _name) : name(_name){}
+
+  struct Member {
+    Member(const std::string& _name) : name(_name){}
       std::string name;
+  };
+
+  template <typename T> 
+    struct Member_ : public Member{
+    Member_(const std::string& _name) : Member(_name){}
+
     };
 
   template <typename T, typename Rtn, typename... Args>
@@ -62,7 +71,14 @@ namespace rikitiki {
     static auto make_field( const std::string& name, S (T::*field))
     RETURN((Field_<T, S>(name, field)))
 
+    
+    struct pullName {
+      std::string operator()(const Member& f){
+	return f.name;
+      }
+    };
+  
   template <typename T, typename... Args> 
     static auto make_fields(Field_<T, Args>... args) 
-    RETURN( std::make_tuple(args...) )   
+    RETURN( (tupleExt::MappedTuple_<std::string, pullName, Field_<T, Args>...>(args...)))   
 }

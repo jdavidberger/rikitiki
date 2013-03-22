@@ -14,46 +14,39 @@ using namespace rikitiki::mongoose;
 
 namespace rikitiki {
 
-  struct Test {};
-
-  struct ISBN  : Test{
-    ISBN(){}
-  ISBN(std::string _isbn) : isbn(_isbn){}
-    std::string isbn;
-    std::string toString() { return "ISBN: " + isbn; }
-    void test(int i) { }
+  struct Character {
+    int id; 
+    std::string name;
   };
+
+  template <> struct MetaClass_<Character> { 
+    static auto fields() 
+      STATIC_RETURN(make_fields(make_field("id", &Character::id),
+				make_field("name", &Character::name)
+				));
+      };
 
   struct Book {
     int id;
     double cost; 
     std::string name;
     std::string author;
-    ISBN isbn;
+    std::string isbn;
+    std::vector<Character> characters;
     Book() {}
   Book(int _id, double _cost, const std::string& _name, const std::string& _author, const std::string& _isbn) :
     id(_id), cost(_cost), name(_name), author(_author), isbn(_isbn) {}
   };
 
-  template <> struct MetaClass_<ISBN> { 
-    static auto fields() 
-      STATIC_RETURN(make_fields(make_field("isbn", &ISBN::isbn)));
-      };
-  
   template <> struct MetaClass_<Book> { 
     static auto fields() STATIC_RETURN(make_fields(make_field("id", &Book::id),
 						   make_field("cost", &Book::cost),
 						   make_field("name", &Book::name),
 						   make_field("author", &Book::author),
+						   make_field("characters", &Book::characters),
 						   make_field("isbn", &Book::isbn)))
       };
-
-  template <>
-    struct valid_conversions<Book> {
-    typedef TypeConversions<Book, InProvider, Json::Value> In;
-    typedef TypeConversions<Book, OutProvider, Json::Value> Out;
-  };
-
+  
   namespace examples {
     /**
        Example implementation of a REST module with object reflection
@@ -63,6 +56,7 @@ namespace rikitiki {
     */    
     struct RestAdvModule  {      
       std::vector<Book> books; 
+
       /// Post operations add items to the DB
       void POST(ConnContext& ctx){
 	Book newBook;
@@ -70,6 +64,7 @@ namespace rikitiki {
 	books.push_back(newBook);
 	ctx << books.size() - 1;
       }
+
       /// Get operations without an ID return a list of all books
       void GET(ConnContext& ctx){
 	ctx << books;
@@ -87,11 +82,33 @@ namespace rikitiki {
 	ctx.handled = true; // If we don't write anything to ctx, it doesn't count as handled. 
       }
       
+      struct PrintFunctor {
+	ConnContext& ctx;
+	Book& book; 
+
+
+      PrintFunctor(ConnContext& _ctx, Book& _book) : ctx(_ctx), book(_book) {}
+	template <typename S>
+	inline void operator()( const Field_<Book, S>& field){
+	    ctx << field.get(book);
+	}
+      };
+
+      void operator()(ConnContext& ctx, int id, const std::string& prop){
+	if(id < 0 || id >= (int)books.size())
+	  ctx << HttpStatus::Bad_Request;
+	else {
+	  MetaClass_<Book>::fields().findAndRun(prop, PrintFunctor(ctx, books[id]));
+	}
+      }
+
       void Register(Server& server){
 	typedef RestAdvModule T;
 	rikitiki::rest::Register(server, "/book-adv", this);
+	server.AddHandler(CreateRoute<int, std::string>::With(this, "/book-adv/{id}/{property}"));
 	books.push_back(Book{0, 1.0, "Test","This","thing"});
 	books.push_back(Book{1, 3.0, "A", "B", "C"});
+	books[0].characters.push_back( Character{0, "Ahab" });
       }
     };
 
