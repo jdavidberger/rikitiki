@@ -4,7 +4,7 @@
 #include <vector>
 #include <map>
 #include <array>
-#include "reflection/reflection.h"
+#include <mxcomp/reflection.h>
 namespace rikitiki {
   struct ConnContext; 
   struct Response;
@@ -82,7 +82,7 @@ namespace rikitiki {
 }
 #include <rikitiki/jsoncpp/jsoncpp>
 namespace rikitiki {
-
+  using namespace mxcomp;
   template<typename T>
     struct valid_conversions<T, typename std::enable_if< std::is_function <decltype(MetaClass_<T>::fields)>::value >::type > {
       typedef TypeConversions<T, InProvider, Json::Value> In;

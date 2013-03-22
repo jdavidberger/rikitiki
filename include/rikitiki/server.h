@@ -7,11 +7,14 @@
 #include <vector>
 #include <sstream>
 #include "content_types.h"
-#include "utils/macros.h"
+
+#include <mxcomp/macros.h>
+#include <mxcomp/tuple_ext.h>
 #include <tuple>
-#include "utils/tuple_ext.h"
+
 #include <rikitiki/log/log>
 #include <rikitiki/http_statuses.h>
+
 #if RT_USE_CTEMPLATE
 #include <rikitiki/ctemplate/templatePreprocessor.h>
 #endif

@@ -13,19 +13,10 @@ using namespace rikitiki;
 using namespace rikitiki::mongoose;
 
 namespace rikitiki {
-
   struct Character {
     int id; 
     std::string name;
   };
-
-  template <> struct MetaClass_<Character> { 
-    static auto fields() 
-      STATIC_RETURN(make_fields(make_field("id", &Character::id),
-				make_field("name", &Character::name)
-				));
-      };
-
   struct Book {
     int id;
     double cost; 
@@ -38,6 +29,15 @@ namespace rikitiki {
     id(_id), cost(_cost), name(_name), author(_author), isbn(_isbn) {}
   };
 
+}
+namespace mxcomp {
+  template <> struct MetaClass_<Character> { 
+    static auto fields() 
+      STATIC_RETURN(make_fields(make_field("id", &Character::id),
+				make_field("name", &Character::name)
+				));
+      };
+
   template <> struct MetaClass_<Book> { 
     static auto fields() STATIC_RETURN(make_fields(make_field("id", &Book::id),
 						   make_field("cost", &Book::cost),
@@ -46,7 +46,9 @@ namespace rikitiki {
 						   make_field("characters", &Book::characters),
 						   make_field("isbn", &Book::isbn)))
       };
-  
+}
+
+namespace rikitiki {  
   namespace examples {
     /**
        Example implementation of a REST module with object reflection

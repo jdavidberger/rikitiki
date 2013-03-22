@@ -6,7 +6,7 @@
 #include <string>
 #include "server.h"
 #include "http_statuses.h"
-#include "reflection/reflection.h"
+#include <mxcomp/reflection.h>
 #include "content_handler.h"
 namespace rikitiki {
   class Server;

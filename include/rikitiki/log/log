@@ -3,7 +3,7 @@
 
 #include <rikitiki/config.h>
 #ifdef RT_USE_LOG
-#include "log.h"
+#include <mxcomp/log.h>
 #else
 #include <iostream>
 extern std::ostream& operator<<(std::ostream&, const std::type_info&);

@@ -50,6 +50,8 @@ include_directories(include)
 
 # Might need some of these...
 add_subdirectory(third)
+include_directories(third/mxcomp/include)
+include_directories(third/stencet/include)
 
 add_subdirectory(src)
 add_subdirectory(test)

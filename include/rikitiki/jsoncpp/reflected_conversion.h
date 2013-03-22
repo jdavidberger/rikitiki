@@ -1,10 +1,12 @@
-#include <rikitiki/reflection/reflection.h>
+#include <mxcomp/reflection.h>
 #include <tuple>
 
 namespace rikitiki {
+  using namespace mxcomp;
+
   template <typename T> struct json_value {
     template <typename S>
-    static auto set(Json::Value& jv, T& t, const Field_<T, S>& field) -> decltype( jv[field.name] << field.get(t), void()) {
+    static auto set(Json::Value& jv, T& t, const mxcomp::Field_<T, S>& field) -> decltype( jv[field.name] << field.get(t), void()) {
       if(!jv.isObject()) throw std::runtime_error("Expected an object in " + field.name);
       jv[field.name] << field.get(t);
     }   
