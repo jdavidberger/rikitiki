@@ -42,13 +42,19 @@ ENABLE_FEATURE(rest)
 ENABLE_FEATURE(configuration)
 ENABLE_FEATURE(log)
 
+DISABLE_FEATURE(stencet) # Not ready yet
+
 set(MAKE_EXAMPLES 1)
 
 include_directories(include)
 
+# Might need some of these...
+add_subdirectory(third)
+
 add_subdirectory(src)
 add_subdirectory(test)
 add_subdirectory(Doxygen)
+
 
 add_custom_target(memcheck
 	COMMAND GLIBCXX_FORCE_NEW=1 valgrind --tool=memcheck --leak-check=full --log-file=log ./examples
