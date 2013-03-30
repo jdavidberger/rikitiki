@@ -10,7 +10,7 @@ auto ConnContext::operator <<(const T& obj)  -> decltype(instance_of<Response>::
   return *this;
 }
 
-static void type_conversion_error(ConnContext& ctx, void** handlers){
+static inline void type_conversion_error(ConnContext& ctx, void** handlers){
   std::string accepts;
   for(auto _type = 0; _type < (int)ContentType::MAX; _type++)
     if(handlers[_type]){

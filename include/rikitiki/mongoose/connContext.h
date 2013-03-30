@@ -11,7 +11,6 @@ namespace rikitiki {
        Connection context for Mongoose servers. 
      */
     class MongooseConnContext : public ConnContext {  
-      mg_event event;
       mg_connection* conn;  
 
     protected:

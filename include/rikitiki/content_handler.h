@@ -6,7 +6,7 @@
 #include <array>
 #include <mxcomp/reflection.h>
 namespace rikitiki {
-  struct ConnContext; 
+  class ConnContext; 
   struct Response;
 
   template <typename T>

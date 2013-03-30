@@ -5,7 +5,7 @@
 #include <ctemplate/template.h>
 
 namespace rikitiki {
-class ConnContext;
+  class ConnContext;
   namespace ctemplates {
     /** 
 	Template preprocessors are ran directly prior to template expansion. 

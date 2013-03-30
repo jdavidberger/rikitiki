@@ -100,7 +100,7 @@ namespace rikitiki {
 	if(id < 0 || id >= (int)books.size())
 	  ctx << HttpStatus::Bad_Request;
 	else {
-	  MetaClass_<Book>::fields().findAndRun(prop, PrintFunctor(ctx, books[id]));
+	  //MetaClass_<Book>::fields().findAndRun(prop, PrintFunctor(ctx, books[id]));
 	}
       }
 

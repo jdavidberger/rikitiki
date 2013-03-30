@@ -30,7 +30,6 @@ namespace rikitiki {
     MongooseConnContext::MongooseConnContext(const Server* s, 
 					     mg_event e, 
 					     mg_connection* c) : 
-      event(e), 
       conn(c), 
       request(*mg_get_request_info(c)), ConnContext(s) { 
 
