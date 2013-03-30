@@ -230,6 +230,12 @@ namespace rikitiki {
     return *this;
   }
 
+  ConnContext& ConnContext::operator<<(std::function<void(std::ostream&)> f){
+    handled = true;
+    f(response.response);
+    return *this;
+  }
+
   ConnContext& operator>>(ConnContext& ctx, std::string& t){
     t = ctx.Payload();
     return ctx;

@@ -56,6 +56,7 @@ namespace rikitiki {
   public:
     std::vector<Handler*> handlers;
     virtual ~Server();
+    Server();
 
     #ifdef RT_USE_CTEMPLATE
     std::vector<ctemplates::TemplatePreprocessor*> templatePreprocessors;

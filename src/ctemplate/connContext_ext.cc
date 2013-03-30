@@ -19,19 +19,18 @@ namespace rikitiki {
     return ctx;
   }
 
-#ifdef RT_USE_CONFIGURATION
 #include <rikitiki/configuration/configuration>
   using namespace rikitiki;
-  static bool _setCTemplateRoot() {
+  void register_ctemplate() {
+#ifdef RT_USE_CONFIGURATION
     std::string root;
-    bool rtn = Configuration::Global().lookupValue("ctemplate_root", root);
+    bool found = Configuration::Global().lookupValue("ctemplate_root", root);
     LOG(Server, Verbose) << "Set ctemplate root to " << root << std::endl;
-    if(rtn)
+    if(found)
       ctemplate::Template::SetTemplateRootDirectory(root);
     else
       LOG(Server, Error) << "Could not find configuration for 'ctemplate_root'" << std::endl;
-    return rtn;
-  };
-  static bool setCTemplateRoot = _setCTemplateRoot();
 #endif
+  };
+
 }

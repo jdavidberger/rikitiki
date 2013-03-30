@@ -5,6 +5,7 @@
 #include <rikitiki/configuration/configuration>
 #include <sstream>
 #include <signal.h>
+#include <mongoose.h>
 
 namespace rikitiki {
   namespace mongoose {
@@ -18,16 +19,13 @@ namespace rikitiki {
 #endif
     }
 
-    static void* _handler(enum mg_event event, struct mg_connection *conn) {
+    static int _handler(struct mg_connection *conn) {
       const struct mg_request_info *request_info = mg_get_request_info(conn);
 
       MongooseServer* server = ((MongooseServer*)(request_info->user_data));
 
-      if(event != MG_NEW_REQUEST)
-	return (void*)0;
-      
-      mongoose::MongooseConnContext ctx(server, event, conn);
-      return server->Handle(ctx) ? (void*)1 : (void*)0;
+      mongoose::MongooseConnContext ctx(server, conn);
+      return server->Handle(ctx) ? 1 : 0;
     }
 
     static volatile sig_atomic_t quit;
@@ -49,17 +47,22 @@ namespace rikitiki {
       Stop();
     }
 
+
     void MongooseServer::Start() {  
+      mg_callbacks callbacks;      
+      memset(&callbacks, 0, sizeof(callbacks));
+      callbacks.begin_request = &_handler;
+      
       std::stringstream _port;
       _port << port;
       std::string __port = _port.str();
-      std::vector<const char*> options;
+      options.clear();
       options.push_back("listening_ports"), options.push_back(__port.c_str());
       if(DocumentRoot.size())
 	options.push_back("document_root"), options.push_back(&DocumentRoot[0]);
       options.push_back(NULL);
 
-      ctx = mg_start(_handler, this, &options[0]);
+      ctx = mg_start(&callbacks, this, &options[0]);
     }
 
     void MongooseServer::Stop() {

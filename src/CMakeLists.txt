@@ -34,6 +34,7 @@ set (RT_SRC
     routing.cc
     http_statuses.cc
     stream_helpers.cc
+    registration.cc
     )
 
 set (RT_LIBS curl pthread mxcomp)
@@ -41,6 +42,11 @@ set (RT_LIBS curl pthread mxcomp)
 IF(${USE_MONGOOSE})
 	include_directories(${THIRD_PARTY_DIR}/mongoose)
 	add_subdirectory(mongoose)	
+ENDIF()
+
+
+IF(${USE_STENCET})
+	add_subdirectory(stencet)
 ENDIF()
 
 IF(${USE_CTEMPLATE})
@@ -60,6 +66,7 @@ ENDIF()
 IF(${USE_CONFIGURATION})
 	add_subdirectory(configuration)
 ENDIF()
+
 
 CONFIGURE_FILE(config.h.in ${CMAKE_SOURCE_DIR}/include/rikitiki/config.h)	
 

@@ -23,7 +23,6 @@ namespace rikitiki {
       const mg_request_info& request;
       virtual const char* URI();
       MongooseConnContext(const Server* s, 
-			  mg_event e, 
 			  mg_connection* c);
       virtual void writeResponse();
     };

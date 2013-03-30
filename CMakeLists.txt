@@ -24,10 +24,12 @@ MACRO( disable_feature feature_)
        SET(USE_${feature} 0) 
 ENDMACRO(disable_feature)
 
+SET(FEATURES "")
 MACRO( enable_feature feature_)
        STRING(TOUPPER ${feature_} feature)       
        SET("USE_${feature}" 1)
        SET(DOXYFILE_DEFINED "${DOXYFILE_DEFINED} RT_USE_${feature}")
+       LIST(APPEND FEATURES "${feature}")
        SET(CONFIG 
 "#define RT_USE_${feature} 1
 ${CONFIG}")
@@ -42,7 +44,7 @@ ENABLE_FEATURE(rest)
 ENABLE_FEATURE(configuration)
 ENABLE_FEATURE(log)
 
-DISABLE_FEATURE(stencet) # Not ready yet
+ENABLE_FEATURE(stencet) 
 
 set(MAKE_EXAMPLES 1)
 

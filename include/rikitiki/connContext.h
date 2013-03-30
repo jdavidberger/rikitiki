@@ -133,6 +133,7 @@ namespace rikitiki {
     bool handled;  
     Method RequestMethod();
 
+    ConnContext& operator <<(std::function<void(std::ostream&)>);
     template <class T> auto operator <<(const T& obj) -> decltype( instance_of<Response>::value << obj, (ConnContext&)*(ConnContext*)0) ;
 
     template <class T> auto operator <<(T&) -> decltype(valid_conversions<T>::Out::Instance(), instance_of<ConnContext>::value);

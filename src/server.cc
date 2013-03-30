@@ -6,6 +6,7 @@
 #include <sstream>
 #include <pthread.h>
 #include <cstring>
+#include <rikitiki/registration.h>
 
 namespace rikitiki {
 
@@ -32,7 +33,9 @@ namespace rikitiki {
       return "anonymous";
     }
   };
-
+  Server::Server(){
+    register_modules();
+  }
   Server::~Server(){
     for(size_t i = 0;i < handlers.size();i++){
       delete handlers[i];
