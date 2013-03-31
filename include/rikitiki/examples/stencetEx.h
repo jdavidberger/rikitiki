@@ -18,6 +18,7 @@ namespace rikitiki {
       void Register(Server& server){
 	Template::Templates()["hw"].Parse("<html><body>{{message}}</body></html>");
 	server.AddHandler( CreateRoute<>::With(this, "/stencet") );
+	server.AddHandler( CreateRoute<std::string>::With(this, "/stencet/fromfile/{0}") );
       }
 
       void operator()(ConnContext& ctx){	
@@ -25,6 +26,13 @@ namespace rikitiki {
 	vm["message"] = "Hello world!";
 	ctx << Template::ByName("hw").With(vm);
       }
+
+      void operator()(ConnContext& ctx, const std::string& msg){	
+	Variant vm;
+	vm["message"] = msg;
+	ctx << Template::ByName("example").With(vm); // Loads from file!
+      }
+
     };
   }
 }

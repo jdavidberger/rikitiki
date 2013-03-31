@@ -8,48 +8,55 @@
 #include <rikitiki/configuration/configuration>
 #include <tuple>
 #include <sqlite3.h>
-
+#include <mxcomp/tuples.h>
+#include <cxxabi.h>
 using namespace rikitiki;
 using namespace rikitiki::mongoose;
 
+
+  inline static std::string prettyName(const std::type_info& ti){
+    char buf[1024];
+    size_t size=1024;
+    int status;
+    char* res = abi::__cxa_demangle (ti.name(),
+				     buf,
+				     &size,
+				     &status);
+    return std::string(res);
+  }
+
 namespace rikitiki {
-  struct Character {
-    int id; 
-    std::string name;
-  };
   struct Book {
-    int id;
-    double cost; 
+
     std::string name;
     std::string author;
     std::string isbn;
-    std::vector<Character> characters;
     Book() {}
-  Book(int _id, double _cost, const std::string& _name, const std::string& _author, const std::string& _isbn) :
-    id(_id), cost(_cost), name(_name), author(_author), isbn(_isbn) {}
+  Book(const std::string& _name, const std::string& _author, const std::string& _isbn) :
+    name(_name), author(_author), isbn(_isbn) {}
   };
 
 }
+
 namespace mxcomp {
-  template <> struct MetaClass_<Character> { 
-    static auto fields() 
-      STATIC_RETURN(make_fields(make_field("id", &Character::id),
-				make_field("name", &Character::name)
-				));
-      };
-
-  template <> struct MetaClass_<Book> { 
-    static auto fields() STATIC_RETURN(make_fields(make_field("id", &Book::id),
-						   make_field("cost", &Book::cost),
-						   make_field("name", &Book::name),
-						   make_field("author", &Book::author),
-						   make_field("characters", &Book::characters),
-						   make_field("isbn", &Book::isbn)))
-      };
+  METACLASS(Book){
+    MEMBERS(FIELD(name),
+	    FIELD(author),
+	    FIELD(isbn));
+  };
 }
-
 namespace rikitiki {  
   namespace examples {
+      struct GetType {
+	template <typename T> 
+	auto operator()(const T& t) const -> typename std::enable_if<std::is_base_of<Field, T>::value, std::string>::type
+	{ return prettyName(typeid(T)); }
+
+	template <typename T> 
+	auto operator()(const T& t) const -> typename std::enable_if<std::is_base_of<Field, T>::value == false, std::string>::type
+	{ return prettyName(typeid(T)) + "!!!"; }
+      };
+
     /**
        Example implementation of a REST module with object reflection
        Demonstrates
@@ -87,12 +94,11 @@ namespace rikitiki {
       struct PrintFunctor {
 	ConnContext& ctx;
 	Book& book; 
-
-
+	
       PrintFunctor(ConnContext& _ctx, Book& _book) : ctx(_ctx), book(_book) {}
 	template <typename S>
 	inline void operator()( const Field_<Book, S>& field){
-	    ctx << field.get(book);
+	  ctx << field.get(book);
 	}
       };
 
@@ -100,7 +106,9 @@ namespace rikitiki {
 	if(id < 0 || id >= (int)books.size())
 	  ctx << HttpStatus::Bad_Request;
 	else {
-	  //MetaClass_<Book>::fields().findAndRun(prop, PrintFunctor(ctx, books[id]));
+	  auto mt = mxcomp::tuples::make_mapped([](const Member& m) { return m.name; },
+						MetaClass_<Book>::fields());				      
+	  mt.findAndRun(prop, PrintFunctor(ctx, books[id]));
 	}
       }
 
@@ -108,9 +116,6 @@ namespace rikitiki {
 	typedef RestAdvModule T;
 	rikitiki::rest::Register(server, "/book-adv", this);
 	server.AddHandler(CreateRoute<int, std::string>::With(this, "/book-adv/{id}/{property}"));
-	books.push_back(Book{0, 1.0, "Test","This","thing"});
-	books.push_back(Book{1, 3.0, "A", "B", "C"});
-	books[0].characters.push_back( Character{0, "Ahab" });
       }
     };
 
