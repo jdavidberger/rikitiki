@@ -1,0 +1,19 @@
+/** \page stencet Stencet
+rikitiki includes support for the [stencet](http://metaxcompile.com/stencet) templating engine. 
+
+By default, template files are found in the working directory of whichever executable is running. You can change this behavior by having a 'stencet_root' setting in your [configuration](Configuration.html) file. 
+
+Use is simple:
+
+~~~~~~~
+ void operator()(ConnContext& ctx, const std::string& msg){	
+   stencet::Variant vm;
+   vm["message"] = msg;
+   ctx << stencet::Template::ByName("example").With(vm); // Loads from file!
+ }
+~~~~~~~
+
+See [stencet documentation](http://metaxcompile.com/stencet/doxygen) for more examples and help using stencet. 
+
+\sa examples/stencetEx.h
+*/
