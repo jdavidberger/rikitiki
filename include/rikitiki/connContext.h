@@ -8,6 +8,11 @@
 #include "http_statuses.h"
 #include <mxcomp/reflection.h>
 #include "content_handler.h"
+
+#ifdef _MSC_VER
+#undef DELETE
+#define decltype(a,b) decltype(b) // VC++ does not get sane error messages yet I guess
+#endif
 namespace rikitiki {
   class Server;
   class ConnContext;
@@ -36,7 +41,7 @@ namespace rikitiki {
    */
   struct Cookie : public stringpair {
     Cookie(const std::string& name, const std::string& value, 
-	   const std::string& Domain = "", const std::string& Path = "",
+	   const std::string& Domain = "", const std::string& Path = "/",
 	   const std::string& Expires = "", bool secure = false, bool httpOnly = false);
   };
 
@@ -134,11 +139,14 @@ namespace rikitiki {
     Method RequestMethod();
 
     ConnContext& operator <<(std::function<void(std::ostream&)>);
-    template <class T> auto operator <<(const T& obj) -> decltype( instance_of<Response>::value << obj, (ConnContext&)*(ConnContext*)0) ;
+    template <class T> ConnContext& operator <<(const T& obj) ;
 
-    template <class T> auto operator <<(T&) -> decltype(valid_conversions<T>::Out::Instance(), instance_of<ConnContext>::value);
+	template <class T> 
+	typename std::enable_if<  std::is_class<typename valid_conversions<T>::In>::value, 
+		ConnContext&>::type operator <<(T&);
     template <class T> auto operator >>(T&) -> decltype(valid_conversions<T>::In ::Instance(), instance_of<ConnContext>::value);
-    Response response;
+
+	Response response;
   };
   void mapContents(std::string& raw_content, PostCollection& post);
   void mapQueryString(const char* _qs, QueryStringCollection& qs);

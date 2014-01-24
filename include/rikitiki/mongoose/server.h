@@ -3,12 +3,7 @@
 #pragma once
 #include "../server.h"
 #include "mongoose.h"
-#ifdef _Win32
-#include <Windows.h>
-#define Sleep usleep
-#else
-#include <unistd.h>
-#endif
+
 
 namespace rikitiki {
   namespace mongoose {

@@ -37,9 +37,11 @@ namespace rikitiki {
       thread_name += " ";
       thread_name += request.request_method[0];
       thread_name.resize(15);
-      int retval = pthread_setname_np(pthread_self(), thread_name.c_str());
+#ifndef _MSC_VER
+	  int retval = pthread_setname_np(pthread_self(), thread_name.c_str());
       if(retval != 0)
 	LOG(Mongoose, Error) << "Couldn't set thread name, err: " << retval << std::endl;
+#endif
       LOG(Mongoose, Verbose) << "Request for [" << request.request_method << "] " << request.uri << std::endl;
     }
 

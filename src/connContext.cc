@@ -3,7 +3,9 @@
 
 #include <rikitiki/connContext.h>
 #include <algorithm>
+#ifndef _MSC_VER
 #include <curl/curl.h>
+#endif
 #include <assert.h>
 #include <cstring>
 
@@ -17,8 +19,8 @@ namespace rikitiki {
 		 const std::string& Expires, bool secure, bool httpOnly) {
     first = name;
     second = value + "; ";
-    if(Domain.size())
-      second += "Domain=" + Domain + "; ";
+//    if(Domain.size())
+	second += "Domain=" + Domain + "; ";
     if(Path.size())
       second += "Path=" + Path + "; ";
     if(Expires.size())
@@ -136,7 +138,7 @@ namespace rikitiki {
       const char *ne, *ve;
       do {
 	n = read_to_name(n);
-	LOG(Server, Error) << "?" <<  n; 
+	
 	ne = read_name(n);
 	ve = read_value(ne);
 	_cookies[std::string(n, ne)] = 
@@ -314,9 +316,15 @@ namespace rikitiki {
 	l_it = it+1;
 	break; 
       case '&': 
+
+	#ifdef _MSC_VER
+		  std::string value(*l_it, *it);
+		  post.insert(PostContent(name, value.c_str()));
+	#else 
 	char* value = curl_unescape(&*l_it, it - l_it);
 	post.insert(PostContent(name, value));
 	curl_free(value);
+	#endif
 	l_it = it+1;
 	break;
       }

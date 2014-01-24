@@ -7,17 +7,17 @@ macro( add_module module )
        STRING(REGEX REPLACE "^.(.*)" "${f}\\1Module" modstruct "${module}")
 
        	IF(${USE_MONGOOSE})
-		CONFIGURE_FILE(main.i ${CMAKE_CURRENT_BINARY_DIR}/main_${module}.cc )	
-		add_executable(${module} main_${module}.cc)
-		target_link_libraries(${module} rikitiki)
+			CONFIGURE_FILE(main.i ${CMAKE_CURRENT_BINARY_DIR}/main_${module}.cc )	
+			add_executable(${module} main_${module}.cc)
+			target_link_libraries(${module} rikitiki)
        	ENDIF()
 
-	IF(${USE_APACHE})
-		CONFIGURE_FILE(mod.i ${CMAKE_CURRENT_BINARY_DIR}/mod_${module}.cc )
-		add_library(mod_${module} SHARED mod_${module}.cc)
-		set_target_properties(mod_${module} PROPERTIES PREFIX "")
-		target_link_libraries(mod_${module} rikitiki)
-	ENDIF()
+		IF(${USE_APACHE})
+			CONFIGURE_FILE(mod.i ${CMAKE_CURRENT_BINARY_DIR}/mod_${module}.cc )
+			add_library(mod_${module} SHARED mod_${module}.cc)
+			set_target_properties(mod_${module} PROPERTIES PREFIX "")
+			target_link_libraries(mod_${module} rikitiki)
+		ENDIF()
 endmacro(add_module )
 
 
@@ -37,7 +37,11 @@ set (RT_SRC
     registration.cc
     )
 
-set (RT_LIBS curl pthread mxcomp)
+IF(${WIN32})
+	set (RT_LIBS mxcomp)
+ELSE()
+	set (RT_LIBS curl pthread mxcomp)
+ENDIF()
 
 IF(${USE_MONGOOSE})
 	include_directories(${THIRD_PARTY_DIR}/mongoose)
@@ -71,6 +75,7 @@ ENDIF()
 CONFIGURE_FILE(config.h.in ${CMAKE_SOURCE_DIR}/include/rikitiki/config.h)	
 
 add_library(rikitiki ${RT_SRC})
+
 target_link_libraries(rikitiki ${RT_LIBS})		     
 install(TARGETS rikitiki DESTINATION lib)
 

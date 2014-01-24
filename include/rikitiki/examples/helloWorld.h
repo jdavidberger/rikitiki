@@ -13,23 +13,22 @@ namespace rikitiki {
      */
     struct HelloWorldModule {
       void Register(Server& server){
-	server.AddHandler( CreateRoute<>::With(this, "/hw/hello") );
-	server.AddHandler( CreateRoute<int>::With(this, "/hw/{number}") );
-	server.AddHandler( CreateRoute<std::string>::With(this, "/hw/{word}") );
+		server.AddHandler( CreateRoute<>::With(this, "/hw/hello") );
+		server.AddHandler( CreateRoute<int>::With(this, "/hw/{number}") );
+		server.AddHandler( CreateRoute<std::string>::With(this, "/hw/{word}") );
       }
 
       void operator()(ConnContext& ctx){
-	ctx << "Hello world!";
+		ctx << "Hello world!";
       }
 
       void operator()(ConnContext& ctx, int number){
-	ctx << "Number: " << number;
+		ctx	<< "Number: " << number;
       }
 
       void operator()(ConnContext& ctx, const std::string& word){
-	ctx << "Word: " << word;
+		ctx << "Word: " << word;
       }  
     };
   }
 }
-

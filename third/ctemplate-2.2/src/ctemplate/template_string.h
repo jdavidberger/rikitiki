@@ -34,7 +34,9 @@
 #define TEMPLATE_TEMPLATE_STRING_H_
 
 #include <string.h>      // for memcmp() and size_t
+#ifdef __GNUC__
 #include <tr1/unordered_map>
+#endif
 #include <string>
 #include <vector>
 

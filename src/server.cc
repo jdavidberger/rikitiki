@@ -4,7 +4,9 @@
 #include <rikitiki/configuration/configuration>
 #include <rikitiki/rikitiki>
 #include <sstream>
+#ifndef _MSC_VER
 #include <pthread.h>
+#endif
 #include <cstring>
 #include <rikitiki/registration.h>
 
@@ -71,7 +73,8 @@ namespace rikitiki {
   }
 
   void Server::AddHandler( Handler* handler) {
-    handlers.push_back(handler);
+	assert(handler);
+	handlers.push_back(handler);
   }
 
   void Server::AddHandler( Handler& handler) {

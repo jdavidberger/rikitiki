@@ -45,8 +45,8 @@ namespace rikitiki {
       }
 
       void set_cookie(ConnContext& ctx, const std::string& name, const std::string& value){
-	ctx << Cookie(name, value)
-	    << "<a href='/cookies/test/test'>test</a>\n";
+		  ctx << Cookie(name, value);
+			  cookies(ctx);
       }
     };
   }

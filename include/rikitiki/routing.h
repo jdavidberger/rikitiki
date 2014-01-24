@@ -36,6 +36,48 @@ struct sane_ref_type<T, true>{
   typedef const T& type;
 };
 
+
+template <typename C, typename rtn, typename... Args> struct Function_{
+	typedef rtn(C::*Type)( typename sane_ref_type<Args>::type...);
+};
+
+#ifdef _MSC_VER
+
+#define SRT(A) typename sane_ref_type<A>::type
+
+template <typename C, typename rtn, typename A1> struct Function_<C, rtn, A1> {
+	typedef rtn(C::*type)(SRT(A1));
+};
+
+template <typename C, typename rtn, typename A1, typename A2> struct Function_<C, rtn, A1, A2> {
+	typedef rtn(C::*type)(SRT(A1), SRT(A2));
+};
+
+template <typename C, typename rtn, typename A1, typename A2, typename A3> struct Function_<C, rtn, A1, A2, A3> {
+	typedef rtn(C::*type)(SRT(A1), SRT(A2), SRT(A3));
+};
+
+template <typename C, typename rtn, typename A1, typename A2, typename A3, typename A4> struct Function_<C, rtn, A1, A2, A3, A4> {
+	typedef rtn(C::*type)(SRT(A1), SRT(A2), SRT(A3), SRT(A4));
+};
+
+template <typename C, typename rtn, typename A1, typename A2, typename A3, typename A4, typename A5> 
+	struct Function_<C, rtn, A1, A2, A3, A4, A5> {
+	typedef rtn(C::*type)(SRT(A1), SRT(A2), SRT(A3), SRT(A4), SRT(A5));
+};
+
+template <typename C, typename rtn, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6>
+struct Function_<C, rtn, A1, A2, A3, A4, A5, A6> {
+	typedef rtn(C::*type)(SRT(A1), SRT(A2), SRT(A3), SRT(A4), SRT(A5), SRT(A6));
+};
+
+template <typename C, typename rtn, typename A1, typename A2, typename A3, typename A4, typename A5, typename A6, typename A7>
+struct Function_<C, rtn, A1, A2, A3, A4, A5, A6, A7> {
+	typedef rtn(C::*type)(SRT(A1), SRT(A2), SRT(A3), SRT(A4), SRT(A5), SRT(A6), SRT(A7));
+};
+#undef SRT(A)
+#endif 
+
 /**
    A route incorporates the variadic logic needed to map the Handle(ConnContext&) call to 
    the function type. 
@@ -43,9 +85,11 @@ struct sane_ref_type<T, true>{
    \param P Usually the module type that the route is for. 
    \param T... The argument types for the function to call
  */
+
 template <typename P, typename... T> 
   struct Route_ : public Route {  
-  typedef void (P::*F)(ConnContext& ctx, typename sane_ref_type<T>::type...);
+	  typedef typename Function_<P, void, ConnContext&, T...>::type F;
+  //typedef void (P::*F)(ConnContext& ctx, typename sane_ref_type<T>::type...);
   P* parent;
   F f;
   virtual bool visible() const { return false; }

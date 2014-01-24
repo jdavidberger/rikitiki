@@ -5,6 +5,10 @@
 #include <map>
 #include <array>
 #include <mxcomp/reflection.h>
+#ifdef _MSC_VER
+#define constexpr
+#endif 
+
 namespace rikitiki {
   class ConnContext; 
   struct Response;
@@ -80,6 +84,8 @@ namespace rikitiki {
     struct valid_conversions { };
 
 }
+
+#ifdef USE_JSONCPP
 #include <rikitiki/jsoncpp/jsoncpp>
 namespace rikitiki {
   using namespace mxcomp;
@@ -97,3 +103,5 @@ namespace rikitiki {
 
 
 }
+
+#endif

@@ -9,10 +9,7 @@ int main(){
   MongooseServer server(5000);
   ${modstruct} module;
   server.Register(module);
-  server.Start();
-  while(true){
-    sleep(1000);
-  }
+  server.Run();
   return 0;
 }
 

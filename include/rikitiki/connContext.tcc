@@ -3,8 +3,7 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
 template <class T>
-auto ConnContext::operator <<(const T& obj)  -> decltype(instance_of<Response>::value << obj, 
-							 (ConnContext&)*(ConnContext*)0) {
+ConnContext& ConnContext::operator <<(const T& obj) {
   handled = true;
   response << obj;
   return *this;
@@ -23,7 +22,8 @@ static inline void type_conversion_error(ConnContext& ctx, void** handlers){
 }
 
 template <class T> 
-auto ConnContext::operator <<(T& obj) -> decltype(valid_conversions<T>::Out::Instance(), instance_of<ConnContext>::value){
+typename std::enable_if<  std::is_class<typename valid_conversions<T>::In>::value,
+	ConnContext&>::type ConnContext::operator <<(T& obj) {
   auto rType = response.ResponseType;
   auto& handlers = valid_conversions<T>::Out::Instance().handlers;
   
