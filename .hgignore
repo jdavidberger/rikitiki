@@ -16,3 +16,4 @@ syntax: glob
 bin/*
 test/output/*
 include/rikitiki/config.h
+*#
