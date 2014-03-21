@@ -48,6 +48,7 @@ IF(${USE_MONGOOSE})
 	add_subdirectory(mongoose)	
 ENDIF()
 
+	add_subdirectory(websocket)	
 
 IF(${USE_STENCET})
 	add_subdirectory(stencet)
@@ -73,7 +74,7 @@ ENDIF()
 
 
 CONFIGURE_FILE(config.h.in ${CMAKE_SOURCE_DIR}/include/rikitiki/config.h)	
-
+ADD_DEFINITIONS(-DUSE_WEBSOCKET)
 add_library(rikitiki ${RT_SRC})
 
 target_link_libraries(rikitiki ${RT_LIBS})		     

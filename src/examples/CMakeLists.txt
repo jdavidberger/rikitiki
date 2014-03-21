@@ -1,6 +1,7 @@
 ADD_MODULE(helloWorld)
 ADD_MODULE(multiType)
 ADD_MODULE(restAdv)
+ADD_MODULE(websocket)
 IF(${USE_STENCET})
 	ADD_MODULE(stencetEx)
 ENDIF()

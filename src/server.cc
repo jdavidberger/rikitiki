@@ -56,7 +56,7 @@ namespace rikitiki {
 
   bool Server::Handle(ConnContext& ctx) {
     for(size_t i = 0;i < handlers.size();i++){
-      try {
+      try {	
 	handlers[i]->Handle(ctx);      
       } catch(HandlerException& ex) {
 	LOG(Server, Debug) << "Error encountered: " << ctx.response.response.str() << std::endl;

@@ -19,6 +19,9 @@
 #include <rikitiki/ctemplate/templatePreprocessor.h>
 #endif
 
+#ifdef RT_USE_WEBSOCKETS
+#include <rikitiki/websocket/websocket>
+#endif
 namespace rikitiki {
   class ConnContext;
 
@@ -45,13 +48,23 @@ namespace rikitiki {
     const HttpStatus* status; 
   };
   
+
+  class Server;
   
+  struct WebModule {
+       virtual void Register(rikitiki::Server&) = 0;
+  };
+
   /**\brief The main interface file between modules and a given server
      Server is the rikitiki component that stores handlers and interfaces with the 
      choosen server module to fire them off. It also is the object that provides
      information about the current server -- IP, Port, etc. 
   */
-  class Server {
+  class Server 
+#ifdef RT_USE_WEBSOCKETS
+    : public rikitiki::websocket::Server
+#endif
+{
   protected:
   public:
     std::vector<Handler*> handlers;
@@ -62,6 +75,7 @@ namespace rikitiki {
     std::vector<ctemplates::TemplatePreprocessor*> templatePreprocessors;
     void AddPreprocessor( rikitiki::ctemplates::TemplatePreprocessor*);
     #endif
+
 
     typedef bool (*handle_t)(ConnContext& ctx);
  

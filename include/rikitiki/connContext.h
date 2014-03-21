@@ -73,6 +73,15 @@ namespace rikitiki {
   template <typename T1, typename T2> 
     struct multimap : public std::multimap<T1, T2> {
     T2& operator[](const T1&);
+    template <typename S>
+    bool hasValue(const T1& key, S& rtn) {
+         typename rikitiki::multimap<T1, T2>::iterator it = this->find(key);
+         if (it != this->end()){
+              rtn = it->second;
+              return true;
+         }
+         return false;
+    }
   };
 
   typedef multimap<std::string, std::string> HeaderCollection;
@@ -116,7 +125,9 @@ namespace rikitiki {
 
     friend class Server;
     virtual void writeResponse() = 0;
-    ConnContext(const Server*);
+    
+
+    ConnContext(Server*);
     ConnContext();
   public:
     /**\brief This is a conv. function to add REQUEST headers, not response headers (use the stream operator for that). 
@@ -125,7 +136,7 @@ namespace rikitiki {
     */
     HeaderCollection::value_type& AddRequestHeader(const char*, const char*);
     virtual ~ConnContext();
-    const Server* server;
+    Server* server;
     std::multimap<double, ContentType::t>& Accepts();
     PostCollection& Post();
     ContentType::t ContentType();
@@ -133,8 +144,9 @@ namespace rikitiki {
     HeaderCollection& Headers();
     CookieCollection& Cookies();
     std::string& Payload();
-
+    virtual int rawWrite(const char* buffer, size_t length) = 0;
     virtual const char* URI() = 0;
+    virtual void Close() = 0;
     bool handled;  
     Method RequestMethod();
 
@@ -156,6 +168,9 @@ namespace rikitiki {
 #include "connContext.tcc"
 }
 
-
+#ifdef _MSC_VER
+#undef DELETE
+#undef decltype(a,b) 
+#endif
 
 //#include "ctemplate/connContext_ext.h"

@@ -13,9 +13,9 @@ namespace rikitiki {
     class MongooseServer : public Server {
       mg_context *ctx;
       std::vector<const char*> options;
-
       int port;      
     public:
+      std::map<void*, websocket::WebsocketProcess*> processes;
       std::string DocumentRoot;
       int Port() { return port; }
       MongooseServer(int _port);

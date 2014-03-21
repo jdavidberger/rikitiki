@@ -44,6 +44,7 @@ ENABLE_FEATURE(rest)
 #ENABLE_FEATURE(configuration)
 ENABLE_FEATURE(log)
 #ENABLE_FEATURE(stencet) 
+ENABLE_FEATURE(websockets)
 
 set(MAKE_EXAMPLES 1)
 

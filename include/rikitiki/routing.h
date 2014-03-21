@@ -41,7 +41,7 @@ template <typename C, typename rtn, typename... Args> struct Function_{
 	typedef rtn(C::*Type)( typename sane_ref_type<Args>::type...);
 };
 
-#ifdef _MSC_VER
+#ifdef _MSC_VER && 0
 
 #define SRT(A) typename sane_ref_type<A>::type
 
@@ -110,7 +110,7 @@ template <typename P>
   virtual bool visible() const { return method == ConnContext::GET || method == ConnContext::ANY; }
   Route_(P* p, const std::string& _route, F _f, ConnContext::Method method);
   virtual bool Handle(ConnContext& ctx);
-};
+};	
 
 /**
    Convienence class, meant to alleviate having to type in the class that the 

@@ -22,9 +22,11 @@ namespace rikitiki {
     public:
       const mg_request_info& request;
       virtual const char* URI();
-      MongooseConnContext(const Server* s, 
+      MongooseConnContext(Server* s, 
 			  mg_connection* c);
       virtual void writeResponse();
+      virtual int rawWrite(const char* buffer, size_t length);
+      virtual void Close();
     };
 
   }

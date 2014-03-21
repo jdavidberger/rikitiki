@@ -243,7 +243,7 @@ namespace rikitiki {
     return ctx;
   }
 
-  ConnContext::ConnContext(const Server* _server) : ConnContext() { server = _server; }
+  ConnContext::ConnContext(Server* _server) : ConnContext() { server = _server; }
   ConnContext::ConnContext() : _method(ANY), 
 			       handled(false), 
 			       server(NULL), 
@@ -301,8 +301,25 @@ namespace rikitiki {
       _qs++;
     }
   }
-
+  void unescapeString(char* s, char* e, std::string& rtn) {
+       rtn.reserve(e - s);
+       for (s; s < e; s++) {
+            if (*s == '%' && s + 2 < e) {
+                 s++;
+                 char z = s[2];
+                 s[2] = 0; // most we can read is 2
+                 rtn.push_back((char)strtol(s, 0, 16));
+                 s[2] = z;
+                 s++;
+            }
+            else {
+                 rtn.push_back(*s);
+            }
+       }
+  }
   void mapContents(std::string& raw_content, PostCollection& post){
+       if (raw_content.size() == 0)
+            return;
     if(raw_content.back() != '&')
       raw_content.push_back('&');
     
@@ -316,10 +333,11 @@ namespace rikitiki {
 	l_it = it+1;
 	break; 
       case '&': 
-
+        
 	#ifdef _MSC_VER
-		  std::string value(*l_it, *it);
-		  post.insert(PostContent(name, value.c_str()));
+           std::string value;
+           unescapeString(&*l_it, &*it, value);		  
+          post.insert(PostContent(name, value.c_str()));
 	#else 
 	char* value = curl_unescape(&*l_it, it - l_it);
 	post.insert(PostContent(name, value));

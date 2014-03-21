@@ -8,17 +8,11 @@
 #include <mongoose.h>
 
 #ifdef _MSC_VER
+
 #include <Windows.h>
 
 void sleep(int waitTime) {
-	__int64 time1 = 0, time2 = 0, freq = 0;
-
-	QueryPerformanceCounter((LARGE_INTEGER *)&time1);
-	QueryPerformanceFrequency((LARGE_INTEGER *)&freq);
-
-	do {
-		QueryPerformanceCounter((LARGE_INTEGER *)&time2);
-	} while ((time2 - time1) < waitTime);
+     Sleep(waitTime);
 }
 #else
 #include <unistd.h>
@@ -36,13 +30,46 @@ namespace rikitiki {
 #endif
     }
 
+    static MongooseServer* getServer(const struct mg_connection *conn) {
+      const struct mg_request_info *request_info = mg_get_request_info(const_cast<struct mg_connection*>(conn));
+      return((MongooseServer*)(request_info->user_data));
+    }
+    
     static int _handler(struct mg_connection *conn) {
-      const struct mg_request_info *request_info = mg_get_request_info(conn);
-
-      MongooseServer* server = ((MongooseServer*)(request_info->user_data));
-
+      MongooseServer* server = getServer(conn);
       mongoose::MongooseConnContext ctx(server, conn);
       return server->Handle(ctx) ? 1 : 0;
+    }
+
+    static int _wsHandler(const struct mg_connection *conn) {
+      MongooseServer* server = getServer(conn);
+      auto ctx = new mongoose::MongooseWebsocketContext(server, conn);
+      websocket::WebsocketProcess* process = server->HandleWs(ctx);
+      if(process) {
+	server->processes[(void*)conn] = process;
+	return 0;
+      }
+      return 1;
+    }
+
+    static void _wsReady(struct mg_connection *conn) {
+      MongooseServer* server = getServer(conn);
+      auto process = server->processes[conn];
+      if(process) {
+	auto ctx = new mongoose::MongooseWebsocketContext(server, conn);
+	
+	delete server->processes[conn]->context;
+	server->processes[conn]->context = ctx;
+	server->processes[conn]->OnReady();
+      }
+    }
+    
+    static int _wsReceive(struct mg_connection *conn, int bits, char* data, size_t length) {
+      MongooseServer* server = getServer(conn);
+	  auto process = server->processes[conn];
+	  assert(process);
+	  websocket::Frame frame(bits, (unsigned char*)data, length);
+	  return server->processes[conn]->OnReceiveFrame(frame) ? 1 : 0;
     }
 
     static volatile sig_atomic_t quit;
@@ -69,7 +96,10 @@ namespace rikitiki {
       mg_callbacks callbacks;      
       memset(&callbacks, 0, sizeof(callbacks));
       callbacks.begin_request = &_handler;
-      
+      callbacks.websocket_connect = &_wsHandler;
+      callbacks.websocket_ready = &_wsReady;
+      callbacks.websocket_data = &_wsReceive;
+
       std::stringstream _port;
       _port << port;
       std::string __port = _port.str();

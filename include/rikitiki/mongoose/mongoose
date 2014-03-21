@@ -7,4 +7,5 @@
 #ifdef RT_USE_MONGOOSE
 #include "server.h"
 #include "connContext.h"
+#include "websocketContext.h"
 #endif

@@ -10,8 +10,10 @@ namespace rikitiki {
     void MongooseConnContext::FillRequestMethod() {
       _method = strToMethod(request.request_method);
     }
-
+    
     void MongooseConnContext::writeResponse(){
+         if (conn == 0)
+              return;
       std::stringstream ss;
       std::string resp = response.response.str();
       ss << "HTTP/1.1 " << response.status->status << " " << response.status->name << "\r\n";
@@ -23,11 +25,16 @@ namespace rikitiki {
       ss << "\r\n";
       ss << resp;
       std::string buffer = ss.str();
-      mg_write(conn, buffer.c_str(), buffer.length());  
+      rawWrite(buffer.c_str(), buffer.length());      
     }
-
-
-    MongooseConnContext::MongooseConnContext(const Server* s, 
+    int MongooseConnContext::rawWrite(const char* buffer, size_t length){
+         return mg_write(conn, buffer, length);
+    }
+    void MongooseConnContext::Close() {
+         //mg_close_connection(conn);
+         conn = 0;
+    }
+    MongooseConnContext::MongooseConnContext(Server* s, 
 					     mg_connection* c) : 
       conn(c), 
       request(*mg_get_request_info(c)), ConnContext(s) { 
