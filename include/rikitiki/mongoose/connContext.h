@@ -7,23 +7,33 @@
 
 namespace rikitiki {
   namespace mongoose {
+
+	  class MongooseRequestContext : public virtual RequestContext {
+	  protected:
+		  virtual void FillQueryString();
+	  public:
+		  MongooseRequestContext(const mg_request_info*);
+
+		  const mg_request_info& request;
+		  virtual const char* URI();
+	  };
     /**
        Connection context for Mongoose servers. 
      */
-    class MongooseConnContext : public ConnContext {  
+	  class MongooseConnContext : public virtual MongooseRequestContext, public  ConnContext {
       mg_connection* conn;  
 
     protected:
       virtual void FillPayload();
-      virtual void FillQueryString();
+      
       virtual void FillRequestMethod();
       virtual void FillHeaders();
-
+	  virtual void FillQueryString();
     public:
-      const mg_request_info& request;
-      virtual const char* URI();
+		
       MongooseConnContext(Server* s, 
 			  mg_connection* c);
+	  virtual const char* URI();
       virtual void writeResponse();
       virtual int rawWrite(const char* buffer, size_t length);
       virtual void Close();

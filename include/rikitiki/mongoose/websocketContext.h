@@ -5,13 +5,15 @@
 #include "../connContext.h"
 #include "mongoose.h"
 #include "../websocket/websocket"
-
+#include "connContext.h"
 namespace rikitiki {
   namespace mongoose {
 
-    class MongooseWebsocketContext : public websocket::WebsocketContext {  
+	  class MongooseWebsocketContext : public MongooseRequestContext, public websocket::WebsocketContext {
       
       virtual int raw_write(const unsigned char* buffer, size_t len);      
+	  protected:
+		  virtual void FillQueryString();
     public:
       mg_connection* conn;
       const mg_connection* requestConn;

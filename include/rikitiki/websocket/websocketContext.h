@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <stdint.h>
+#include <rikitiki\connContext.h>
 
 namespace rikitiki {
   namespace websocket {
@@ -47,11 +48,11 @@ namespace rikitiki {
     };
 	
     const static size_t MAX_FRAME = 10;
-    struct WebsocketContext {
+	struct WebsocketContext : public virtual RequestContext {
     private:
       virtual int raw_write(const unsigned char*, size_t) = 0;
-    public:
-      virtual const char* URI() = 0;
+	
+    public:      
       std::vector<std::string> availableProtocols;
 
       std::string key;

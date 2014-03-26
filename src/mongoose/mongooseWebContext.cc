@@ -4,6 +4,7 @@
 #include <rikitiki/mongoose/websocketContext.h>
 #include <cstring>
 
+
 namespace rikitiki {
   namespace mongoose {
 	  const char* MongooseWebsocketContext::URI() {
@@ -16,10 +17,13 @@ namespace rikitiki {
 		  return request->uri;
 	  }
 
-	MongooseWebsocketContext::MongooseWebsocketContext(const Server* s, const mg_connection* conn) : requestConn(conn), conn(0) {
+	  void MongooseWebsocketContext::FillQueryString() {
+		  MongooseRequestContext::FillQueryString();
+	  }
+	MongooseWebsocketContext::MongooseWebsocketContext(const Server* s, const mg_connection* conn) : requestConn(conn), conn(0), MongooseRequestContext(mg_get_request_info(const_cast<mg_connection*>(conn))) {
 		
     }
-    MongooseWebsocketContext::MongooseWebsocketContext(const Server* s, mg_connection* conn) : requestConn(conn), conn(conn) {
+	  MongooseWebsocketContext::MongooseWebsocketContext(const Server* s, mg_connection* conn) : requestConn(conn), conn(conn), MongooseRequestContext(mg_get_request_info(conn)) {
       
     }
     int MongooseWebsocketContext::raw_write(const unsigned char* buffer, size_t len) {

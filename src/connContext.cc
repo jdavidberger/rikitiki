@@ -189,7 +189,7 @@ namespace rikitiki {
     return _cookies;
   }
 
-  QueryStringCollection& ConnContext::QueryString() {
+  QueryStringCollection& RequestContext::QueryString() {
     if(!mappedQs){
       this->FillQueryString();
       assert(mappedQs);
@@ -242,13 +242,15 @@ namespace rikitiki {
     t = ctx.Payload();
     return ctx;
   }
-
+  RequestContext::~RequestContext(){
+	  std::cerr << "..." << std::endl;
+  }
+  RequestContext::RequestContext() : mappedQs(false) {}
   ConnContext::ConnContext(Server* _server) : ConnContext() { server = _server; }
   ConnContext::ConnContext() : _method(ANY), 
 			       handled(false), 
 			       server(NULL), 
 			       mappedPost(false), 
-			       mappedQs(false), 
 			       mappedHeaders(false), 
 			       mappedCookies(false), 
 			       mappedPayload(false),

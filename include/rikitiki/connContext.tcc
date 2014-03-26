@@ -18,7 +18,7 @@ static inline void type_conversion_error(ConnContext& ctx, void** handlers){
       accepts += ContentType::ToString((ContentType::t)_type);
     }
   ctx << Header("Accept", accepts);
-  throw HandlerException(HttpStatus::Not_Acceptable);
+  throw rikitiki::HandlerException(HttpStatus::Not_Acceptable);
 }
 
 template <class T> 

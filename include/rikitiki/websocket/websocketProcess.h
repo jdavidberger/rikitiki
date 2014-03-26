@@ -2,6 +2,7 @@
 
 #include <string>
 #include "websocketContext.h"
+#include <mxcomp\log.h>
 
 namespace rikitiki {
   namespace websocket {
@@ -25,25 +26,36 @@ namespace rikitiki {
       virtual WebsocketProcess* Handle(WebsocketContext*) = 0;      
     };
 
-    template <typename P>
-      struct WebsocketRoute_ : public WebsocketHandler {
+	struct WebsocketRoute : public WebsocketHandler {
+		std::string route;
+		virtual WebsocketProcess* CreateProcessor(WebsocketContext* ctx) = 0;
+		WebsocketRoute(const std::string& r) : route(r) {}
+		
+		virtual WebsocketProcess* Handle(WebsocketContext* ctx) {
+
+			bool shouldAttempt =
+				strcmp(route.c_str(), ctx->URI()) == 0;
+
+			if (shouldAttempt){
+				auto rtn = CreateProcessor(ctx);
+				if (rtn->OnConnect()) {
+					LOG(Web, Verbose) << "Using websocket " << route << std::endl;
+					return rtn;
+				}
+				delete rtn;
+			}
+			return 0;
+		}
+	};
+	
+    template <typename T>
+	struct WebsocketRoute_ : public WebsocketRoute {
       std::string route;
-    WebsocketRoute_(const std::string& r) : route(r) {}
-      virtual WebsocketProcess* Handle(WebsocketContext* ctx) {
-
-	bool shouldAttempt =
-	  strcmp(route.c_str(), ctx->URI()) == 0;
-
-	if (shouldAttempt){
-	  auto rtn = new P(ctx);
-	  if (rtn->OnConnect()) {
-	    LOG(Web, Verbose) << "Using websocket " << route << std::endl;
-	    return rtn;
+	  
+	  WebsocketRoute_(const std::string& r) : WebsocketRoute(r) {}
+	  virtual WebsocketProcess* CreateProcessor(WebsocketContext* ctx) {
+		  return new T(ctx);
 	  }
-	  delete rtn;
-	}
-	return 0;
-      }
     };
 
   }

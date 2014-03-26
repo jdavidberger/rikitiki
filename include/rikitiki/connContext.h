@@ -89,6 +89,20 @@ namespace rikitiki {
   typedef multimap<std::string, std::string> PostCollection;
   typedef std::map<std::string, std::string> CookieCollection;
 
+  class RequestContext {
+  protected:
+  protected:
+	  bool mappedQs;
+	  QueryStringCollection _qs;
+	  virtual void FillQueryString() = 0;
+	  RequestContext();
+	  virtual ~RequestContext();
+  public:
+
+	  QueryStringCollection& QueryString();
+	  virtual const char* URI() = 0;
+  };
+
   /**
      Connection Context object. This is the main object in which handlers use both to read request data and
      write response data. 
@@ -96,15 +110,14 @@ namespace rikitiki {
      In general, you can just stream ('<<') whatever you want into it, and there should be an override that 
      does the right thing. 
    */
-  class ConnContext {  
+  class ConnContext : public virtual RequestContext {  
   public:
     enum Method {
       ANY = 0, GET = 1, POST = 2, HEAD = 3, PUT = 4, DELETE = 5, TRACE = 6, OPTIONS = 7, CONNECT = 8, PATCH = 9, OTHER
     };
   protected:
-    bool mappedPost, mappedQs, mappedHeaders, mappedCookies, mappedPayload, mappedContentType; 
+    bool mappedPost, mappedHeaders, mappedCookies, mappedPayload, mappedContentType; 
     PostCollection _post;
-    QueryStringCollection _qs;
     HeaderCollection _headers;
     CookieCollection _cookies;
     std::multimap<double, ContentType::t>* _accepts;
@@ -118,7 +131,6 @@ namespace rikitiki {
     virtual void FillPayload() = 0;
     virtual void FillPost();
 
-    virtual void FillQueryString() = 0;
     virtual void FillHeaders() = 0;
     virtual void FillRequestMethod() = 0;  
     virtual void FillCookies();  
@@ -145,7 +157,7 @@ namespace rikitiki {
     CookieCollection& Cookies();
     std::string& Payload();
     virtual int rawWrite(const char* buffer, size_t length) = 0;
-    virtual const char* URI() = 0;
+    
     virtual void Close() = 0;
     bool handled;  
     Method RequestMethod();

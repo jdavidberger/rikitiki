@@ -6,6 +6,19 @@
 
 namespace rikitiki {
   namespace mongoose {
+	  
+	  MongooseRequestContext::MongooseRequestContext(const mg_request_info* _request) : request(*_request){
+
+	  }
+
+	  const char* MongooseRequestContext::URI(){
+		  return request.uri;
+	  }
+
+	  void MongooseRequestContext::FillQueryString() {
+		  mapQueryString(request.query_string, _qs);
+		  mappedQs = true;
+	  }
 
     void MongooseConnContext::FillRequestMethod() {
       _method = strToMethod(request.request_method);
@@ -34,10 +47,7 @@ namespace rikitiki {
          //mg_close_connection(conn);
          conn = 0;
     }
-    MongooseConnContext::MongooseConnContext(Server* s, 
-					     mg_connection* c) : 
-      conn(c), 
-      request(*mg_get_request_info(c)), ConnContext(s) { 
+	MongooseConnContext::MongooseConnContext(Server* s, mg_connection* c) : ConnContext(s), MongooseRequestContext(mg_get_request_info(c)), conn(c) {
 
       std::string thread_name = "";
       thread_name += request.uri;
@@ -52,14 +62,15 @@ namespace rikitiki {
       LOG(Mongoose, Verbose) << "Request for [" << request.request_method << "] " << request.uri << std::endl;
     }
 
-    const char* MongooseConnContext::URI(){
-      return request.uri;
-    }
 
-    void MongooseConnContext::FillQueryString() {
-      mapQueryString(request.query_string, _qs);
-      mappedQs = true;
-    }
+	const char* MongooseConnContext::URI(){
+		return MongooseRequestContext::URI();
+	}
+
+	void MongooseConnContext::FillQueryString() {
+		MongooseRequestContext::FillQueryString();
+	}
+
 
     void MongooseConnContext::FillHeaders() {      
       std::string name, value;

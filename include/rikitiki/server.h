@@ -15,45 +15,47 @@
 #include <rikitiki/log/log>
 #include <rikitiki/http_statuses.h>
 
-#if RT_USE_CTEMPLATE
+#ifdef RT_USE_WEBSOCKETS
+#include <rikitiki/websocket/websocketServer.h>
+#endif
+
+#ifdef RT_USE_CTEMPLATE
 #include <rikitiki/ctemplate/templatePreprocessor.h>
 #endif
 
-#ifdef RT_USE_WEBSOCKETS
-#include <rikitiki/websocket/websocket>
-#endif
 namespace rikitiki {
-  class ConnContext;
+	class ConnContext;
 
-  /**
-     Base handler class. These are checked in order whenever there is a request. 
-   */ 
-  struct Handler {
-    virtual bool Handle(ConnContext& ctx) = 0;
-    virtual bool visible() const = 0;
-    virtual std::string name() const = 0;
-    virtual std::string desc() const;
-    virtual ~Handler(); 
-  };
+	/**
+	   Base handler class. These are checked in order whenever there is a request.
+	   */
+	struct Handler {
+		virtual bool Handle(ConnContext& ctx) = 0;
+		virtual bool visible() const = 0;
+		virtual std::string name() const = 0;
+		virtual std::string desc() const;
+		virtual ~Handler();
+	};
 
-  /** Thrown from within handlers to immediately stop handler execution.    
-      Note that throwing an exception will treat the request as handled, by design. 
-   */
-  struct HandlerException {
-  HandlerException() : status(0){}
-  HandlerException(const HttpStatus& s) : status(&s){}
-    /** Optionally specify the status to return.
-	If no status is set, Internal_Server_Error is returned. 
-     */
-    const HttpStatus* status; 
-  };
-  
+	/** Thrown from within handlers to immediately stop handler execution.
+		Note that throwing an exception will treat the request as handled, by design.
+		*/
+	struct HandlerException {
+		HandlerException() : status(0){}
+		HandlerException(const HttpStatus& s) : status(&s){}
+		/** Optionally specify the status to return.
+		If no status is set, Internal_Server_Error is returned.
+		*/
+		const HttpStatus* status;
+	};
 
-  class Server;
-  
-  struct WebModule {
-       virtual void Register(rikitiki::Server&) = 0;
-  };
+
+	class Server;
+
+	struct WebModule {
+		virtual void Register(rikitiki::Server&) = 0;
+	};
+
 
   /**\brief The main interface file between modules and a given server
      Server is the rikitiki component that stores handlers and interfaces with the 
