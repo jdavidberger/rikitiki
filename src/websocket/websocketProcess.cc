@@ -1,4 +1,5 @@
 #include <rikitiki/websocket/websocket>
+#include <mxcomp\log.h>
 
 namespace rikitiki {
   namespace websocket {
@@ -39,6 +40,23 @@ namespace rikitiki {
       }
 
       return rtn;
+    }
+
+
+    WebsocketRoute::WebsocketRoute(const std::string& r) : route(r) {}
+
+    WebsocketProcess* WebsocketRoute::Handle(WebsocketContext* ctx) {
+         bool shouldAttempt = strcmp(route.c_str(), ctx->URI()) == 0;
+
+         if (shouldAttempt){
+              auto rtn = CreateProcessor(ctx);
+              if (rtn->OnConnect()) {
+                   LOG(Web, Verbose) << "Using websocket " << route << std::endl;
+                   return rtn;
+              }
+              delete rtn;
+         }
+         return 0;
     }
 
   }

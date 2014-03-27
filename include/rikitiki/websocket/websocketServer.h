@@ -2,16 +2,16 @@
 #include <vector>
 
 namespace rikitiki {
-  namespace websocket {
+     namespace websocket {
 
-	  class WebsocketProcess;
-	  class WebsocketHandler;
-	  class WebsocketContext;
+          class WebsocketProcess;
+          class WebsocketHandler;
+          class WebsocketContext;
 
-    struct Server {
-      std::vector<WebsocketHandler*> wsHandlers;
-      void AddWsHandler( WebsocketHandler* handler);
-      WebsocketProcess* HandleWs(WebsocketContext* ctx);
-    };
-  }
+          struct Server {
+               std::vector<WebsocketHandler*> wsHandlers;
+               void AddWsHandler(WebsocketHandler* handler);
+               WebsocketProcess* HandleWs(WebsocketContext* ctx);
+          };
+     }
 }
