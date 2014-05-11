@@ -19,22 +19,7 @@ namespace rikitiki {
   Handler::~Handler() {
 
   }
-  /**
-     Wraps up a function into a handler
-   */
-  struct GHandler : public Handler {
-    Server::handle_t handlef;
-    GHandler(  Server::handle_t _handlef) : handlef(_handlef) {}
-    virtual bool Handle(ConnContext& ctx) {
-      return handlef(ctx);
-    }
-    virtual bool visible() const {
-      return false;
-    }
-    virtual std::string name() const {
-      return "anonymous";
-    }
-  };
+  
   Server::Server(){
     register_modules();
   }
@@ -53,19 +38,24 @@ namespace rikitiki {
 #endif
     
   }
+  Handler* Server::GetHandler(RequestContext& ctx) {
+       for (size_t i = 0; i < handlers.size(); i++){
+            if (handlers[i]->CanHandle(ctx))
+                 return handlers[i];
+       }
+       return nullptr;
+  }
 
-  bool Server::Handle(ConnContext& ctx) {
+  bool Server::Handle(ConnContextRef ctx) {
     for(size_t i = 0;i < handlers.size();i++){
-      try {	
+      try {
 	handlers[i]->Handle(ctx);      
       } catch(HandlerException& ex) {
-	LOG(Server, Debug) << "Error encountered: " << ctx.response.response.str() << std::endl;
-	ctx << (ex.status == 0 ? HttpStatus::Internal_Server_Error : *(ex.status));
-	ctx.writeResponse(); // Assumably the thrower cleared then wrote out a reason to throw. 
+//	LOG(Server, Debug) << "Error encountered: " << ctx->response.response.str() << std::endl;
+	ctx << (ex.status == 0 ? HttpStatus::Internal_Server_Error : *(ex.status));	
 	return true;
       }
-      if(ctx.handled){
-	ctx.writeResponse();
+      if(ctx->handled){
 	return true;
       }
     }
@@ -80,11 +70,7 @@ namespace rikitiki {
   void Server::AddHandler( Handler& handler) {
     AddHandler(&handler);
   }
-
-  void Server::AddHandler( handle_t handler) {
-    AddHandler( new GHandler( handler ) );
-  }
-
+  
 #ifdef RT_USE_CTEMPLATE
   void Server::AddPreprocessor( rikitiki::ctemplates::TemplatePreprocessor* tp){
     templatePreprocessors.push_back(tp);

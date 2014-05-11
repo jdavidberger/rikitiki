@@ -2,10 +2,8 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
 #include <rikitiki/rikitiki>
-#include <rikitiki/mongoose/mongoose>
 
 using namespace rikitiki;
-using namespace rikitiki::mongoose;
 
 namespace rikitiki {
   namespace examples {
@@ -13,20 +11,20 @@ namespace rikitiki {
      */
     struct HelloWorldModule {
       void Register(Server& server){
-		server.AddHandler( CreateRoute<>::With(this, "/hw/hello") );
-		server.AddHandler( CreateRoute<int>::With(this, "/hw/{number}") );
-		server.AddHandler( CreateRoute<std::string>::With(this, "/hw/{word}") );
+		server.AddHandler( CreateRoute<>::With(this, L"/hw/hello") );
+                server.AddHandler(CreateRoute<int>::With(this, L"/hw/{number}"));
+                server.AddHandler(CreateRoute<std::wstring>::With(this, L"/hw/{word}"));
       }
 
-      void operator()(ConnContext& ctx){
+      void operator()(ConnContextRef ctx){
 		ctx << "Hello world!";
       }
 
-      void operator()(ConnContext& ctx, int number){
+      void operator()(ConnContextRef ctx, int number){
 		ctx	<< "Number: " << number;
       }
 
-      void operator()(ConnContext& ctx, const std::string& word){
+      void operator()(ConnContextRef ctx, const std::wstring& word){
 		ctx << "Word: " << word;
       }  
     };

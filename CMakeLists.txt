@@ -2,6 +2,7 @@ cmake_minimum_required (VERSION 2.6)
 project (rikitiki) 
 
 SET(rikitiki_VERSION_MAJOR 0.1)
+SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS On) 
 
 EXEC_PROGRAM(hg ${CMAKE_CURRENT_SOURCE_DIR} ARGS tip OUTPUT_VARIABLE hg_tip)
 SET(rikitiki_minor_version "unknown")
@@ -15,7 +16,13 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fPIC")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+
+# MSVC warnings are dumb
+if (MSVC)
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -wd4514 -wd4820 -wd4350 -wd4710")
+endif (MSVC)
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11 -O3")
 
 # Not super useful, except for self documentation purposes
@@ -37,14 +44,15 @@ ${CONFIG}")
 ENDMACRO(enable_feature)
 
 #ENABLE_FEATURE(apache)
-ENABLE_FEATURE(mongoose)
+#ENABLE_FEATURE(mongoose)
 #ENABLE_FEATURE(ctemplate)
 #ENABLE_FEATURE(jsoncpp)
-ENABLE_FEATURE(rest)
+#ENABLE_FEATURE(rest)
 #ENABLE_FEATURE(configuration)
 ENABLE_FEATURE(log)
 #ENABLE_FEATURE(stencet) 
 ENABLE_FEATURE(websockets)
+ENABLE_FEATURE(cef)
 
 set(MAKE_EXAMPLES 1)
 

@@ -30,7 +30,7 @@ namespace rikitiki {
 
           static int _handler(struct mg_connection *conn) {
                MongooseServer* server = getServer(conn);
-               mongoose::MongooseConnContext ctx(server, conn);
+               std::shared_ptr<mongoose::MongooseConnContext> ctx(new mongoose::MongooseConnContext(server, conn));
                return server->Handle(ctx) ? 1 : 0;
           }
 

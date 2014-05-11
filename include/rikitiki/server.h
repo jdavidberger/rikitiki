@@ -14,7 +14,7 @@
 
 #include <rikitiki/log/log>
 #include <rikitiki/http_statuses.h>
-
+#include <memory>
 #ifdef RT_USE_WEBSOCKETS
 #include <rikitiki/websocket/websocketServer.h>
 #endif
@@ -25,14 +25,25 @@
 
 namespace rikitiki {
      class ConnContext;
+     class RequestContext;     
+     typedef std::shared_ptr<ConnContext> ConnContextRef;
+
+     template <class T>
+     std::shared_ptr<ConnContext>& operator<<(std::shared_ptr<ConnContext>& me, T& t)
+     {
+          *me << t;
+          return me;
+     }
 
      /**
         Base handler class. These are checked in order whenever there is a request.
         */
      struct Handler {
-          virtual bool Handle(ConnContext& ctx) = 0;
+          
+          virtual bool Handle(ConnContextRef ctx) = 0;
+          virtual bool CanHandle(RequestContext& ctx) = 0;
           virtual bool visible() const = 0;
-          virtual std::string name() const = 0;
+          virtual std::wstring name() const = 0;
           virtual std::string desc() const;
           virtual ~Handler();
      };
@@ -66,14 +77,13 @@ namespace rikitiki {
 #endif
 
 
-          typedef bool(*handle_t)(ConnContext& ctx);
-
-          bool Handle(ConnContext& ctx);
+          
+          bool Handle(ConnContextRef ctx);
+          Handler* GetHandler(RequestContext& ctx);
 
           void AddHandler(Handler& handler);
           void AddHandler(Handler* handler);
-          void AddHandler(handle_t handler);
-
+          
           template <typename T>
           void Register(T& t){
                t.Register(*this);

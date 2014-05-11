@@ -29,14 +29,14 @@ namespace rikitiki {
           const HttpStatus* status;
      };
 
-     typedef std::pair<std::string, std::string> stringpair;
+     typedef std::pair<std::wstring, std::wstring> stringpair;
 
      /**
         Headers are just string pairs
         We can't just typedef it since we want to pass it around with stream operators
         */
      struct Header : public stringpair {
-          Header(const std::string& name, const std::string& value);
+          Header(const std::wstring& name, const std::wstring& value);
      };
 
      /**
@@ -44,7 +44,7 @@ namespace rikitiki {
         We can't just typedef it since we want to pass it around with stream operators
         */
      struct PostContent : public stringpair {
-          PostContent(const std::string& name, const std::string& value);
+          PostContent(const std::wstring& name, const std::wstring& value);
      };
 
      /**
@@ -52,9 +52,9 @@ namespace rikitiki {
         TODO: Add expiration, domain, etc
         */
      struct Cookie : public stringpair {
-          Cookie(const std::string& name, const std::string& value,
-               const std::string& Domain = "", const std::string& Path = "/",
-               const std::string& Expires = "", bool secure = false, bool httpOnly = false);
+          Cookie(const std::wstring& name, const std::wstring& value,
+               const std::wstring& Domain = L"", const std::wstring& Path = L"/",
+               const std::wstring& Expires = L"", bool secure = false, bool httpOnly = false);
      };
 
      /**
@@ -65,12 +65,12 @@ namespace rikitiki {
 
           std::vector<Header> headers;
           const HttpStatus* status;
-          std::stringstream response;
+          std::wstringstream response;
           void reset();
           Response();
           template <class T>
 
-          auto operator <<(const T& obj) -> decltype(instance_of<std::stringstream>::value << obj, instance_of<Response&>::value)
+          auto operator <<(const T& obj) -> decltype(instance_of<std::wstringstream>::value << obj, instance_of<Response&>::value)
           {
                response << obj; return *this;
           }
@@ -98,10 +98,10 @@ namespace rikitiki {
           }
      };
 
-     typedef multimap<std::string, std::string> HeaderCollection;
-     typedef std::map<std::string, std::string> QueryStringCollection;
-     typedef multimap<std::string, std::string> PostCollection;
-     typedef std::map<std::string, std::string> CookieCollection;
+     typedef multimap<std::wstring, std::wstring> HeaderCollection;
+     typedef std::map<std::wstring, std::wstring> QueryStringCollection;
+     typedef multimap<std::wstring, std::wstring> PostCollection;
+     typedef std::map<std::wstring, std::wstring> CookieCollection;
 
      /***
         Request context object. Contains everything about the request; but has no methods to deal with responding to the request.
@@ -124,12 +124,12 @@ namespace rikitiki {
           This function exists so the raw conncontext drivers can just kick down unsanitized header data and this function
           does the right thing. Namely that means lower-casing it.
           */
-          HeaderCollection::value_type& AddRequestHeader(const char*, const char*);
+          HeaderCollection::value_type& AddRequestHeader(const wchar_t*, const wchar_t*);
      public:
           HeaderCollection& Headers();
           CookieCollection& Cookies();
           QueryStringCollection& QueryString();
-          virtual const char* URI() = 0;
+          virtual const wchar_t* URI() = 0;
      };
 
      /**
@@ -173,7 +173,7 @@ namespace rikitiki {
           ContentType::t ContentType();
 
           std::string& Payload();
-          virtual int rawWrite(const char* buffer, size_t length) = 0;
+          virtual int rawWrite(const wchar_t* buffer, size_t length) = 0;
 
           virtual void Close() = 0;
           bool handled;
@@ -189,11 +189,11 @@ namespace rikitiki {
 
           Response response;
      };
-     void mapContents(std::string& raw_content, PostCollection& post);
-     void mapQueryString(const char* _qs, QueryStringCollection& qs);
-     ConnContext::Method strToMethod(const char* method);
+     void mapContents(std::wstring& raw_content, PostCollection& post);
+     void mapQueryString(const wchar_t* _qs, QueryStringCollection& qs);
+     ConnContext::Method strToMethod(const wchar_t* method);
 
-     ConnContext& operator>>(ConnContext&, std::string& t);
+     ConnContext& operator>>(ConnContext&, std::wstring& t);
 #include "connContext.tcc"
 }
 

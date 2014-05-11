@@ -10,32 +10,49 @@ macro( add_module module )
 			CONFIGURE_FILE(main.i ${CMAKE_CURRENT_BINARY_DIR}/main_${module}.cc )	
 			add_executable(${module} main_${module}.cc)
 			target_link_libraries(${module} rikitiki)
+			set_property(TARGET ${module} PROPERTY FOLDER "examples")
        	ENDIF()
 
-		IF(${USE_APACHE})
-			CONFIGURE_FILE(mod.i ${CMAKE_CURRENT_BINARY_DIR}/mod_${module}.cc )
-			add_library(mod_${module} SHARED mod_${module}.cc)
-			set_target_properties(mod_${module} PROPERTIES PREFIX "")
-			target_link_libraries(mod_${module} rikitiki)
-		ENDIF()
+	IF(${USE_APACHE})
+		CONFIGURE_FILE(mod.i ${CMAKE_CURRENT_BINARY_DIR}/mod_${module}.cc )
+		add_library(mod_${module} SHARED mod_${module}.cc)
+		set_target_properties(mod_${module} PROPERTIES PREFIX "")
+		target_link_libraries(mod_${module} rikitiki)
+		set_property(TARGET mod_${module} PROPERTY FOLDER "apache examples")
+	ENDIF()
+
+	IF(${USE_CEF})
+		CONFIGURE_FILE(main_cef.i ${CMAKE_CURRENT_BINARY_DIR}/main_cef_${module}.cc )	
+		add_executable(${module}_cef main_cef_${module}.cc)
+		target_link_libraries(${module}_cef rikitiki)
+		set_property(TARGET ${module}_cef PROPERTY FOLDER "examples")
+	ENDIF()
+
 endmacro(add_module )
 
+macro(add_source_directory srcdir) 
+	file (GLOB _INCLUDES "../include/rikitiki/${srcdir}/*.h")
+	file (GLOB _SOURCES "${srcdir}/*.cc")
+
+	SOURCE_GROUP("Source\\${srcdir}" FILES ${_SOURCES})
+	SOURCE_GROUP("Include\\${srcdir}" FILES ${_INCLUDES})
+	set(RT_SRC ${RT_SRC} ${_INCLUDES} ${_SOURCES})
+endmacro(add_source_directory)
 
 include_directories(${THIRD_PARTY_DIR}/curl-7.28.1/include)
 
 link_directories(
 		${THIRD_PARTY_DIR}/curl-7.28.1/bin/lib
-		${THIRD_PARTY_DIR}/ctemplate-2.2 )
+		${THIRD_PARTY_DIR}/ctemplate-2.2 
+		${THIRD_PARTY_DIR}/chromium-embedded/cef3
+		C:\\Users\\justin\\Documents\\Projects\\StitchApp2\\cef_binary_3.1650.1562_windows64\\Release
+)
 
-set (RT_SRC
-    server.cc 
-    connContext.cc 
-    content_types.cc 
-    routing.cc
-    http_statuses.cc
-    stream_helpers.cc
-    registration.cc
-    )
+file (GLOB RT_INC "../include/rikitiki/*.h")
+file (GLOB RT_SRC "*.cc")
+
+SOURCE_GROUP("Source" FILES ${RT_SRC})
+SOURCE_GROUP("Include" FILES ${RT_INC})
 
 IF(${WIN32})
 	set (RT_LIBS mxcomp)
@@ -44,11 +61,13 @@ ELSE()
 ENDIF()
 
 IF(${USE_MONGOOSE})
+	add_source_directory(mongoose)	
 	include_directories(${THIRD_PARTY_DIR}/mongoose)
 	add_subdirectory(mongoose)	
 ENDIF()
 
-	add_subdirectory(websocket)	
+	add_source_directory(websocket)	
+	add_subdirectory(websocket)		
 
 IF(${USE_STENCET})
 	add_subdirectory(stencet)
@@ -61,7 +80,7 @@ ENDIF()
 
 IF(${USE_APACHE})
 	include_directories(/usr/include/apr-1/)	
-	add_subdirectory(apache)
+	add_source_directory(apache)
 ENDIF()
 
 IF(${USE_JSONCPP})
@@ -69,8 +88,15 @@ IF(${USE_JSONCPP})
 ENDIF()
 
 IF(${USE_CONFIGURATION})
+	add_source_directory(configuration)
 	add_subdirectory(configuration)
 ENDIF()
+
+IF(${USE_CEF})
+	add_source_directory(cef)
+	set(RT_LIBS ${RT_LIBS} cef)
+	include_directories(${THIRD_PARTY_DIR}/chromium-embedded/cef3)
+ENDIF() 
 
 
 CONFIGURE_FILE(config.h.in ${CMAKE_SOURCE_DIR}/include/rikitiki/config.h)	

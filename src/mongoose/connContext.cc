@@ -4,32 +4,38 @@
 #include <rikitiki/mongoose/connContext.h>
 #include <cstring>
 #include <mxcomp\log.h>
+#include <locale>
+#include <codecvt>
 
 namespace rikitiki {
      namespace mongoose {
 
           MongooseRequestContext::MongooseRequestContext(const mg_request_info* _request) : request(_request){
-
+               const char* _uri = request->uri;
+               for (; *_uri != 0; _uri++)
+                    uri.push_back(*_uri);
           }
 
-          const char* MongooseRequestContext::URI(){
-               return request->uri;
+          const wchar_t* MongooseRequestContext::URI(){
+               return uri.c_str();
           }
 
           void MongooseRequestContext::FillQueryString() {
-               mapQueryString(request->query_string, _qs);
+               std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+               mapQueryString(converter.from_bytes(request->query_string).c_str(), _qs);
                mappedQs = true;
           }
 
-          void MongooseConnContext::FillRequestMethod() {
-               _method = strToMethod(request->request_method);
+          void MongooseRequestContext::FillRequestMethod() {
+               std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+               _method = strToMethod(converter.from_bytes(request->request_method).c_str());
           }
 
           void MongooseConnContext::writeResponse(){
                if (conn == 0)
                     return;
-               std::stringstream ss;
-               std::string resp = response.response.str();
+               std::wstringstream ss;
+               std::wstring resp = response.response.str();
                ss << "HTTP/1.1 " << response.status->status << " " << response.status->name << "\r\n";
                ss << "Content-Length: " << resp.size() << "\r\n";
                ss << "Content-Type: " << ToString(response.ResponseType) << "\r\n";
@@ -38,10 +44,10 @@ namespace rikitiki {
                }
                ss << "\r\n";
                ss << resp;
-               std::string buffer = ss.str();
+               std::wstring buffer = ss.str();
                rawWrite(buffer.c_str(), buffer.length());
           }
-          int MongooseConnContext::rawWrite(const char* buffer, size_t length){
+          int MongooseConnContext::rawWrite(const wchar_t* buffer, size_t length){
                return mg_write(conn, buffer, length);
           }
           void MongooseConnContext::Close() {
@@ -50,7 +56,7 @@ namespace rikitiki {
           }
           MongooseConnContext::MongooseConnContext(Server* s, mg_connection* c) :
                RequestContext(),
-               ConnContext(s),
+               ConnContextWithWrite(s),
                MongooseRequestContext(mg_get_request_info(c)),
                conn(c) {
 
@@ -69,6 +75,7 @@ namespace rikitiki {
 
 
           void MongooseRequestContext::FillHeaders() {
+
                std::string name, value;
                for (int i = 0; i < request->num_headers; i++)
                     AddRequestHeader(request->http_headers[i].name,

@@ -5,19 +5,24 @@
 template <class T>
 ConnContext& ConnContext::operator <<(const T& obj) {
   handled = true;
+  if (headersDone == false) {
+       OnHeadersFinished();
+       headersDone = true;
+  }
+  this->OnData();
   response << obj;
   return *this;
 }
 
 static inline void type_conversion_error(ConnContext& ctx, void** handlers){
-  std::string accepts;
+  std::wstring accepts;
   for(auto _type = 0; _type < (int)ContentType::MAX; _type++)
     if(handlers[_type]){
       if(accepts.size())
-	 accepts += ", ";
+	 accepts += L", ";
       accepts += ContentType::ToString((ContentType::t)_type);
     }
-  ctx << Header("Accept", accepts);
+  ctx << Header(L"Accept", accepts);
   throw rikitiki::HandlerException(HttpStatus::Not_Acceptable);
 }
 

@@ -5,6 +5,7 @@
 #include "server.h"
 #include "connContext.h"
 #include <cstring>
+#include <memory>
 namespace rikitiki {
 
      /**
@@ -12,13 +13,14 @@ namespace rikitiki {
         and also has a specification as to what http method it accepts.
         */
      struct Route : public Handler {
-          std::string route;
+          std::wstring route;
           ConnContext::Method method;
 
-          Route(const std::string& _route, ConnContext::Method _method);
-          Route(const std::string& _route);
-          virtual std::string name() const;
+          Route(const std::wstring& _route, ConnContext::Method _method);
+          Route(const std::wstring& _route);
+          virtual std::wstring name() const;
      };
+
 
      /**
         Maps compound types to 'const T&', others to 'T'.
@@ -36,6 +38,10 @@ namespace rikitiki {
           typedef const T& type;
      };
 
+     template <typename T>
+     struct sane_ref_type<typename std::shared_ptr<T>, true> {
+          typedef std::shared_ptr<T> type;
+     };
 
      template <typename C, typename rtn, typename... Args> struct Function_{
           typedef rtn(C::*Type)(typename sane_ref_type<Args>::type...);
@@ -88,15 +94,16 @@ namespace rikitiki {
 
      template <typename P, typename... T>
      struct Route_ : public Route {
-          typedef typename Function_<P, void, ConnContext&, T...>::type F;
+          typedef typename Function_<P, void, ConnContextRef, T...>::type F;
           //typedef void (P::*F)(ConnContext& ctx, typename sane_ref_type<T>::type...);
           P* parent;
           F f;
           virtual bool visible() const { return false; }
-          Route_(P* p, const std::string& _route, F _f, ConnContext::Method method);
-
-          int Scan(ConnContext& ctx, T&... t);
-          virtual bool Handle(ConnContext& ctx);
+          Route_(P* p, const std::wstring& _route, F _f, ConnContext::Method method);
+          
+          int Scan(ConnContextRef uri, T&... t);
+          virtual bool Handle(ConnContextRef ctx);
+          virtual bool CanHandle(RequestContext& ctx);
      };
 
      /** Specialization of Route_ for functions with no parameters.
@@ -104,12 +111,13 @@ namespace rikitiki {
          */
      template <typename P>
      struct Route_<P> : public Route{
-          typedef void (P::*F)(ConnContext& ctx);
+          typedef void (P::*F)(ConnContextRef ctx);
           P* parent;
           F f;
           virtual bool visible() const { return method == ConnContext::GET || method == ConnContext::ANY; }
-          Route_(P* p, const std::string& _route, F _f, ConnContext::Method method);
-          virtual bool Handle(ConnContext& ctx);
+          Route_(P* p, const std::wstring& _route, F _f, ConnContext::Method method);
+          virtual bool Handle(ConnContextRef ctx);
+          virtual bool CanHandle(RequestContext& ctx);
      };
 
      /**
@@ -121,13 +129,13 @@ namespace rikitiki {
      struct CreateRoute {
           template<typename P>
           static Route* With(P* p,
-               const std::string& _route,
+               const std::wstring& _route,
                typename Route_<P, T...>::F _f,
                ConnContext::Method method = ConnContext::ANY);
 
           template<typename P>
           static Route* With(P* p,
-               const std::string& _route,
+               const std::wstring& _route,
                ConnContext::Method method = ConnContext::ANY);
 
      };

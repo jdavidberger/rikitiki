@@ -4,17 +4,17 @@
 #include <rikitiki/content_types.h>
 #include <map>
 
-#define CASE_RET(X,Y) case X ## _ ## Y: return #X "/" #Y;
-#define CASE_RET_PLUS(X,Y,Z) case X ## _ ## Y ## _ ## Z: return #X "/" #Y "+" #Z;
-#define CASE_RET_DASH(X,Y,Z) case X ## _ ## Y ## _ ## Z: return #X "/" #Y "-" #Z;
-#define CASE_RET_DASH_DASH(X,Y,Z,A) case X ## _ ## Y ## _ ## Z ## _ ## A: return #X "/" #Y "-" #Z "-" #A;
+#define CASE_RET(X,Y) case X ## _ ## Y: return L#X L"/" L#Y;
+#define CASE_RET_PLUS(X,Y,Z) case X ## _ ## Y ## _ ## Z: return L#X L"/" L#Y L"+" L#Z;
+#define CASE_RET_DASH(X,Y,Z) case X ## _ ## Y ## _ ## Z: return L#X L"/" L#Y L"-" L#Z;
+#define CASE_RET_DASH_DASH(X,Y,Z,A) case X ## _ ## Y ## _ ## Z ## _ ## A: return L#X L"/" L#Y L"-" L#Z L"-" L#A;
 
 
 namespace rikitiki {
   namespace ContentType {
-    t FromString(const std::string& type){
-      static std::map<std::string, t> types;
-      if(type == "")
+    t FromString(const std::wstring& type){
+      static std::map<std::wstring, t> types;
+      if(type == L"")
 	return DEFAULT;
       if(types.size() == 0){
 	for(auto _type = (int)ALL; _type < (int)MAX; _type++)
@@ -23,7 +23,7 @@ namespace rikitiki {
       return types[type];
     }
 
-    std::string ToString(t type){
+    std::wstring ToString(t type){
       switch(type){
 	CASE_RET_PLUS(application, atom, xml);
 	CASE_RET     (application, ecmascript);
@@ -98,11 +98,11 @@ namespace rikitiki {
 	CASE_RET_DASH_DASH(video, x, ms, wmv);
 	CASE_RET_DASH(video, x, flv);
       case ALL:
-	return "*/*";
+	return L"*/*";
       case DEFAULT:
 	CASE_RET     (text, html);
       default:
-	return "unknown";
+	return L"unknown";
 	  }
     }
   }

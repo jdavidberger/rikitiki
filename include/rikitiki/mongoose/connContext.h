@@ -14,26 +14,28 @@ namespace rikitiki {
           protected:
                virtual void FillQueryString();
                virtual void FillHeaders();               
+               virtual void FillRequestMethod();
+
+               std::wstring uri;
           public:
                MongooseRequestContext(const mg_request_info*);
 
                const mg_request_info* request;
-               virtual const char* URI();
+               virtual const wchar_t* URI();
           };
           /**
              Connection context for Mongoose servers.
              */
-          class MongooseConnContext : public MongooseRequestContext, public  ConnContext {
+          class MongooseConnContext : public MongooseRequestContext, public  ConnContextWithWrite {
                mg_connection* conn;
 
           protected:
                virtual void FillPayload();
-               virtual void FillRequestMethod();
                
           public:
                MongooseConnContext(Server* s, mg_connection* c);
                virtual void writeResponse();
-               virtual int rawWrite(const char* buffer, size_t length);
+               virtual int rawWrite(const wchar_t* buffer, size_t length);
                virtual void Close();
           };
 

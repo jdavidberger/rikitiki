@@ -88,8 +88,8 @@ namespace rikitiki {
       MAX
     };
 
-    t FromString(const std::string& type);
-    std::string ToString(t type);
+    t FromString(const std::wstring& type);
+    std::wstring ToString(t type);
   }
 }
 
