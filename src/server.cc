@@ -13,6 +13,11 @@
 
 namespace rikitiki {
 
+     void CleanConnContext(ConnContext* ctx) {
+          ctx->Close();
+          delete ctx;
+     }
+
      std::string Handler::desc() const {
           return "";
      }

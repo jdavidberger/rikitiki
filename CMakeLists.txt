@@ -47,7 +47,7 @@ ${CONFIG}")
 ENDMACRO(enable_feature)
 
 #ENABLE_FEATURE(apache)
-#ENABLE_FEATURE(mongoose)
+ENABLE_FEATURE(mongoose)
 #ENABLE_FEATURE(ctemplate)
 #ENABLE_FEATURE(jsoncpp)
 #ENABLE_FEATURE(rest)

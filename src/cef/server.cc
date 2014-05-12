@@ -29,7 +29,7 @@ namespace rikitiki {
        class ResourceHandler : public CefResourceHandler {
             Handler& handler; 
             
-            std::shared_ptr<ConnContext> ctx; 
+            ConnContextRef_<cef::ConnContext> ctx;
             Server* server; 
        public:
             ResourceHandler(Server* _server, Handler& _handler) : handler(_handler), server(_server) {
@@ -38,7 +38,7 @@ namespace rikitiki {
 
             virtual bool ProcessRequest(CefRefPtr<CefRequest> request,
                  CefRefPtr<CefCallback> callback) OVERRIDE{                 
-                 ctx = std::shared_ptr<ConnContext>(new ConnContext(server, request));
+                 ctx = ConnContextRef_<cef::ConnContext>(new ConnContext(server, request));
                  ctx->headersReady = callback;
                  handler.Handle(ctx);
                  return true;

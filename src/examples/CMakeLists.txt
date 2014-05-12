@@ -22,7 +22,8 @@ IF(${USE_REST})
 ENDIF()
 
 IF(${USE_MONGOOSE})
-	add_executable(examples examples.cc)
-	target_link_libraries(examples sqlite3 rikitiki)
+	add_executable(multi_examples examples.cc)
+	target_link_libraries(multi_examples sqlite3 rikitiki)
+	set_property(TARGET multi_examples PROPERTY FOLDER "examples")
 ENDIF()
 

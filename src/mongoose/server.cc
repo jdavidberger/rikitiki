@@ -30,10 +30,11 @@ namespace rikitiki {
 
           static int _handler(struct mg_connection *conn) {
                MongooseServer* server = getServer(conn);
-               std::shared_ptr<mongoose::MongooseConnContext> ctx(new mongoose::MongooseConnContext(server, conn));
+               ConnContextRef_<ConnContext> ctx(new mongoose::MongooseConnContext(server, conn));
                return server->Handle(ctx) ? 1 : 0;
           }
 
+#ifdef USE_WEBSOCKET
           static int _wsHandler(const struct mg_connection *conn) {
                MongooseServer* server = getServer(conn);
                auto ctx = new mongoose::MongooseWebsocketContext(server, conn);
@@ -56,6 +57,21 @@ namespace rikitiki {
                }
           }
 
+          static int _wsReceive(struct mg_connection *conn, int bits, char* data, size_t length) {
+               MongooseServer* server = getServer(conn);
+               auto process = server->processes[conn];
+               assert(process);
+               websocket::Frame frame(bits, (unsigned char*)data, length);
+
+               if (frame.info.OpCode() & websocket::OpCode::Close) {
+                    process->OnClose();
+                    delete process;
+                    server->processes.erase(conn);
+                    return true;
+               }
+               return process->OnReceiveFrame(frame) ? 1 : 0;
+          }
+#endif
 
 		  void MongooseServer::Close(websocket::WebsocketContext* _ctx) {
 			  auto ctx = dynamic_cast<MongooseWebsocketContext*>(_ctx);
@@ -67,20 +83,6 @@ namespace rikitiki {
 			  processes.erase(conn);
 		  }
 
-          static int _wsReceive(struct mg_connection *conn, int bits, char* data, size_t length) {
-               MongooseServer* server = getServer(conn);
-               auto process = server->processes[conn];
-               assert(process);
-               websocket::Frame frame(bits, (unsigned char*)data, length);
-			   
-			   if (frame.info.OpCode() & websocket::OpCode::Close) {				   
-				   process->OnClose();
-				   delete process;
-				   server->processes.erase(conn);
-				   return true;
-			   }
-               return process->OnReceiveFrame(frame) ? 1 : 0;
-          }
 
           static volatile bool quit;
           static std::condition_variable quit_cond;
@@ -117,10 +119,11 @@ namespace rikitiki {
                mg_callbacks callbacks;
                memset(&callbacks, 0, sizeof(callbacks));
                callbacks.begin_request = &_handler;
+#ifdef USE_WEBSOCKET
                callbacks.websocket_connect = &_wsHandler;
                callbacks.websocket_ready = &_wsReady;
                callbacks.websocket_data = &_wsReceive;
-			   
+#endif   
                std::stringstream _port;
                _port << port;
                std::string __port = _port.str();

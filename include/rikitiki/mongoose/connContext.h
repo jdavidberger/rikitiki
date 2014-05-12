@@ -35,7 +35,7 @@ namespace rikitiki {
           public:
                MongooseConnContext(Server* s, mg_connection* c);
                virtual void writeResponse();
-               virtual int rawWrite(const wchar_t* buffer, size_t length);
+               virtual int rawWrite(const void* buffer, size_t length);
                virtual void Close();
           };
 

@@ -26,6 +26,16 @@
 namespace rikitiki {
      class ConnContext;
      class RequestContext;     
+
+     void CleanConnContext(ConnContext* ctx);
+     
+     template <class T>
+     class ConnContextRef_ : public std::shared_ptr<T> {
+     public: 
+          ConnContextRef_() {}
+          ConnContextRef_(T*ptr) : std::shared_ptr<T>(ptr, CleanConnContext){}
+     };
+
      typedef std::shared_ptr<ConnContext> ConnContextRef;
 
      template <class T>

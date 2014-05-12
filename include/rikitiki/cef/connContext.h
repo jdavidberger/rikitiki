@@ -12,9 +12,9 @@ namespace rikitiki {
 
        class RequestContext : public virtual rikitiki::RequestContext {
           protected:
-               virtual void FillQueryString(){}
-               virtual void FillHeaders(){}
-               virtual void FillRequestMethod(){}
+               virtual void FillQueryString() OVERRIDE;
+               virtual void FillHeaders() OVERRIDE;
+               virtual void FillRequestMethod() OVERRIDE;
 	       CefRefPtr<CefRequest> request;
                std::wstring url; 
           public:

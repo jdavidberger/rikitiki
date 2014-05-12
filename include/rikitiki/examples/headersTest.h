@@ -18,33 +18,33 @@ namespace rikitiki {
     struct HeadersTestModule {
       void Register(Server& server){
 	typedef HeadersTestModule T;
-	server.AddHandler( CreateRoute<>::With(this, "/headers", &T::headers) );
-	server.AddHandler( CreateRoute<std::string, std::string>::With(this, "/cookies/{name}/{value}", &T::set_cookie) );
-	server.AddHandler( CreateRoute<>::With(this, "/cookies", &T::cookies) );
+	server.AddHandler( CreateRoute<>::With(this, L"/headers", &T::headers) );
+        server.AddHandler(CreateRoute<std::string, std::string>::With(this, L"/cookies/{name}/{value}", &T::set_cookie));
+        server.AddHandler(CreateRoute<>::With(this, L"/cookies", &T::cookies));
       }
 
-      void headers(ConnContext& ctx){
+      void headers(ConnContextRef ctx){
 	ctx << ContentType::text_plain
 	    << "Headers: \n";
-	for(auto header : ctx.Headers())
+	for(auto header : ctx->Headers())
 	  ctx << header.first << ": " << header.second << "\n";
       }
 
-      void cookies(ConnContext& ctx){
-	if(ctx.QueryString()["name"].size())
-	  ctx << Cookie(ctx.QueryString()["name"], ctx.QueryString()["value"]);
+      void cookies(ConnContextRef ctx){
+	if(ctx->QueryString()["name"].size())
+	  ctx << Cookie(ctx->QueryString()["name"], ctx->QueryString()["value"]);
     
 	ctx << ContentType::text_plain
 	    << "Cookies: \n";
 
-	for(auto cook : ctx.Cookies())
+	for(auto cook : ctx->Cookies())
 	  ctx << cook.first << ": " << cook.second << "\n";
 	ctx << "Headers: \n";
-	for(auto header : ctx.Headers())
+	for(auto header : ctx->Headers())
 	  ctx << header.first << ": " << header.second << "\n";
       }
 
-      void set_cookie(ConnContext& ctx, const std::string& name, const std::string& value){
+      void set_cookie(ConnContextRef ctx, const std::string& name, const std::string& value){
 		  ctx << Cookie(name, value);
 			  cookies(ctx);
       }

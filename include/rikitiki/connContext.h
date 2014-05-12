@@ -131,7 +131,7 @@ namespace rikitiki {
           This function exists so the raw conncontext drivers can just kick down unsanitized header data and this function
           does the right thing. Namely that means lower-casing it.
           */
-          HeaderCollection::value_type& AddRequestHeader(const wchar_t*, const wchar_t*);
+          HeaderCollection::value_type& AddRequestHeader(const std::wstring&, const std::wstring&);          
      public:
           Method RequestMethod();
           HeaderCollection& Headers();
@@ -198,13 +198,13 @@ namespace rikitiki {
      class ConnContextWithWrite : public ConnContext {
      protected:
           void writeResponse();
-          virtual int rawWrite(const wchar_t* buffer, size_t length) = 0;
+          virtual int rawWrite(const void* buffer, size_t length) = 0;
 
      public:
-          void Close();
+          virtual void Close();
 
           ConnContextWithWrite(Server* s);
-          void operator delete(void* ptr);
+          virtual ~ConnContextWithWrite();
      };
 
      void mapContents(std::wstring& raw_content, PostCollection& post);

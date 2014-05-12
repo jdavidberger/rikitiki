@@ -139,6 +139,7 @@ namespace rikitiki {
           }
           return _contentType;
      }
+
      std::wstring& ConnContext::Payload() {
           if (!mappedPayload){
                this->FillPayload();
@@ -147,12 +148,10 @@ namespace rikitiki {
           return _payload;
      }
 
-     HeaderCollection::value_type& RequestContext::AddRequestHeader(const wchar_t* _name, const wchar_t* value){
+     HeaderCollection::value_type& RequestContext::AddRequestHeader(const std::wstring& _name, const std::wstring& value){
           std::wstring name(_name);
           std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-          auto& newHeader = *_headers.insert(std::make_pair(name,
-               std::wstring(value)));
-
+          auto& newHeader = *_headers.insert(std::make_pair(name, value));
           return newHeader;
      }
 
@@ -278,12 +277,11 @@ namespace rikitiki {
      void ConnContextWithWrite::Close() {
           this->writeResponse();
      }
-     ConnContextWithWrite::ConnContextWithWrite(Server* s) : ConnContext(s) {}
-     void ConnContextWithWrite::operator delete(void* ptr) {
-          ConnContextWithWrite* ctx = static_cast<ConnContextWithWrite*>(ptr);
-          ctx->Close();
-          ::operator delete(ptr);
+     ConnContextWithWrite::~ConnContextWithWrite() {
+
      }
+     ConnContextWithWrite::ConnContextWithWrite(Server* s) : ConnContext(s) {}
+
 
 #define MATCH_METHOD_ENUM(eval)	do{if(wcscmp(method, L#eval) == 0) return ConnContext::eval;}while(false)
 
@@ -300,19 +298,19 @@ namespace rikitiki {
           LOG(Server, Error) << "strToMethod failed on method '" << method << "'" << std::endl;
           return ConnContext::ANY;
      }
-     void mapQueryString(const wchar_t* _qs, std::map<std::string, std::string>& qs){
+     void mapQueryString(const wchar_t* _qs, std::map<std::wstring, std::wstring>& qs){
           if (_qs == NULL) return;
-          std::string name;
-          std::string* val = 0;
+          std::wstring name;
+          std::wstring* val = 0;
           bool nameMode = true;
-          while (*_qs != '\0'){
+          while (*_qs != L'\0'){
                if (nameMode){
-                    if (*_qs == '='){
+                    if (*_qs == L'='){
                          nameMode = false;
                          val = &qs[name];
                     }
-                    else if (*_qs == '&'){
-                         qs[name] = "";
+                    else if (*_qs == L'&'){
+                         qs[name] = L"";
                          name.clear();
                     }
                     else {
@@ -320,7 +318,7 @@ namespace rikitiki {
                     }
                }
                else {
-                    if (*_qs == '&'){
+                    if (*_qs == L'&'){
                          nameMode = true;
                          name.clear();
                     }

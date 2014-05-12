@@ -25,3 +25,8 @@ ENDIF()
 IF(${USE_CEF})
 	       ADD_SUBDIRECTORY(cef)	
 ENDIF()
+
+IF(${USE_MONGOOSE})
+	add_library(mongoose mongoose/mongoose.h mongoose/mongoose.c)	
+        set_property(TARGET mongoose PROPERTY FOLDER "third")		
+ENDIF()
