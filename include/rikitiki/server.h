@@ -35,6 +35,13 @@ namespace rikitiki {
           return me;
      }
 
+     template <class T>
+     std::shared_ptr<ConnContext>& operator<<(std::shared_ptr<ConnContext>& me, const T& t)
+     {
+          *me << t;
+          return me;
+     }
+
      /**
         Base handler class. These are checked in order whenever there is a request.
         */
@@ -46,6 +53,17 @@ namespace rikitiki {
           virtual std::wstring name() const = 0;
           virtual std::string desc() const;
           virtual ~Handler();
+     };
+
+     struct StaticContentHandler : public Handler {
+          std::wstring prefix; 
+          std::wstring path; 
+          StaticContentHandler(const std::wstring& prefix, const std::wstring& path);
+          virtual bool Handle(ConnContextRef ctx) ;
+          virtual bool CanHandle(RequestContext& ctx) ;
+          virtual bool visible() const ;
+          virtual std::wstring name() const ;
+          virtual ~StaticContentHandler();
      };
 
      class Server;

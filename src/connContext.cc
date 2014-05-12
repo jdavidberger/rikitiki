@@ -139,7 +139,7 @@ namespace rikitiki {
           }
           return _contentType;
      }
-     std::string& ConnContext::Payload() {
+     std::wstring& ConnContext::Payload() {
           if (!mappedPayload){
                this->FillPayload();
                assert(mappedPayload);
@@ -242,7 +242,7 @@ namespace rikitiki {
           return *this;
      }
 
-     ConnContext& operator>>(ConnContext& ctx, std::string& t){
+     ConnContext& operator>>(ConnContext& ctx, std::wstring& t){
           t = ctx.Payload();
           return ctx;
      }

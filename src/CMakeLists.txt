@@ -31,7 +31,7 @@ macro( add_module module )
 endmacro(add_module )
 
 macro(add_source_directory srcdir) 
-	file (GLOB _INCLUDES "../include/rikitiki/${srcdir}/*.h")
+	file (GLOB _INCLUDES ../include/rikitiki/${srcdir}/*.tcc ../include/rikitiki/${srcdir}/*.h )
 	file (GLOB _SOURCES "${srcdir}/*.cc")
 
 	SOURCE_GROUP("Source\\${srcdir}" FILES ${_SOURCES})
@@ -45,14 +45,14 @@ link_directories(
 		${THIRD_PARTY_DIR}/curl-7.28.1/bin/lib
 		${THIRD_PARTY_DIR}/ctemplate-2.2 
 		${THIRD_PARTY_DIR}/chromium-embedded/cef3
-		C:\\Users\\justin\\Documents\\Projects\\StitchApp2\\cef_binary_3.1650.1562_windows64\\Release
+		C:\\Users\\justin\\Documents\\Projects\\StitchApp2\\cef_binary_3.1650.1562_windows64
 )
 
-file (GLOB RT_INC "../include/rikitiki/*.h")
+file (GLOB RT_INC ../include/rikitiki/*.h ../include/rikitiki/*.tcc)
 file (GLOB RT_SRC "*.cc")
-
-SOURCE_GROUP("Source" FILES ${RT_SRC})
-SOURCE_GROUP("Include" FILES ${RT_INC})
+set(RT_SRC ${RT_INC} ${RT_SRC})
+SOURCE_GROUP("Source\\Base"  FILES ${RT_SRC})
+SOURCE_GROUP("Include\\Base" FILES ${RT_INC})
 
 IF(${WIN32})
 	set (RT_LIBS mxcomp)
@@ -94,8 +94,9 @@ ENDIF()
 
 IF(${USE_CEF})
 	add_source_directory(cef)
-	set(RT_LIBS ${RT_LIBS} cef)
-	include_directories(${THIRD_PARTY_DIR}/chromium-embedded/cef3)
+	set(RT_LIBS ${RT_LIBS} libcef C:\\Users\\justin\\Documents\\Projects\\StitchApp2\\cef_binary_3.1650.1562_windows64\\out\\$(Configuration)\\lib\\libcef_dll_wrapper.lib)
+	include_directories(C:\\Users\\justin\\Documents\\Projects\\StitchApp2\\cef_binary_3.1650.1562_windows64\\)
+#	include_directories(${THIRD_PARTY_DIR}/chromium-embedded/cef3/cef_1650)
 ENDIF() 
 
 

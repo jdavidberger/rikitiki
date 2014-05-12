@@ -57,7 +57,7 @@ static inline int modern_sscanf(std::wstringstream& b, const wchar_t*& format){
     b.get(); if(!b.good()) return 0;
     format++;
   }       
-  return *format == '\0' && EOF == b.peek() ? 1 : 0;
+  return *format == '\0' && (wchar_t)EOF == b.peek() ? 1 : 0;
 } 
 
 template <typename H, typename... T>
@@ -84,7 +84,10 @@ int Route_<P, T...>::Scan(ConnContextRef ctx, T&... t){
      return modern_sscanf(ctx->URI(), route.c_str(), t...);
 }
 
-
+template <typename P, typename... T>
+int Route_<P, T...>::ScanTest(RequestContext& ctx, T&... t){
+     return modern_sscanf(ctx.URI(), route.c_str(), t...);
+}
 
 template <typename P, typename... T>
 bool Route_<P, T...>::CanHandle(RequestContext& ctx){
@@ -92,11 +95,10 @@ bool Route_<P, T...>::CanHandle(RequestContext& ctx){
           return false;
      }
 
+     auto args = std::tuple_cat(std::tuple<RequestContext&>(ctx), std::tuple<T...>());
 
-     auto args = std::tuple_cat(std::make_tuple(ctx.URI(), route.c_str()), std::tuple<T...>());
-     
-     int matched = 0;// mxcomp::tuples::applyTuple1(modern_sscanf, args);
-     if (matched == sizeof...(T)){
+     int matched = mxcomp::tuples::applyTuple(this, &Route_<P, T...>::ScanTest, args);
+     if (matched == sizeof...(T) + 1){
           return true;
      }
      return false;
@@ -107,15 +109,15 @@ bool Route_<P,T...>::Handle(ConnContextRef ctx){
   if( method != ConnContext::ANY && method != ctx->RequestMethod() ) {
     return false;
   }
-  auto args = std::tuple_cat(std::tuple<ConnContextRef>(ctx),
-       std::tuple<T...>());
+  
+  auto args = std::tuple_cat(std::tuple<ConnContextRef>(ctx), std::tuple<T...>());
 
   // If anyone can tell me why this applyTuple expands out completely,
   // but the one below [applyTuple(parent, f, args)] doesn't, I'd be 
   // super interested to hear it. 
   int matched = mxcomp::tuples::applyTuple(this, &Route_<P, T...>::Scan, args);
   if(matched == sizeof...(T) + 1){
-//    LOG(Web, Verbose) << "Using route " << route << ", " << method << std::endl;
+    LOG(Web, Verbose) << "Using route " << route << ", " << method << std::endl;
     mxcomp::tuples::applyTuple(parent, f, args);
     return true;
   }
@@ -130,6 +132,15 @@ Route_<P>::Route_(P* p,
 		  ConnContext::Method method) : parent(p), f(_f), Route(_route, method) {          
 }
 
+template <typename P>
+bool Route_<P>::CanHandle(RequestContext& ctx){
+     bool shouldAttempt =
+          wcscmp(route.c_str(), ctx.URI()) == 0 &&
+          (method == ConnContext::ANY ||
+          method == ctx.RequestMethod());
+     return shouldAttempt;
+}
+
 template <typename P> 
 bool Route_<P>::Handle(ConnContextRef ctx){
   bool shouldAttempt = 
@@ -138,7 +149,7 @@ bool Route_<P>::Handle(ConnContextRef ctx){
      method == ctx->RequestMethod());
   
   if(shouldAttempt){
-    //LOG(Web, Verbose) << "Using route " << route << ", " << method << std::endl;
+    LOG(Web, Verbose) << "Using route " << route << ", " << method << std::endl;
     (parent->*f)(ctx);
     return true;
   }

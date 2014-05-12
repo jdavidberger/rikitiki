@@ -14,10 +14,11 @@ namespace rikitiki {
 		server.AddHandler( CreateRoute<>::With(this, L"/hw/hello") );
                 server.AddHandler(CreateRoute<int>::With(this, L"/hw/{number}"));
                 server.AddHandler(CreateRoute<std::wstring>::With(this, L"/hw/{word}"));
+                server.AddHandler(new StaticContentHandler(L"/static/", L"."));
       }
 
-      void operator()(ConnContextRef ctx){
-		ctx << "Hello world!";
+      void operator()(ConnContextRef ctx){           
+	ctx << "Hello world!!";
       }
 
       void operator()(ConnContextRef ctx, int number){

@@ -29,13 +29,13 @@ namespace rikitiki {
           const HttpStatus* status;
      };
 
-     typedef std::pair<std::wstring, std::wstring> stringpair;
+     typedef std::pair<std::wstring, std::wstring> wstringpair;
 
      /**
         Headers are just string pairs
         We can't just typedef it since we want to pass it around with stream operators
         */
-     struct Header : public stringpair {
+     struct Header : public wstringpair {
           Header(const std::wstring& name, const std::wstring& value);
      };
 
@@ -43,7 +43,7 @@ namespace rikitiki {
         Things parsed out of the response, ala forms
         We can't just typedef it since we want to pass it around with stream operators
         */
-     struct PostContent : public stringpair {
+     struct PostContent : public wstringpair {
           PostContent(const std::wstring& name, const std::wstring& value);
      };
 
@@ -51,7 +51,7 @@ namespace rikitiki {
         Cookies are key value pairs too.
         TODO: Add expiration, domain, etc
         */
-     struct Cookie : public stringpair {
+     struct Cookie : public wstringpair {
           Cookie(const std::wstring& name, const std::wstring& value,
                const std::wstring& Domain = L"", const std::wstring& Path = L"/",
                const std::wstring& Expires = L"", bool secure = false, bool httpOnly = false);
@@ -107,15 +107,22 @@ namespace rikitiki {
         Request context object. Contains everything about the request; but has no methods to deal with responding to the request.
         */
      class RequestContext {     
+     public:
+          enum Method {
+               ANY = 0, GET = 1, POST = 2, HEAD = 3, PUT = 4, DELETE = 5, TRACE = 6, OPTIONS = 7, CONNECT = 8, PATCH = 9, OTHER
+          };
      protected:
           bool mappedQs, mappedHeaders, mappedCookies;
           QueryStringCollection _qs;
           HeaderCollection _headers;
           CookieCollection _cookies;
 
+          Method _method;
+
           virtual void FillQueryString() = 0;
           virtual void FillHeaders() = 0;
           virtual void FillCookies();
+          virtual void FillRequestMethod() = 0;
 
           RequestContext();
           virtual ~RequestContext();
@@ -126,6 +133,7 @@ namespace rikitiki {
           */
           HeaderCollection::value_type& AddRequestHeader(const wchar_t*, const wchar_t*);
      public:
+          Method RequestMethod();
           HeaderCollection& Headers();
           CookieCollection& Cookies();
           QueryStringCollection& QueryString();
@@ -140,25 +148,19 @@ namespace rikitiki {
         does the right thing.
         */
      class ConnContext : public virtual RequestContext {
-     public:
-          enum Method {
-               ANY = 0, GET = 1, POST = 2, HEAD = 3, PUT = 4, DELETE = 5, TRACE = 6, OPTIONS = 7, CONNECT = 8, PATCH = 9, OTHER
-          };
      protected:
           bool mappedPost, mappedPayload, mappedContentType;
+          bool headersDone;
           PostCollection _post;
           std::multimap<double, ContentType::t>* _accepts;
           ContentType::t _contentType;
-          std::string _payload;
-
-          Method _method;
+          std::wstring _payload;
 
           virtual void FillAccepts();
           virtual void FillContentType();
           virtual void FillPayload() = 0;
           virtual void FillPost();
-          virtual void FillRequestMethod() = 0;
-
+          
           friend class Server;
           virtual void writeResponse() = 0;
 
@@ -172,14 +174,17 @@ namespace rikitiki {
           PostCollection& Post();
           ContentType::t ContentType();
 
-          std::string& Payload();
-          virtual int rawWrite(const wchar_t* buffer, size_t length) = 0;
-
+          std::wstring& Payload();
+          
           virtual void Close() = 0;
           bool handled;
-          Method RequestMethod();
+          virtual void OnHeadersFinished() {}
+          virtual void OnData() {}
 
-          ConnContext& operator <<(std::function<void(std::ostream&)>);
+          ConnContext& operator <<(const Cookie& obj);
+          ConnContext& operator <<(const Header& obj);
+
+          ConnContext& operator <<(std::function<void(std::wostream&)>);
           template <class T> ConnContext& operator <<(const T& obj);
 
           template <class T>
@@ -189,6 +194,19 @@ namespace rikitiki {
 
           Response response;
      };
+     
+     class ConnContextWithWrite : public ConnContext {
+     protected:
+          void writeResponse();
+          virtual int rawWrite(const wchar_t* buffer, size_t length) = 0;
+
+     public:
+          void Close();
+
+          ConnContextWithWrite(Server* s);
+          void operator delete(void* ptr);
+     };
+
      void mapContents(std::wstring& raw_content, PostCollection& post);
      void mapQueryString(const wchar_t* _qs, QueryStringCollection& qs);
      ConnContext::Method strToMethod(const wchar_t* method);

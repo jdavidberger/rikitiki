@@ -21,6 +21,9 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 # MSVC warnings are dumb
 if (MSVC)
    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -wd4514 -wd4820 -wd4350 -wd4710")
+   set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
+   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_RELEASE} /MTd")
+			    				
 endif (MSVC)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11 -O3")
@@ -83,6 +86,11 @@ add_custom_target(release
 	COMMAND hg archive -t tgz ${CMAKE_BINARY_DIR}/rikitiki-${rikitiki_version}-src.tar.gz
 	COMMENT "Generating release tar" VERBATIM
 )
+
+set_property(TARGET helgrind PROPERTY FOLDER "testing")
+set_property(TARGET memcheck PROPERTY FOLDER "testing")	
+set_property(TARGET release PROPERTY FOLDER "testing")
+set_property(TARGET test PROPERTY FOLDER "testing")
 
 export(PACKAGE rikitiki)
 

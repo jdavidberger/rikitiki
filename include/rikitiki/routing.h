@@ -101,7 +101,8 @@ namespace rikitiki {
           virtual bool visible() const { return false; }
           Route_(P* p, const std::wstring& _route, F _f, ConnContext::Method method);
           
-          int Scan(ConnContextRef uri, T&... t);
+          int ScanTest(RequestContext&, T&... t);
+          int Scan(ConnContextRef, T&... t);
           virtual bool Handle(ConnContextRef ctx);
           virtual bool CanHandle(RequestContext& ctx);
      };
