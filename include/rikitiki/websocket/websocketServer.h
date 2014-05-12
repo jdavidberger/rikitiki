@@ -12,6 +12,7 @@ namespace rikitiki {
                std::vector<WebsocketHandler*> wsHandlers;
                void AddWsHandler(WebsocketHandler* handler);
                WebsocketProcess* HandleWs(WebsocketContext* ctx);
+	       virtual void Close(WebsocketContext*) = 0;
           };
      }
 }

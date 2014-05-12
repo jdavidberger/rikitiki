@@ -16,7 +16,7 @@ namespace rikitiki {
 
                virtual bool OnConnect();
                virtual bool OnReady();
-
+			   virtual void OnClose();
                virtual bool OnReceiveFrame(const Frame& frame);
                virtual bool OnReceiveMessage(const Message& message);
                virtual bool OnReceiveText(const char*, size_t);

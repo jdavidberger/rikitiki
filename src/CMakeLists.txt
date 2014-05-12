@@ -25,6 +25,9 @@ macro( add_module module )
 		CONFIGURE_FILE(main_cef.i ${CMAKE_CURRENT_BINARY_DIR}/main_cef_${module}.cc )	
 		add_executable(${module}_cef main_cef_${module}.cc)
 		target_link_libraries(${module}_cef rikitiki)
+		SET_TARGET_PROPERTIES(${module}_cef PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS") 
+		SET_TARGET_PROPERTIES(${module}_cef PROPERTIES COMPILE_FLAGS "/D _UNICODE /D UNICODE")
+		add_custom_command(TARGET ${module}_cef PRE_BUILD COMMAND ${CMAKE_COMMAND} -E copy_directory ${THIRD_PARTY_DIR}/cef/cef3/Release $<TARGET_FILE_DIR:${module}_cef>)
 		set_property(TARGET ${module}_cef PROPERTY FOLDER "examples")
 	ENDIF()
 
@@ -44,8 +47,7 @@ include_directories(${THIRD_PARTY_DIR}/curl-7.28.1/include)
 link_directories(
 		${THIRD_PARTY_DIR}/curl-7.28.1/bin/lib
 		${THIRD_PARTY_DIR}/ctemplate-2.2 
-		${THIRD_PARTY_DIR}/chromium-embedded/cef3
-		C:\\Users\\justin\\Documents\\Projects\\StitchApp2\\cef_binary_3.1650.1562_windows64
+		${THIRD_PARTY_DIR}/cef/cef3/Release
 )
 
 file (GLOB RT_INC ../include/rikitiki/*.h ../include/rikitiki/*.tcc)
@@ -94,16 +96,13 @@ ENDIF()
 
 IF(${USE_CEF})
 	add_source_directory(cef)
-	set(RT_LIBS ${RT_LIBS} libcef C:\\Users\\justin\\Documents\\Projects\\StitchApp2\\cef_binary_3.1650.1562_windows64\\out\\$(Configuration)\\lib\\libcef_dll_wrapper.lib)
-	include_directories(C:\\Users\\justin\\Documents\\Projects\\StitchApp2\\cef_binary_3.1650.1562_windows64\\)
-#	include_directories(${THIRD_PARTY_DIR}/chromium-embedded/cef3/cef_1650)
+	set(RT_LIBS ${RT_LIBS} libcef libcef_dll_wrapper )
+	include_directories(${THIRD_PARTY_DIR}/cef/cef3/)
 ENDIF() 
 
-
 CONFIGURE_FILE(config.h.in ${CMAKE_SOURCE_DIR}/include/rikitiki/config.h)	
-ADD_DEFINITIONS(-DUSE_WEBSOCKET)
-add_library(rikitiki ${RT_SRC})
 
+add_library(rikitiki ${RT_SRC})
 target_link_libraries(rikitiki ${RT_LIBS})		     
 install(TARGETS rikitiki DESTINATION lib)
 

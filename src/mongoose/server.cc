@@ -56,12 +56,30 @@ namespace rikitiki {
                }
           }
 
+
+		  void MongooseServer::Close(websocket::WebsocketContext* _ctx) {
+			  auto ctx = dynamic_cast<MongooseWebsocketContext*>(_ctx);
+			  mg_connection * conn = ctx->conn; 
+			  auto process = processes[conn];
+			  assert(process);
+			  process->OnClose();
+			  delete process;
+			  processes.erase(conn);
+		  }
+
           static int _wsReceive(struct mg_connection *conn, int bits, char* data, size_t length) {
                MongooseServer* server = getServer(conn);
                auto process = server->processes[conn];
                assert(process);
                websocket::Frame frame(bits, (unsigned char*)data, length);
-               return server->processes[conn]->OnReceiveFrame(frame) ? 1 : 0;
+			   
+			   if (frame.info.OpCode() & websocket::OpCode::Close) {				   
+				   process->OnClose();
+				   delete process;
+				   server->processes.erase(conn);
+				   return true;
+			   }
+               return process->OnReceiveFrame(frame) ? 1 : 0;
           }
 
           static volatile bool quit;
@@ -102,7 +120,7 @@ namespace rikitiki {
                callbacks.websocket_connect = &_wsHandler;
                callbacks.websocket_ready = &_wsReady;
                callbacks.websocket_data = &_wsReceive;
-
+			   
                std::stringstream _port;
                _port << port;
                std::string __port = _port.str();

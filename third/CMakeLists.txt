@@ -6,6 +6,7 @@ IF(NOT ${MXCOMP_LIB})
 	      EXEC_PROGRAM(hg ARGS clone http://hg.code.sf.net/p/mxcomp/code ${CMAKE_CURRENT_SOURCE_DIR}/mxcomp)
        ENDIF()
        ADD_SUBDIRECTORY(mxcomp)
+       set_property(TARGET mxcomp  PROPERTY FOLDER "third")	
 ENDIF()
 
 IF(${USE_STENCET})
@@ -17,5 +18,10 @@ IF(${USE_STENCET})
 
                ENDIF()
 	       ADD_SUBDIRECTORY(stencet)
+	       set_property(TARGET stencet   PROPERTY FOLDER "third")	
 	ENDIF()
+ENDIF()
+
+IF(${USE_CEF})
+	       ADD_SUBDIRECTORY(cef)	
 ENDIF()

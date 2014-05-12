@@ -20,7 +20,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 
 # MSVC warnings are dumb
 if (MSVC)
-   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -wd4514 -wd4820 -wd4350 -wd4710")
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -wd4514 -wd4820 -wd4350 -wd4710 -wd4711")
    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_RELEASE} /MTd")
 			    				
@@ -54,7 +54,7 @@ ENDMACRO(enable_feature)
 #ENABLE_FEATURE(configuration)
 ENABLE_FEATURE(log)
 #ENABLE_FEATURE(stencet) 
-ENABLE_FEATURE(websockets)
+#ENABLE_FEATURE(websocket)
 ENABLE_FEATURE(cef)
 
 set(MAKE_EXAMPLES 1)

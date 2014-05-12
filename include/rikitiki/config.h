@@ -10,6 +10,5 @@
 #pragma once
 
 #define RT_USE_CEF 1
-#define RT_USE_WEBSOCKETS 1
 #define RT_USE_LOG 1
 

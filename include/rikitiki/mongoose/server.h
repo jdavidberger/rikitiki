@@ -7,6 +7,7 @@
 namespace rikitiki {
      namespace websocket {
           struct WebsocketProcess;
+		  struct WebsocketContext;
      }
      
      namespace mongoose {
@@ -19,10 +20,12 @@ namespace rikitiki {
                int port;
           public:
                std::map<void*, websocket::WebsocketProcess*> processes;
-               std::string DocumentRoot;
+			   virtual void Close(websocket::WebsocketContext*);
+			   
+			   std::string DocumentRoot;
                int Port() { return port; }
                MongooseServer(int _port);
-
+			   
                /** Blocking call to start the mongoose server. Sets up an interrupt handler to stop the server with siginterrupt.
                    If you have more than one server running, SIGINT shuts them all down.
                    */

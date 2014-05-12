@@ -15,8 +15,7 @@ using namespace rikitiki::cef;
 class DemoHandler : public CefClient,
      public CefDisplayHandler,
      public CefLifeSpanHandler,
-     public CefLoadHandler,
-  public CefRequestHandler {
+     public CefLoadHandler {
  public:
   CefRefPtr<CefInternalServer> rHandler;
  DemoHandler() : rHandler(new CefInternalServer()) {
@@ -41,16 +40,8 @@ class DemoHandler : public CefClient,
   }
 
   virtual CefRefPtr<CefRequestHandler> GetRequestHandler() OVERRIDE{
-    return this;
+    return rHandler;
   }
-
-  virtual CefRefPtr<CefResourceHandler> GetResourceHandler(
-							   CefRefPtr<CefBrowser> browser,
-							   CefRefPtr<CefFrame> frame,
-							   CefRefPtr<CefRequest> request) OVERRIDE {
-    return 0;
-    //return this;
-  } 
 
   // CefDisplayHandler methods:
   virtual void OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString& title) {}
@@ -108,8 +99,13 @@ public:
        // Specify CEF browser settings here.
        CefBrowserSettings browser_settings;
 
+       CefRefPtr<CefCommandLine> command_line =
+	 CefCommandLine::GetGlobalCommandLine();
+
+       auto url = command_line->GetSwitchValue("url");
+
        // Create the first browser window.
-       CefBrowserHost::CreateBrowser(window_info, handler.get(), "about:blank",
+       CefBrowserHost::CreateBrowser(window_info, handler.get(), url,
 				     browser_settings, NULL);     
      }
 
@@ -119,7 +115,7 @@ public:
 };
 
 
-int APIENTRY _twWinMain(HINSTANCE hInstance,
+int APIENTRY wWinMain(HINSTANCE hInstance,
      HINSTANCE hPrevInstance,
      LPTSTR    lpCmdLine,
      int       nCmdShow) {
