@@ -26,7 +26,7 @@ if (MSVC)
 			    				
 endif (MSVC)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11 -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 
 # Not super useful, except for self documentation purposes
 MACRO( disable_feature feature_)

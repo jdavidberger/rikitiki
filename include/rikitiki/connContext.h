@@ -57,12 +57,16 @@ namespace rikitiki {
                const std::wstring& Expires = L"", bool secure = false, bool httpOnly = false);
      };
 
+     std::wostream & operator<< (std::wostream & ostr,
+          std::string const & str);
+
      /**
         Response class that handlers write to. Contains headers, response stream, status, etc.
         */
      struct Response {
-          ContentType::t ResponseType;
-
+          ContentType::t GetResponseType() const { return ContentType::FromString(ResponseType); }
+          void SetResponseType(ContentType::t v) { ResponseType = ContentType::ToString(v);  }
+          std::wstring ResponseType;
           std::vector<Header> headers;
           const HttpStatus* status;
           std::wstringstream response;

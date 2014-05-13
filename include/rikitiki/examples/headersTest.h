@@ -19,7 +19,7 @@ namespace rikitiki {
       void Register(Server& server){
 	typedef HeadersTestModule T;
 	server.AddHandler( CreateRoute<>::With(this, L"/headers", &T::headers) );
-        server.AddHandler(CreateRoute<std::string, std::string>::With(this, L"/cookies/{name}/{value}", &T::set_cookie));
+        server.AddHandler(CreateRoute<std::wstring, std::wstring>::With(this, L"/cookies/{name}/{value}", &T::set_cookie));
         server.AddHandler(CreateRoute<>::With(this, L"/cookies", &T::cookies));
       }
 
@@ -31,8 +31,8 @@ namespace rikitiki {
       }
 
       void cookies(ConnContextRef ctx){
-	if(ctx->QueryString()["name"].size())
-	  ctx << Cookie(ctx->QueryString()["name"], ctx->QueryString()["value"]);
+	if(ctx->QueryString()[L"name"].size())
+	  ctx << Cookie(ctx->QueryString()[L"name"], ctx->QueryString()[L"value"]);
     
 	ctx << ContentType::text_plain
 	    << "Cookies: \n";
@@ -44,7 +44,7 @@ namespace rikitiki {
 	  ctx << header.first << ": " << header.second << "\n";
       }
 
-      void set_cookie(ConnContextRef ctx, const std::string& name, const std::string& value){
+      void set_cookie(ConnContextRef ctx, const std::wstring& name, const std::wstring& value){
 		  ctx << Cookie(name, value);
 			  cookies(ctx);
       }

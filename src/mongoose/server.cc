@@ -99,7 +99,7 @@ namespace rikitiki {
 
           void MongooseServer::Run(){
                quit = 0;
-               signal(SIGINT, signal_handler);
+               //signal(SIGINT, signal_handler);
                Start();
 
                // Possible race condition -- If we catch sigint and then a new server

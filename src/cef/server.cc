@@ -56,7 +56,7 @@ namespace rikitiki {
                  response->GetHeaderMap(map);
                  for (auto it = ctx->response.headers.begin(); it != ctx->response.headers.end(); it++)
                       map.insert(*it);
-                 response->SetMimeType(ToString(ctx->response.ResponseType));
+                 response->SetMimeType(ctx->response.ResponseType);
             }
 
             virtual bool ReadResponse(void* data_out,

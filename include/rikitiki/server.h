@@ -68,6 +68,7 @@ namespace rikitiki {
      struct StaticContentHandler : public Handler {
           std::wstring prefix; 
           std::wstring path; 
+          std::map<std::wstring, std::wstring> mime_types; 
           StaticContentHandler(const std::wstring& prefix, const std::wstring& path);
           virtual bool Handle(ConnContextRef ctx) ;
           virtual bool CanHandle(RequestContext& ctx) ;

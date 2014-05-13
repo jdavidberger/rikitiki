@@ -19,10 +19,10 @@ namespace rikitiki {
      */
     struct MultiTypeModule {
       void Register(Server& server){
-	server.AddHandler( CreateRoute<std::string, float, double, int, char, std::string>::
-			   With(this, "/mt/{string}/{floa}/{doubl}/{in}/{ch}/{string}/matchthistoo", &MultiTypeModule::zigzag) );
+	server.AddHandler( CreateRoute<std::wstring, float, double, int, wchar_t, std::wstring>::
+			   With(this, L"/mt/{string}/{floa}/{doubl}/{in}/{ch}/{string}/matchthistoo", &MultiTypeModule::zigzag) );
       }
-      void zigzag(ConnContext& ctx, const std::string& a, float b, double c, int d, char e, const std::string& f){
+      void zigzag(ConnContextRef ctx, const std::wstring& a, float b, double c, int d, wchar_t e, const std::wstring& f){
 	ctx << a << " "
 	    << b << " "
 	    << c << " "

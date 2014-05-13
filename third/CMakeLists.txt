@@ -28,5 +28,6 @@ ENDIF()
 
 IF(${USE_MONGOOSE})
 	add_library(mongoose mongoose/mongoose.h mongoose/mongoose.c)	
+	SET_TARGET_PROPERTIES(mongoose PROPERTIES COMPILE_FLAGS "/MTd")	
         set_property(TARGET mongoose PROPERTY FOLDER "third")		
 ENDIF()

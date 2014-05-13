@@ -69,8 +69,10 @@ IF(${USE_MONGOOSE})
 	add_subdirectory(mongoose)	
 ENDIF()
 
+IF(${USE_WEBSOCKET})
 	add_source_directory(websocket)	
 	add_subdirectory(websocket)		
+ENDIF()
 
 IF(${USE_STENCET})
 	add_subdirectory(stencet)
