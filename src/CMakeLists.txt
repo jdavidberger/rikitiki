@@ -107,7 +107,10 @@ CONFIGURE_FILE(config.h.in ${CMAKE_SOURCE_DIR}/include/rikitiki/config.h)
 
 add_library(rikitiki ${RT_SRC})
 target_link_libraries(rikitiki ${RT_LIBS})		     
-install(TARGETS rikitiki DESTINATION lib)
+
+IF("${INSTALL}" STREQUAL "" OR "${INSTALL}" STREQUAL "1")
+		install(TARGETS rikitiki DESTINATION lib)
+ENDIF()
 
 if(${MAKE_EXAMPLES})
 	add_subdirectory(examples)
