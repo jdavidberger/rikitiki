@@ -27,16 +27,19 @@ endif (MSVC)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
 
-# Not super useful, except for self documentation purposes
-MACRO( disable_feature feature_)
-       STRING(TOUPPER ${feature_} feature)
-       SET(USE_${feature} 0) 
-ENDMACRO(disable_feature)
 
 SET(FEATURES "")
+
+MACRO( disable_feature feature_)
+       STRING(TOUPPER ${feature_} feature)
+       SET("USE_${feature}" 0)
+       MESSAGE("Not using ${feature_}")
+ENDMACRO(disable_feature)
+
 MACRO( enable_feature feature_)
        STRING(TOUPPER ${feature_} feature)       
        SET("USE_${feature}" 1)
+       MESSAGE("Using ${feature}")
        SET(DOXYFILE_DEFINED "${DOXYFILE_DEFINED} RT_USE_${feature}")
        LIST(APPEND FEATURES "${feature}")
        SET(CONFIG 
@@ -45,18 +48,33 @@ ${CONFIG}")
 
 ENDMACRO(enable_feature)
 
-#ENABLE_FEATURE(apache)
-ENABLE_FEATURE(mongoose)
-#ENABLE_FEATURE(ctemplate)
-#ENABLE_FEATURE(jsoncpp)
-#ENABLE_FEATURE(rest)
-#ENABLE_FEATURE(configuration)
-ENABLE_FEATURE(log)
-#ENABLE_FEATURE(stencet) 
-#ENABLE_FEATURE(websocket)
-ENABLE_FEATURE(cef)
+MACRO( check_feature feature_ defaultvalue)
+       STRING(TOUPPER ${feature_} feature)  
+       IF("${USE_${feature}}" STREQUAL "")
+       	SET("USE_${feature}" ${defaultvalue})
+       endif()
+       IF("${USE_${feature}}" EQUAL "1")
+       	ENABLE_FEATURE(${feature})
+	ELSE()
+	DISABLE_FEATURE(${feature})
+	endif()
 
-set(MAKE_EXAMPLES 1)
+ENDMACRO(check_feature)
+
+CHECK_FEATURE(apache 0)
+CHECK_FEATURE(mongoose 1)
+CHECK_FEATURE(ctemplate 0)
+CHECK_FEATURE(jsoncpp 0)
+CHECK_FEATURE(rest 0)
+CHECK_FEATURE(configuration 0)
+CHECK_FEATURE(log 1)
+CHECK_FEATURE(stencet 0) 
+CHECK_FEATURE(websocket 0)
+CHECK_FEATURE(cef 0)
+
+IF("${MAKE_EXAMPLES}" STREQUAL "")
+       set(MAKE_EXAMPLES 0)
+ENDIF()
 
 include_directories(include)
 

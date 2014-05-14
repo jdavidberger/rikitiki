@@ -9,7 +9,6 @@
 
 #pragma once
 
-#define RT_USE_CEF 1
 #define RT_USE_LOG 1
 #define RT_USE_MONGOOSE 1
 
