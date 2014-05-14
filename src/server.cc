@@ -135,15 +135,16 @@ namespace rikitiki {
 
           ctx->response.ResponseType = mime;
 
-          std::wifstream file(relpath, std::ios::binary);
+          std::ifstream file(relpath, std::ios::binary);
           ctx->OnHeadersFinished();
-          while (file.good()) {
-               auto n = (wchar_t)file.get();
+
+          if (file.good()) {
                ctx->handled = true;
-               if (n != (wchar_t)-1)
-                    ctx->response.response << n;
+               ctx->response.response << file.rdbuf();               
+               return true;
           }
-          return true;
+          
+          return false;
      }
 
      bool StaticContentHandler::CanHandle(RequestContext& ctx) {
@@ -163,12 +164,6 @@ namespace rikitiki {
      }
      StaticContentHandler::~StaticContentHandler(){}
 
-     std::wostream & operator<< (std::wostream & ostr,
-          std::string const & str) {
-          std::copy(str.begin(), str.end(),
-               std::ostream_iterator<char, wchar_t>(ostr));
-          return (ostr);
-     }
 
 #ifdef RT_USE_CTEMPLATE
   void Server::AddPreprocessor( rikitiki::ctemplates::TemplatePreprocessor* tp){

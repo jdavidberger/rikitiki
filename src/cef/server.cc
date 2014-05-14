@@ -64,14 +64,8 @@ namespace rikitiki {
                  int& bytes_read,
                  CefRefPtr<CefCallback> callback) OVERRIDE{
                  
-                 ctx->response.response.get((wchar_t*)data_out, bytes_to_read);
-                 bytes_read = ctx->response.response.gcount() * sizeof(wchar_t);
-                 std::wstring buffer((wchar_t*)data_out, (wchar_t*)((int)data_out + bytes_read));
-                 
-                 std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-                 auto buffer8 = conv.to_bytes(buffer);
-                 memcpy(data_out, &buffer8[0], buffer8.size());
-                 bytes_read = buffer8.size();
+                 ctx->response.response.get((char*)data_out, bytes_to_read, '\0');
+                 bytes_read = ctx->response.response.gcount();
 
                  ctx->dataReady = bytes_read == 0 ? callback : 0;
                  if (bytes_read)

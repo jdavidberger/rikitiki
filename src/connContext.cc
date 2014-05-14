@@ -11,6 +11,15 @@
 #include <cstring>
 
 namespace rikitiki {
+     auto operator <<(std::ostream& response, const wchar_t* obj) -> decltype(instance_of<std::ostream&>::value)
+     {
+          std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+          response << conv.to_bytes(obj);
+          return response;
+     }
+     std::ostream& operator <<(std::ostream& response, const std::wstring& obj) {
+          return response << obj.c_str();
+     }
      Header::Header(const std::wstring& name, const std::wstring& value) : wstringpair(name, value){}
 
      PostContent::PostContent(const std::wstring& name, const std::wstring& value) : wstringpair(name, value){}
@@ -234,13 +243,13 @@ namespace rikitiki {
           headers.push_back(header);
           return *this;
      }
-
+     /*
      ConnContext& ConnContext::operator<<(std::function<void(std::wostream&)> f){
           handled = true;
           f(response.response);
           return *this;
      }
-
+     */
      ConnContext& operator>>(ConnContext& ctx, std::wstring& t){
           t = ctx.Payload();
           return ctx;

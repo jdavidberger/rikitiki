@@ -8,14 +8,23 @@
 #include "http_statuses.h"
 #include <mxcomp/reflection.h>
 #include "content_handler.h"
-
+#include <locale>
+#include <codecvt>
 #ifdef _MSC_VER
 #undef DELETE
 #define decltype(a,b) decltype(b) // VC++ does not get sane error messages yet I guess
 #endif
+
+#ifndef OVERRIDE
+#define OVERRIDE override
+#endif
 namespace rikitiki {
      class Server;
      class ConnContext;
+
+
+     std::ostream& operator <<(std::ostream& response, const wchar_t* obj);
+     std::ostream& operator <<(std::ostream& response, const std::wstring& obj);
 
      /** Thrown from within handlers to immediately stop handler execution.
      Note that throwing an exception will treat the request as handled, by design.
@@ -57,9 +66,6 @@ namespace rikitiki {
                const std::wstring& Expires = L"", bool secure = false, bool httpOnly = false);
      };
 
-     std::wostream & operator<< (std::wostream & ostr,
-          std::string const & str);
-
      /**
         Response class that handlers write to. Contains headers, response stream, status, etc.
         */
@@ -69,12 +75,12 @@ namespace rikitiki {
           std::wstring ResponseType;
           std::vector<Header> headers;
           const HttpStatus* status;
-          std::wstringstream response;
+          std::stringstream response;
           void reset();
           Response();
-          template <class T>
 
-          auto operator <<(const T& obj) -> decltype(instance_of<std::wstringstream>::value << obj, instance_of<Response&>::value)
+          template <class T>
+          auto operator <<(const T& obj) -> decltype(instance_of<std::stringstream>::value << obj, instance_of<Response&>::value)
           {
                response << obj; return *this;
           }
@@ -166,7 +172,6 @@ namespace rikitiki {
           virtual void FillPost();
           
           friend class Server;
-          virtual void writeResponse() = 0;
 
 
           ConnContext(Server*);
@@ -201,7 +206,7 @@ namespace rikitiki {
      
      class ConnContextWithWrite : public ConnContext {
      protected:
-          void writeResponse();
+          virtual void writeResponse();
           virtual int rawWrite(const void* buffer, size_t length) = 0;
 
      public:

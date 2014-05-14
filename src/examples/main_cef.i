@@ -48,7 +48,7 @@ class DemoHandler : public CefClient,
 
   // CefLifeSpanHandler methods:
   virtual void OnAfterCreated(CefRefPtr<CefBrowser> browser) {};
-  virtual bool DoClose(CefRefPtr<CefBrowser> browser) {return true;};
+  virtual bool DoClose(CefRefPtr<CefBrowser> browser) {return false;};
   virtual void OnBeforeClose(CefRefPtr<CefBrowser> browser) {};
 
   // CefLoadHandler methods:

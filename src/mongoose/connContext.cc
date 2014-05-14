@@ -41,22 +41,20 @@ namespace rikitiki {
           void MongooseConnContext::writeResponse(){
                if (conn == 0)
                     return;
-               std::wstringstream ss;
-               std::wstring resp = response.response.str();
+               std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+
+               std::stringstream ss;
+               std::string resp = response.response.str();
                ss << "HTTP/1.1 " << response.status->status << " " << response.status->name << "\r\n";
                ss << "Content-Length: " << resp.size() << "\r\n";
-               ss << "Content-Type: " << response.ResponseType << "\r\n";
+               ss << "Content-Type: " << conv.to_bytes(response.ResponseType) << "\r\n";
                for (auto it : response.headers){
-                    ss << it.first << ": " << it.second << "\r\n";
+                    ss << conv.to_bytes(it.first) << ": " << conv.to_bytes(it.second) << "\r\n";
                }
                ss << "\r\n";
                ss << resp;
-               std::wstring wbuffer = ss.str();
-               std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-
-               auto buffer = conv.to_bytes(wbuffer);
-
-
+               std::string buffer = ss.str();
+               
                rawWrite(buffer.c_str(), buffer.length());
           }
           int MongooseConnContext::rawWrite(const void* buffer, size_t length){
