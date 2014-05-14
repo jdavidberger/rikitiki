@@ -63,8 +63,7 @@ namespace rikitiki {
                  int bytes_to_read,
                  int& bytes_read,
                  CefRefPtr<CefCallback> callback) OVERRIDE{
-                 
-                 ctx->response.response.get((char*)data_out, bytes_to_read, '\0');
+                 ctx->response.response.read((char*)data_out, bytes_to_read);                 
                  bytes_read = ctx->response.response.gcount();
 
                  ctx->dataReady = bytes_read == 0 ? callback : 0;
@@ -82,9 +81,13 @@ namespace rikitiki {
             IMPLEMENT_REFCOUNTING(ResourceHandler);
        };
 
+       CefInternalServer::CefInternalServer(const std::wstring& _host) : hostname(_host) {}
+
     CefRefPtr<CefResourceHandler> CefInternalServer::GetResourceHandler(CefRefPtr<CefBrowser> browser,
 									CefRefPtr<CefFrame> frame,
 									CefRefPtr<CefRequest> request) {
+         if (wcsncmp(request->GetURL().c_str(), hostname.c_str(), hostname.size()) != 0)
+              return 0; 
          cef::RequestContext _request(request);
          auto handler = this->GetHandler(_request);
          if (handler) {

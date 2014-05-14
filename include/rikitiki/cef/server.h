@@ -9,8 +9,10 @@ namespace rikitiki {
           /**
 	     Little bit of an odd one. This 'server' is actual intercepting requests from an embedded chromium window. 
              */
-       class CefInternalServer : public rikitiki::Server, public CefRequestHandler {
+       class CefInternalServer : public rikitiki::Server, public CefRequestHandler {            
+            std::wstring hostname; // We have to pretend to be a host
           public:               
+               CefInternalServer(const std::wstring& _host = L"http://app/");
 	       virtual CefRefPtr<CefResourceHandler> GetResourceHandler(CefRefPtr<CefBrowser> browser,
 									CefRefPtr<CefFrame> frame,
 									CefRefPtr<CefRequest> request) OVERRIDE; 
