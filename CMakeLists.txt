@@ -109,6 +109,7 @@ set_property(TARGET memcheck PROPERTY FOLDER "testing")
 set_property(TARGET release PROPERTY FOLDER "testing")
 set_property(TARGET test PROPERTY FOLDER "testing")
 
-export(PACKAGE rikitiki)
-
-install(DIRECTORY include/rikitiki DESTINATION include)
+IF("${INSTALL}" STREQUAL "" OR "${INSTALL}" STREQUAL "1")
+		export(PACKAGE rikitiki)
+		install(DIRECTORY include/rikitiki DESTINATION include)
+ENDIF()
