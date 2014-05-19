@@ -11,7 +11,7 @@ FILE(WRITE ${CMAKE_BINARY_DIR}/VERSION "v${rikitiki_VERSION_MAJOR}.${rikitiki_VE
 FILE(READ ${CMAKE_BINARY_DIR}/VERSION rikitiki_version)
 message("Building rikitiki ${rikitiki_version}")
 
-set(THIRD_PARTY_DIR ${CMAKE_SOURCE_DIR}/third)
+set(THIRD_PARTY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -26,7 +26,6 @@ if (MSVC)
 endif (MSVC)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS} -std=c++11")
-
 
 SET(FEATURES "")
 
@@ -81,13 +80,14 @@ include_directories(include)
 # Might need some of these...
 include_directories(third/mxcomp/include)
 include_directories(third/stencet/include)
+
+set(rikitiki_INCLUDE_DIRS "${rikitiki_INCLUDE_DIRS};${CMAKE_CURRENT_SOURCE_DIR}/include;${CMAKE_CURRENT_SOURCE_DIR}/third/mxcomp/include;${CMAKE_CURRENT_SOURCE_DIR}/third/stencet/include")
+message('${rikitiki_INCLUDE_DIRS}')
 add_subdirectory(third)
-
-
 add_subdirectory(src)
 add_subdirectory(test)
 add_subdirectory(Doxygen)
-
+message('${rikitiki_INCLUDE_DIRS}')
 
 add_custom_target(memcheck
 	COMMAND GLIBCXX_FORCE_NEW=1 valgrind --tool=memcheck --leak-check=full --log-file=log ./examples
@@ -109,7 +109,7 @@ set_property(TARGET memcheck PROPERTY FOLDER "testing")
 set_property(TARGET release PROPERTY FOLDER "testing")
 set_property(TARGET test PROPERTY FOLDER "testing")
 
-IF("${INSTALL}" STREQUAL "" OR "${INSTALL}" STREQUAL "1")
-		export(PACKAGE rikitiki)
-		install(DIRECTORY include/rikitiki DESTINATION include)
-ENDIF()
+export(PACKAGE rikitiki)
+install(DIRECTORY include/rikitiki DESTINATION include)
+
+set(rikitiki_INCLUDE_DIRS "${rikitiki_INCLUDE_DIRS}" PARENT_SCOPE)
