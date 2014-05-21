@@ -131,9 +131,9 @@ namespace rikitiki {
 
           virtual void FillQueryString() = 0;
           virtual void FillHeaders() = 0;
-          virtual void FillCookies();
           virtual void FillRequestMethod() = 0;
-
+          virtual void FillCookies();
+          
           RequestContext();
           virtual ~RequestContext();
 
@@ -166,9 +166,9 @@ namespace rikitiki {
           ContentType::t _contentType;
           std::wstring _payload;
 
-          virtual void FillAccepts();
-          virtual void FillContentType();
           virtual void FillPayload() = 0;
+          virtual void FillAccepts();
+          virtual void FillContentType();          
           virtual void FillPost();
           
           friend class Server;

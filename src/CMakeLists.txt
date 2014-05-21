@@ -42,6 +42,18 @@ macro(add_source_directory srcdir)
 	set(RT_SRC ${RT_SRC} ${_INCLUDES} ${_SOURCES})
 endmacro(add_source_directory)
 
+macro(add_server_directory srcdir) 
+	file (GLOB _INCLUDES ../include/rikitiki/${srcdir}/*.tcc ../include/rikitiki/${srcdir}/*.h )
+	file (GLOB _SOURCES "${srcdir}/*.c*")
+        
+	SOURCE_GROUP("Source" FILES ${_SOURCES})
+	SOURCE_GROUP("Include" FILES ${_INCLUDES})
+	add_library(rt_${srcdir} ${_INCLUDES} ${_SOURCES})
+        target_link_libraries(rt_${srcdir} rikitiki)
+        set_property(TARGET rt_${srcdir} PROPERTY FOLDER "servers")
+endmacro(add_server_directory)
+
+
 include_directories(${THIRD_PARTY_DIR}/curl-7.28.1/include)
 
 link_directories(
@@ -62,14 +74,6 @@ ELSE()
 	set (RT_LIBS curl pthread mxcomp)
 ENDIF()
 
-IF(${USE_MONGOOSE})
-	add_source_directory(mongoose)
-	include_directories(${THIRD_PARTY_DIR}/mongoose)
-        set(rikitiki_INCLUDE_DIRS "${rikitiki_INCLUDE_DIRS};${THIRD_PARTY_DIR}/mongoose")         
-	set(RT_LIBS ${RT_LIBS} mongoose )
-	add_subdirectory(mongoose)	
-ENDIF()
-
 IF(${USE_WEBSOCKET})
 	add_source_directory(websocket)	
 	add_subdirectory(websocket)		
@@ -84,11 +88,6 @@ IF(${USE_CTEMPLATE})
 	add_subdirectory(ctemplate)
 ENDIF()
 
-IF(${USE_APACHE})
-	include_directories(/usr/include/apr-1/)	
-	add_source_directory(apache)
-ENDIF()
-
 IF(${USE_JSONCPP})
 	add_subdirectory(jsoncpp)
 ENDIF()
@@ -98,17 +97,36 @@ IF(${USE_CONFIGURATION})
 	add_subdirectory(configuration)
 ENDIF()
 
-IF(${USE_CEF})
-	add_source_directory(cef)
-	set(RT_LIBS ${RT_LIBS} libcef libcef_dll_wrapper )
-        set(rikitiki_INCLUDE_DIRS "${rikitiki_INCLUDE_DIRS};${THIRD_PARTY_DIR}/cef/cef3/")         
-	include_directories(${THIRD_PARTY_DIR}/cef/cef3/)
-ENDIF() 
-
 CONFIGURE_FILE(config.h.in ${CMAKE_SOURCE_DIR}/include/rikitiki/config.h)	
 
 add_library(rikitiki ${RT_SRC})
 target_link_libraries(rikitiki ${RT_LIBS})		     
+
+IF(${USE_MONGOOSE})
+	add_server_directory(mongoose)
+
+	include_directories(${THIRD_PARTY_DIR}/mongoose)
+        set(rikitiki_INCLUDE_DIRS "${rikitiki_INCLUDE_DIRS};${THIRD_PARTY_DIR}/mongoose")         
+	set(RT_LIBS ${RT_LIBS} mongoose )
+	#add_subdirectory(mongoose)	
+ENDIF()
+
+IF(${USE_APACHE})
+	include_directories(/usr/include/apr-1/)	
+	add_server_directory(apache)
+ENDIF()
+
+IF(${USE_IIS7})	
+	add_server_directory(iis7)
+ENDIF()
+
+IF(${USE_CEF})
+	add_server_directory(cef)
+        target_link_libraries(rt_cef libcef libcef_dll_wrapper )		     
+        set(rikitiki_INCLUDE_DIRS "${rikitiki_INCLUDE_DIRS};${THIRD_PARTY_DIR}/cef/cef3/")         
+	include_directories(${THIRD_PARTY_DIR}/cef/cef3/)
+ENDIF() 
+
 
 install(TARGETS rikitiki DESTINATION lib)
 
