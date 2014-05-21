@@ -74,7 +74,7 @@ namespace rikitiki {
                     return RQ_NOTIFICATION_PENDING;
                }
           };
-          Server* CreateIIS7Server(DWORD dwServerVersion, IHttpModuleRegistrationInfo * pModuleInfo, IHttpServer * pHttpServer) {
+          Server* CreateServer(DWORD dwServerVersion, IHttpModuleRegistrationInfo * pModuleInfo, IHttpServer * pHttpServer) {
                auto rtn = new IIS7Server(dwServerVersion,  pModuleInfo, pHttpServer);
                pModuleInfo->SetRequestNotifications(rtn, RQ_ACQUIRE_REQUEST_STATE, 0);
                return rtn;

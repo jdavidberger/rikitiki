@@ -6,6 +6,6 @@
 
 namespace rikitiki {
      namespace iis7 {
-          Server* CreateIIS7Server(DWORD _dwServerVersion, IHttpModuleRegistrationInfo * _pModuleInfo, IHttpServer * _pHttpServer);
+          Server* CreateServer(DWORD _dwServerVersion, IHttpModuleRegistrationInfo * _pModuleInfo, IHttpServer * _pHttpServer);
      }
 }

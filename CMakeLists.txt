@@ -84,12 +84,10 @@ include_directories(third/mxcomp/include)
 include_directories(third/stencet/include)
 
 set(rikitiki_INCLUDE_DIRS "${rikitiki_INCLUDE_DIRS};${CMAKE_CURRENT_SOURCE_DIR}/include;${CMAKE_CURRENT_SOURCE_DIR}/third/mxcomp/include;${CMAKE_CURRENT_SOURCE_DIR}/third/stencet/include")
-message('${rikitiki_INCLUDE_DIRS}')
 add_subdirectory(third)
 add_subdirectory(src)
 add_subdirectory(test)
 add_subdirectory(Doxygen)
-message('${rikitiki_INCLUDE_DIRS}')
 
 add_custom_target(memcheck
 	COMMAND GLIBCXX_FORCE_NEW=1 valgrind --tool=memcheck --leak-check=full --log-file=log ./examples
