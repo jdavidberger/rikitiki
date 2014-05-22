@@ -34,7 +34,7 @@ namespace rikitiki {
                // Websocket contexts should be able to close sockets.... but I wonder if this is truely necessary. 
                friend class WebsocketContext;
           public: 
-               void Register(WebModule& t);
+               void RegisterWebsocketModule(WebModule& t);
                void AddWsHandler(WebsocketHandler* handler);
                virtual ~Server();
           };

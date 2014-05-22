@@ -15,7 +15,7 @@ namespace rikitiki {
     /**
      * This example module exposes how to work with headers and cookies. 
      */
-    struct HeadersTestModule {
+    struct HeadersTestModule : public WebModule {
       void Register(Server& server){
 	typedef HeadersTestModule T;
 	server.AddHandler( CreateRoute<>::With(this, L"/headers", &T::headers) );

@@ -17,7 +17,7 @@ namespace rikitiki {
 	  
 	  Verified to behave as expected in v0.1.38. 
      */
-    struct MultiTypeModule {
+    struct MultiTypeModule : public WebModule {
       void Register(Server& server){
 	server.AddHandler( CreateRoute<std::wstring, float, double, int, wchar_t, std::wstring>::
 			   With(this, L"/mt/{string}/{floa}/{doubl}/{in}/{ch}/{string}/matchthistoo", &MultiTypeModule::zigzag) );

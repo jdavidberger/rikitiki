@@ -29,7 +29,7 @@ namespace rikitiki {
                processes.erase(ctx->Handle());
           }
 
-          void Server::Register(WebModule& t){
+          void Server::RegisterWebsocketModule(WebModule& t){
                t.Register(*this);
           }
 

@@ -3,9 +3,7 @@
 #pragma once
 #include <rikitiki\server.h>
 #include <mongoose.h>
-#if RT_USE_WEBSOCKET
-#include <rikitiki\websocket\websocketContext.h>
-#endif
+#include <rikitiki\websocket\websocket>
 
 
 namespace rikitiki {
@@ -14,7 +12,7 @@ namespace rikitiki {
           /**
              Mongoose wrapper. Contains base server functionality, plus also exposes Start/Stop methods.
              */
-          class MongooseServer : public rikitiki::Server {
+          class MongooseServer : public rikitiki::websocket::Server {
                mg_context *ctx;
                std::vector<const char*> options;
                int port;

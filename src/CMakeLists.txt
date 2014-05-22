@@ -9,7 +9,7 @@ macro( add_module module )
        	IF(${USE_MONGOOSE})
 			CONFIGURE_FILE(main.i ${CMAKE_CURRENT_BINARY_DIR}/main_${module}.cc )	
 			add_executable(${module}_mongoose main_${module}.cc)
-			target_link_libraries(${module}_mongoose rt_mongoose)
+			target_link_libraries(${module}_mongoose rt_mongoose mongoose)
 			set_property(TARGET ${module}_mongoose PROPERTY FOLDER "examples/mongoose")
        	ENDIF()
 
