@@ -1,6 +1,6 @@
 /* Copyright (C) 2012-2013 Justin Berger 
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
-
+#pragma once
 #include <rikitiki/rikitiki>
 
 using namespace rikitiki;
@@ -9,7 +9,7 @@ namespace rikitiki {
   namespace examples {
     /** Simple example module of routing
      */
-    struct HelloWorldModule {
+    struct HelloWorldModule : public rikitiki::WebModule {
       void Register(Server& server){
 		server.AddHandler( CreateRoute<>::With(this, L"/hw/hello") );
                 server.AddHandler(CreateRoute<int>::With(this, L"/hw/{number}"));

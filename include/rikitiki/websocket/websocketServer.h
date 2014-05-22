@@ -1,10 +1,10 @@
 #pragma once
 #include <vector>
 #include <map>
+#include <rikitiki\rikitiki>
 
 namespace rikitiki {
      namespace websocket {
-
           /*
                There are three active parts to a web socket connection. First, is a server which accepts and delegates incoming and ongoing connections and data. 
                Second is the websocketprocess, which is the actual handler for the various kind of events websockets expose. Third, we have WebsocketContexts, which,
@@ -12,11 +12,12 @@ namespace rikitiki {
 
                We also have handlers for websockets -- they are responsible for seeing an initial websocket request, and generating the correct process for it. 
           */
+          struct WebModule;
           class WebsocketProcess;
           class WebsocketContext;
           class WebsocketHandler;
           typedef void* ConnectionHandle; 
-          class Server {               
+          class Server : public rikitiki::Server {               
           protected:
                // map of unique ids and open processes. 
                std::map<ConnectionHandle, websocket::WebsocketProcess*> processes;
@@ -33,9 +34,13 @@ namespace rikitiki {
                // Websocket contexts should be able to close sockets.... but I wonder if this is truely necessary. 
                friend class WebsocketContext;
           public: 
-               
+               void Register(WebModule& t);
                void AddWsHandler(WebsocketHandler* handler);
                virtual ~Server();
           };
+          struct WebModule {
+               virtual void Register(rikitiki::websocket::Server&) = 0;
+          };
+
      }
 }

@@ -15,9 +15,6 @@
 #include <rikitiki/log/log>
 #include <rikitiki/http_statuses.h>
 #include <memory>
-#ifdef RT_USE_WEBSOCKET
-#include <rikitiki/websocket/websocketServer.h>
-#endif
 
 #ifdef RT_USE_CTEMPLATE
 #include <rikitiki/ctemplate/templatePreprocessor.h>
@@ -90,9 +87,6 @@ namespace rikitiki {
         information about the current server -- IP, Port, etc.
         */
      class Server
-#ifdef RT_USE_WEBSOCKET
-          : public rikitiki::websocket::Server
-#endif
      {
      protected:
      public:
@@ -104,19 +98,13 @@ namespace rikitiki {
           std::vector<ctemplates::TemplatePreprocessor*> templatePreprocessors;
           void AddPreprocessor( rikitiki::ctemplates::TemplatePreprocessor*);
 #endif
-
-
-          
           bool Handle(ConnContextRef ctx);
           Handler* GetHandler(RequestContext& ctx);
 
           void AddHandler(Handler& handler);
           void AddHandler(Handler* handler);
           
-          template <typename T>
-          void Register(T& t){
-               t.Register(*this);
-          }
+          virtual void Register(WebModule& t);
      };
 
 }

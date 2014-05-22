@@ -29,6 +29,10 @@ namespace rikitiki {
                processes.erase(ctx->Handle());
           }
 
+          void Server::Register(WebModule& t){
+               t.Register(*this);
+          }
+
           Server::~Server() {
 
           }

@@ -69,7 +69,11 @@ namespace rikitiki {
           }
           return false;
      }
-
+     
+     void Server::Register(WebModule& t){
+          t.Register(*this);
+     }
+     
      void Server::AddHandler(Handler* handler) {
           assert(handler);
           handlers.push_back(handler);

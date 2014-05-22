@@ -37,12 +37,12 @@ namespace rikitiki {
 
 				if (send_size < 126) {
 					header_len = 2; 
-					header[1] = send_size;
+					header[1] = (uint8_t)send_size;
 				}
 				else if (send_size < (1 << 16)) {
 					header_len = 4; // control, len control, 2 byte length
 					header[1] = 126; 
-					*((uint16_t*)&header[2]) = htons(send_size);					
+                                        *((uint16_t*)&header[2]) = htons((uint16_t)send_size);
 				}
 				else {
 					header_len = 10; // control, len control, 8 byte length
@@ -69,7 +69,7 @@ namespace rikitiki {
 
 		void Frame::Init(unsigned char opcode, const unsigned char* buffer, size_t len){
 			info.length = len;
-			info.isFinished = opcode & OpCode::Close;
+			info.isFinished = (opcode & OpCode::Close) > 0;
 			info.opcode = opcode & 0xEF;
 			data = buffer;
 		}

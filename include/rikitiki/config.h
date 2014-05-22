@@ -9,6 +9,7 @@
 
 #pragma once
 
+#define RT_USE_IIS7 1
 #define RT_USE_CEF 1
 #define RT_USE_WEBSOCKET 1
 #define RT_USE_LOG 1
