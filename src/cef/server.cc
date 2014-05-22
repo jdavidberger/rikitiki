@@ -81,9 +81,17 @@ namespace rikitiki {
             IMPLEMENT_REFCOUNTING(ResourceHandler);
        };
 
-       CefInternalServer::CefInternalServer(const std::wstring& _host) : hostname(_host) {}
+#ifdef RT_USE_WEBSOCKET
+       websocket::WebsocketProcess* CefInternalServer::HandleWs(websocket::ConnectionHandle) {
+            return 0;
+       }
+#endif
+       CefInternalServer::CefInternalServer(const std::wstring& _host) : hostname(_host) {
+            CefRegisterSchemeHandlerFactory("ws", "", this);
+            CefRegisterSchemeHandlerFactory("wss", "", this);
+       }
 
-    CefRefPtr<CefResourceHandler> CefInternalServer::GetResourceHandler(CefRefPtr<CefBrowser> browser,
+       CefRefPtr<CefResourceHandler> CefInternalServer::GetResourceHandler(CefRefPtr<CefBrowser> browser,
 									CefRefPtr<CefFrame> frame,
 									CefRefPtr<CefRequest> request) {
          if (wcsncmp(request->GetURL().c_str(), hostname.c_str(), hostname.size()) != 0)
@@ -97,5 +105,12 @@ namespace rikitiki {
          return 0;
     }; 
 
+       CefRefPtr<CefResourceHandler> CefInternalServer::Create(
+            CefRefPtr<CefBrowser> browser,
+            CefRefPtr<CefFrame> frame,
+            const CefString& scheme_name,
+            CefRefPtr<CefRequest> request) {
+            return 0;
+       }
    }
 }

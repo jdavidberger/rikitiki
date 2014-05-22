@@ -47,7 +47,7 @@ namespace rikitiki {
           typedef rtn(C::*Type)(typename sane_ref_type<Args>::type...);
      };
 
-#ifdef _MSC_VER && 0
+#ifdef _MSC_VER
 
 #define SRT(A) typename sane_ref_type<A>::type
 
@@ -81,7 +81,7 @@ namespace rikitiki {
      struct Function_<C, rtn, A1, A2, A3, A4, A5, A6, A7> {
           typedef rtn(C::*type)(SRT(A1), SRT(A2), SRT(A3), SRT(A4), SRT(A5), SRT(A6), SRT(A7));
      };
-#undef SRT(A)
+#undef SRT
 #endif 
 
      /**

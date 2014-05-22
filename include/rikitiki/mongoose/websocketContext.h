@@ -23,8 +23,8 @@ namespace rikitiki {
                mg_connection* conn;
                const mg_connection* requestConn;
 
-               MongooseWebsocketContext( Server* s, const mg_connection* conn);
-               MongooseWebsocketContext( Server* s, mg_connection* conn);
+               MongooseWebsocketContext( websocket::Server* s, const mg_connection* conn);
+               MongooseWebsocketContext( websocket::Server* s, mg_connection* conn);
           };
 
      }

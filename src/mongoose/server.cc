@@ -13,7 +13,7 @@
 
 namespace rikitiki {
      namespace mongoose {
-
+          int MongooseServer::Port() { return port; }
           MongooseServer::MongooseServer(int _port) : port(_port)  {
                ctx = 0;
 #ifdef RT_USE_CONFIGURATION
@@ -34,30 +34,30 @@ namespace rikitiki {
                return server->Handle(ctx) ? 1 : 0;
           }
 
-#ifdef USE_WEBSOCKET
-          static int _wsHandler(const struct mg_connection *conn) {
-               MongooseServer* server = getServer(conn);
-               auto ctx = new mongoose::MongooseWebsocketContext(server, conn);
-               websocket::WebsocketProcess* process = server->HandleWs(ctx);
+#ifdef RT_USE_WEBSOCKET
+          using namespace websocket;
+          WebsocketProcess* MongooseServer::HandleWs(ConnectionHandle conn) {
+               auto ctx = new mongoose::MongooseWebsocketContext(this, (const struct mg_connection *)conn);
+               websocket::WebsocketProcess* process = HandleWs(ctx);
                if (process) {
-                    server->processes[(void*)conn] = process;
-                    return 0;
+                    return processes[conn] = process;                    
                }
-               return 1;
+               return 0;
           }
 
-          static void _wsReady(struct mg_connection *conn) {
+          int MongooseServer::_wsHandler(const struct mg_connection *conn) {
                MongooseServer* server = getServer(conn);
-               auto process = server->processes[conn];
-               if (process) {
-                    auto ctx = dynamic_cast<mongoose::MongooseWebsocketContext*>(process->context);
-                    assert(ctx);
-                    ctx->setConnection(conn);
-                    server->processes[conn]->OnReady();
-               }
+               if (server->HandleWs((ConnectionHandle)conn) == 0)
+                    return 1;
+               return 0;
           }
 
-          static int _wsReceive(struct mg_connection *conn, int bits, char* data, size_t length) {
+          void MongooseServer::_wsReady(struct mg_connection *conn) {
+               MongooseServer* server = getServer(conn);
+               server->OnReady((ConnectionHandle)conn);
+          }
+
+          int MongooseServer::_wsReceive(struct mg_connection *conn, int bits, char* data, size_t length) {
                MongooseServer* server = getServer(conn);
                auto process = server->processes[conn];
                assert(process);
@@ -71,17 +71,17 @@ namespace rikitiki {
                }
                return process->OnReceiveFrame(frame) ? 1 : 0;
           }
-#endif
 
-		  void MongooseServer::Close(websocket::WebsocketContext* _ctx) {
-			  auto ctx = dynamic_cast<MongooseWebsocketContext*>(_ctx);
-			  mg_connection * conn = ctx->conn; 
-			  auto process = processes[conn];
-			  assert(process);
-			  process->OnClose();
-			  delete process;
-			  processes.erase(conn);
-		  }
+          void MongooseServer::Close(websocket::WebsocketContext* _ctx) {
+               auto ctx = dynamic_cast<MongooseWebsocketContext*>(_ctx);
+               mg_connection * conn = ctx->conn; 
+               auto process = processes[conn];
+               assert(process);
+               process->OnClose();
+               delete process;
+               processes.erase(conn);
+          }
+#endif
 
 
           static volatile bool quit;

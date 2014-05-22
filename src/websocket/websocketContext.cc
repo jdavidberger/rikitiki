@@ -10,6 +10,9 @@ namespace rikitiki {
 		void WebsocketContext::Write(const std::string& buffer) {
 			Write((unsigned char*)&buffer[0], buffer.size(), OpCode::Text);
 		}
+                ConnectionHandle WebsocketContext::Handle() const {
+                     return (void*)this;
+                }
 		void WebsocketContext::Ping() {
 
 		}

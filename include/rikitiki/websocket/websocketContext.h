@@ -48,24 +48,30 @@ namespace rikitiki {
 		};
 
 		const static size_t MAX_FRAME = 4294967296;
-		struct WebsocketContext : public virtual RequestContext {
+		class WebsocketContext : public virtual RequestContext {
 		private:
 			virtual int raw_write(const unsigned char*, size_t) = 0;
-
 		public:
-			rikitiki::websocket::Server* server;
-			std::vector<std::string> availableProtocols;
+                    
+		    rikitiki::websocket::Server* server;
+		    std::vector<std::string> availableProtocols;
 
-			std::string key;
-			std::string SelectedProtocol;
-			unsigned Version;
+		    std::string key;
+		    std::string SelectedProtocol;
+		    unsigned Version;
 
-			virtual void Ping();
-			virtual void Write(const char*, size_t, OpCode::T opcode = OpCode::Binary);
-			virtual void Write(const unsigned char*, size_t, OpCode::T opcode = OpCode::Binary);
-			virtual void Write(const std::string& buffer);
+                    /*
+                    We don't assume every implementation is going to have a socket context which is always persisted and never is copied/created/etc. 
+                    However; we do need to have a way of uniquely identifying an open communication so we can tie it to a process. So the Id is unique
+                    per connection. Default is the address of the context object. 
+                    */
+                    virtual ConnectionHandle Handle() const;
+		    virtual void Ping();
+		    virtual void Write(const char*, size_t, OpCode::T opcode = OpCode::Binary);
+		    virtual void Write(const unsigned char*, size_t, OpCode::T opcode = OpCode::Binary);
+		    virtual void Write(const std::string& buffer);
 
-			WebsocketContext(websocket::Server*);
+		    WebsocketContext(websocket::Server*);
 		};
 	}
 }

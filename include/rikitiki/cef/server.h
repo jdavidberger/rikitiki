@@ -3,19 +3,29 @@
 #pragma once
 #include <rikitiki\server.h>
 #include <include\cef_request_handler.h>
+#include <include/cef_scheme.h>
 
 namespace rikitiki {
      namespace cef {
           /**
 	     Little bit of an odd one. This 'server' is actual intercepting requests from an embedded chromium window. 
              */
-       class CefInternalServer : public rikitiki::Server, public CefRequestHandler {            
+          class CefInternalServer : public rikitiki::Server, public CefRequestHandler, public CefSchemeHandlerFactory {
             std::wstring hostname; // We have to pretend to be a host
-          public:               
+#ifdef RT_USE_WEBSOCKET            
+            virtual websocket::WebsocketProcess* HandleWs(websocket::ConnectionHandle);
+#endif
+           public:               
                CefInternalServer(const std::wstring& _host = L"http://app/");
 	       virtual CefRefPtr<CefResourceHandler> GetResourceHandler(CefRefPtr<CefBrowser> browser,
 									CefRefPtr<CefFrame> frame,
 									CefRefPtr<CefRequest> request) OVERRIDE; 
+               virtual CefRefPtr<CefResourceHandler> Create(
+                    CefRefPtr<CefBrowser> browser,
+                    CefRefPtr<CefFrame> frame,
+                    const CefString& scheme_name,
+                    CefRefPtr<CefRequest> request);
+
               IMPLEMENT_REFCOUNTING(CefInternalServer);
        };
      }

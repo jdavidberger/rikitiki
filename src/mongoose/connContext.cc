@@ -54,7 +54,7 @@ namespace rikitiki {
                ss << "\r\n";
                ss << resp;
                std::string buffer = ss.str();
-               
+
                rawWrite(buffer.c_str(), buffer.length());
           }
           int MongooseConnContext::rawWrite(const void* buffer, size_t length){
@@ -94,7 +94,6 @@ namespace rikitiki {
           }
 
           void MongooseConnContext::FillPayload() {
-
                _payload.resize(512);
                int nth = 0;
                do{

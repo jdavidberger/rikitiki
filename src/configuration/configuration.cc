@@ -2,20 +2,35 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
 #include <rikitiki/configuration/configuration>
-#include <dlfcn.h>
+
 #include <rikitiki/log/log>
 #include <assert.h>
 #include <vector>
 #include <stdio.h>
 #include <string.h>
 #include <atomic>
+
+#ifdef WIN32
+#include <Windows.h>
+static void getAssemblyFullPath(std::string& fullPath) { 
+     fullPath.resize(1024);
+     GetModuleFileName(nullptr, &fullPath[0], 1024);
+}
+#else
+#include <dlfcn.h>
+static void getAssemblyFullPath(std::string& fullPath) {
+     Dl_info info;
+     memset(&info, 0, sizeof(Dl_info));
+     dladdr((void*)&getAssemblyName, &info);
+     fullPath = info.dli_fname; 
+}
+#endif
+
 using namespace rikitiki;
 static void getAssemblyName(std::string& name){
-    Dl_info info;
-    memset(&info, 0, sizeof(Dl_info));
-    dladdr( (void*)&getAssemblyName, &info);
 
-    std::string exePath(info.dli_fname);
+     std::string exePath;
+     getAssemblyPath(exePath);
     auto start = exePath.find_last_of('/');
     auto end = exePath.find_last_of('.');
 
@@ -27,13 +42,12 @@ static void getAssemblyName(std::string& name){
 }
 
 static void getAssemblyPath(std::string& path){
-  Dl_info info;
-  dladdr( (void*)&getAssemblyName, &info);
-  std::string exePath(info.dli_fname);
+     std::string exePath;
+     getAssemblyPath(exePath);
   
-  auto end = exePath.find_last_of('/');
-  end = end == std::string::npos ? 1 : end;    
-  path = std::string(&exePath[0], &exePath[end]);
+     auto end = exePath.find_last_of('/');
+     end = end == std::string::npos ? 1 : end;    
+     path = std::string(&exePath[0], &exePath[end]);
 }
 
 Configuration::Configuration() : Config() {     

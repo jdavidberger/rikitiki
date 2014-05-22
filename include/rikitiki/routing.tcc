@@ -33,13 +33,13 @@ inline static bool extract(std::wstringstream& b, T& t){
 template <>
 inline bool extract(std::wstringstream& b, std::wstring& t){
   while(b.good()){
-    int v = b.get();
+    auto v = b.get();
     bool accept = 
-      (v >= '0' && v <= ';') ||
-      (v >= '@' && v <= 'Z') ||
-      (v >= '_' && v <= 'z') ||
-      (v == '%') ||
-      (v == '-');
+      (v >= L'0' && v <= L';') ||
+      (v >= L'@' && v <= L'Z') ||
+      (v >= L'_' && v <= L'z') ||
+      (v == L'%') ||
+      (v == L'-');
     if(accept)
       t += v;
     else {

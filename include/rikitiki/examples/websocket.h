@@ -22,9 +22,9 @@ namespace rikitiki {
 
         if (input.is_open()){
              input.seekg(0, input.end);
-             int length = input.tellg();
+             auto length = input.tellg();
              input.seekg(0, input.beg);
-             buffer.resize(length);
+             buffer.resize((std::size_t)length);
              input.read(&buffer[0], length);
              input.close();
         }
@@ -59,8 +59,8 @@ namespace rikitiki {
      */
     struct WebsocketModule {
       void Register(Server& server){
-	server.AddWsHandler(new WebsocketRoute_<Chat>("/chat"));
-	server.AddWsHandler(new WebsocketRoute_<Image>("/image"));
+           server.AddWsHandler(CreateWsRoute<Chat>::With(L"/chat"));
+           server.AddWsHandler(CreateWsRoute<Image>::With(L"/image"));
       }
     };
   }

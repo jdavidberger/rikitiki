@@ -15,7 +15,7 @@
 #include <rikitiki/log/log>
 #include <rikitiki/http_statuses.h>
 #include <memory>
-#ifdef RT_USE_WEBSOCKETS
+#ifdef RT_USE_WEBSOCKET
 #include <rikitiki/websocket/websocketServer.h>
 #endif
 
@@ -90,7 +90,7 @@ namespace rikitiki {
         information about the current server -- IP, Port, etc.
         */
      class Server
-#ifdef RT_USE_WEBSOCKETS
+#ifdef RT_USE_WEBSOCKET
           : public rikitiki::websocket::Server
 #endif
      {

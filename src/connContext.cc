@@ -114,7 +114,7 @@ namespace rikitiki {
                     }
                     b = efe;
                }
-               _accepts->insert(std::make_pair(-q, ContentType::FromString(std::wstring(ct_begin, ct_end - ct_begin))));
+               _accepts->insert(std::make_pair(-q, ContentType::FromString(std::wstring(ct_begin, (std::wstring::size_type)(ct_end - ct_begin)))));
                b = ee;
                while (*b == ',' || *b == ' ') b++;
           }
@@ -159,7 +159,7 @@ namespace rikitiki {
 
      HeaderCollection::value_type& RequestContext::AddRequestHeader(const std::wstring& _name, const std::wstring& value){
           std::wstring name(_name);
-          std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+          std::transform(name.begin(), name.end(), name.begin(), ::towlower);
           auto& newHeader = *_headers.insert(std::make_pair(name, value));
           return newHeader;
      }
@@ -231,7 +231,7 @@ namespace rikitiki {
      }
 
      Response& Response::operator <<(rikitiki::ContentType::t t){
-          ResponseType = t;
+          ResponseType = ContentType::ToString(t);
           return *this;
      }
 
@@ -292,7 +292,7 @@ namespace rikitiki {
      ConnContextWithWrite::ConnContextWithWrite(Server* s) : ConnContext(s) {}
 
 
-#define MATCH_METHOD_ENUM(eval)	do{if(wcscmp(method, L#eval) == 0) return ConnContext::eval;}while(false)
+#define MATCH_METHOD_ENUM(eval)	{if(wcscmp(method, L#eval) == 0) return ConnContext::eval;}
 
      ConnContext::Method strToMethod(const wchar_t* method){
           MATCH_METHOD_ENUM(GET);
@@ -352,8 +352,9 @@ namespace rikitiki {
      }
 
      void unescapeString(wchar_t* s, wchar_t* e, std::wstring& rtn) {
-          rtn.reserve(e - s);
-          for (s; s < e; s++) {
+          assert(e > s);
+          rtn.reserve((std::wstring::size_type)(e - s));
+          for (; s < e; s++) {
                if (*s == '%' && s + 2 < e) {
                     s++;
                     wchar_t z = s[2];

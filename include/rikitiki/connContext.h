@@ -176,6 +176,9 @@ namespace rikitiki {
 
           ConnContext(Server*);
           ConnContext();
+          ConnContext(ConnContext&) = delete;
+          ConnContext& operator=(const ConnContext& rhs) = delete;
+
      public:
           virtual ~ConnContext();
           Server* server;
@@ -205,6 +208,8 @@ namespace rikitiki {
      };
      
      class ConnContextWithWrite : public ConnContext {
+     private:
+          
      protected:
           virtual void writeResponse();
           virtual int rawWrite(const void* buffer, size_t length) = 0;
@@ -226,7 +231,7 @@ namespace rikitiki {
 
 #ifdef _MSC_VER
 #undef DELETE
-#undef decltype(a,b) 
+#undef decltype
 #endif
 
 //#include "ctemplate/connContext_ext.h"

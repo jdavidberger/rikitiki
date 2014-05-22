@@ -97,10 +97,12 @@ namespace rikitiki {
 	CASE_RET_DASH(video, x, matroska);
 	CASE_RET_DASH_DASH(video, x, ms, wmv);
 	CASE_RET_DASH(video, x, flv);
+        
       case ALL:
 	return L"*/*";
       case DEFAULT:
 	CASE_RET     (text, html);
+      case MAX:
       default:
 	return L"unknown";
 	  }

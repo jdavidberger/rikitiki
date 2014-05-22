@@ -26,7 +26,7 @@ namespace rikitiki {
           /**
              Connection context for Mongoose servers.
              */
-          class MongooseConnContext : public MongooseRequestContext, public  ConnContextWithWrite {
+          class MongooseConnContext : public MongooseRequestContext, public  ConnContextWithWrite {               
                mg_connection* conn;
 
           protected:

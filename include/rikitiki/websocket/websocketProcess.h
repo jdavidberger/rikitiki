@@ -16,7 +16,7 @@ namespace rikitiki {
 
                virtual bool OnConnect();
                virtual bool OnReady();
-			   virtual void OnClose();
+	       virtual void OnClose();
                virtual bool OnReceiveFrame(const Frame& frame);
                virtual bool OnReceiveMessage(const Message& message);
                virtual bool OnReceiveText(const char*, size_t);
@@ -29,26 +29,37 @@ namespace rikitiki {
 
           struct WebsocketRoute : public WebsocketHandler {
                std::wstring route;
+               virtual ~WebsocketRoute(){}
                virtual WebsocketProcess* CreateProcessor(WebsocketContext* ctx) = 0;
                WebsocketRoute(const std::wstring& r);
                virtual WebsocketProcess* Handle(WebsocketContext* ctx);
           };
 
-          template <typename T, typename A>
+          template <typename T, typename... A> T* create(WebsocketContext* ctx, const A&... args) {
+               
+          }
+
+          template <typename T, typename... A>
           struct WebsocketRoute_ : public WebsocketRoute {
                std::wstring route;
-               A arg;
-               WebsocketRoute_(const std::wstring& r, const A& _arg) : WebsocketRoute(r), arg(_arg) {}
-               virtual WebsocketProcess* CreateProcessor(WebsocketContext* ctx) {                    
-                    return new T(ctx, arg);
+               std::tuple<A...> args; 
+               WebsocketRoute_(const std::wstring& r, A... _arg) : WebsocketRoute(r), args(_arg...) {
+
+               }
+               T* create(WebsocketContext* ctx, const A&... args) {
+                    return new T(ctx, args...);
+               }
+               virtual WebsocketProcess* CreateProcessor(WebsocketContext* ctx) {
+                    std::tuple<WebsocketContext*, A...> applyArgs = std::tuple_cat(std::make_tuple(ctx), args);
+                    return mxcomp::tuples::applyTuple(this, &WebsocketRoute_<T,A...>::create, applyArgs);
                }
           };
 
           template <typename P>
           struct CreateWsRoute {
-               template<typename A>
-               static WebsocketRoute* With(A p, const std::wstring& _route){
-                    return new WebsocketRoute_<P, A>(_route, p);
+               template<typename... A>
+               static WebsocketRoute* With(const std::wstring& _route, A... p){
+                    return new WebsocketRoute_<P, A...>(_route, p...);
                }
           };
      }

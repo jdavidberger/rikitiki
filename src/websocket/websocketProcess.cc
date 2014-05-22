@@ -12,6 +12,7 @@ namespace rikitiki {
 
     bool WebsocketProcess::OnConnect() { return true; }
     bool WebsocketProcess::OnReady() { return true; }
+    void WebsocketProcess::OnClose() {}
     bool WebsocketProcess::OnReceiveText(const char*, size_t) { return true; }
     bool WebsocketProcess::OnReceiveBinary(const unsigned char*, size_t) { return true; }
 
