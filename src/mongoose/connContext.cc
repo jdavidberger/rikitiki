@@ -12,7 +12,11 @@ namespace rikitiki {
           static inline std::wstring toWString(const char* str) {
                auto size = strlen(str);
                std::wstring rtn(size, L'\0');
+#ifdef _MSC_VER
+			   mbstowcs_s(&size, &rtn[0], size, str, size);
+#else
                mbstowcs(&rtn[0], str, size);
+#endif
                return rtn;
           }
 
@@ -20,7 +24,7 @@ namespace rikitiki {
           MongooseRequestContext::MongooseRequestContext(const mg_request_info* _request) : request(_request){
                const char* _uri = request->uri;
                for (; *_uri != 0; _uri++)
-                    uri.push_back(*_uri);
+                    uri.push_back((wchar_t)*_uri);
           }
 
           const wchar_t* MongooseRequestContext::URI(){
@@ -95,7 +99,7 @@ namespace rikitiki {
 
           void MongooseConnContext::FillPayload() {
                _payload.resize(512);
-               int nth = 0;
+               size_t nth = 0;
                do{
                     _payload.resize(_payload.size() * 2);
                     nth += mg_read(conn, &_payload[nth], _payload.size() - nth);

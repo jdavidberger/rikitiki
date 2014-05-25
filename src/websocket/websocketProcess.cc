@@ -17,12 +17,11 @@ namespace rikitiki {
     bool WebsocketProcess::OnReceiveBinary(const unsigned char*, size_t) { return true; }
 
     bool WebsocketProcess::OnReceiveMessage(const Message& message) {
-		switch (message.opCode) {
-		case OpCode::Text:
+		if(message.opCode & OpCode::Text) 
 			return OnReceiveText((const char*)&message.data[0], message.data.size());
-		case OpCode::Binary:
-			return OnReceiveBinary(&message.data[0], message.data.size());
-		} 
+		else if(message.opCode & OpCode::Binary)
+			return OnReceiveBinary(&message.data[0], message.data.size());	
+		
 		return true;	
     }
 

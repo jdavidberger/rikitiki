@@ -8,8 +8,11 @@
 #include <sstream>
 #include <signal.h>
 #include <mongoose.h>
+
+#pragma warning(disable:4265)
 #include <condition_variable>
 #include <thread>
+#pragma warning(default:4265)
 
 namespace rikitiki {
      namespace mongoose {
@@ -61,7 +64,7 @@ namespace rikitiki {
                MongooseServer* server = getServer(conn);
                auto process = server->processes[conn];
                assert(process);
-               websocket::Frame frame(bits, (unsigned char*)data, length);
+               websocket::Frame frame((unsigned char)bits, (unsigned char*)data, length);
 
                if (frame.info.OpCode() & websocket::OpCode::Close) {
                     process->OnClose();
@@ -92,6 +95,7 @@ namespace rikitiki {
                quit_cond.notify_all();
           }
           static void signal_handler(int sig){
+			  UNREFERENCED_PARAMETER(sig);
                if (quit == 1)
                     signal(SIGINT, SIG_DFL); // Don't trap the signal forever; the next SIGINT should abort. 
                forcequit();
@@ -99,7 +103,7 @@ namespace rikitiki {
 
           void MongooseServer::Run(){
                quit = 0;
-               //signal(SIGINT, signal_handler);
+               signal(SIGINT, signal_handler);
                Start();
 
                // Possible race condition -- If we catch sigint and then a new server

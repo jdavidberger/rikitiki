@@ -1,9 +1,14 @@
 #include <rikitiki/websocket/websocket>
 #include <assert.h>
 #include <stdint.h>
+#include <exception>
 
+#ifdef _MSC_VER
+#pragma warning(disable: 4668)
+#define NOMINMAX
 #include <WinSock2.h>
-
+#pragma warning(default: 4668)
+#endif
 namespace rikitiki {
 	namespace websocket {
 
@@ -29,7 +34,7 @@ namespace rikitiki {
 			uint8_t header_len = 0;
 			header[0] = opcode;
 			while (len > 0) {
-				uint64_t send_size = len > MAX_FRAME ? MAX_FRAME : len;
+				size_t send_size = len > MAX_FRAME ? MAX_FRAME : len;
 				len -= send_size;
 
 				OpCode::T control = len == 0 ? OpCode::Final : OpCode::Continuation;
@@ -67,16 +72,16 @@ namespace rikitiki {
 		}
 
 
-		void Frame::Init(unsigned char opcode, const unsigned char* buffer, size_t len){
+		void Frame::Init(unsigned char opcode, const unsigned char* buffer, uint64_t len){
 			info.length = len;
 			info.isFinished = (opcode & OpCode::Close) > 0;
-			info.opcode = opcode & 0xEF;
+			info.opcode = (unsigned char)(opcode & 0xEF);
 			data = buffer;
 		}
 
-		Frame::Frame(const unsigned char* buffer, size_t len) {
+		Frame::Frame(const unsigned char* buffer, uint64_t len) {
 			unsigned char opcode = buffer[0];
-			size_t length = 0;
+			uint64_t length = 0;
 			buffer++;
 			info.isMasked = buffer[0] && 0x80;
 
@@ -97,11 +102,12 @@ namespace rikitiki {
 				info.mask = *(uint32_t*)buffer;
 				buffer += sizeof(uint32_t);
 			}
-
+			assert(length == len);
+			length = std::min(length, len); 
 			Init(opcode, buffer, length);
 		}
 
-		Frame::Frame(unsigned char opcode, const unsigned char* buffer, size_t len){
+		Frame::Frame(unsigned char opcode, const unsigned char* buffer, uint64_t len){
 			Init(opcode, buffer, len);
 		}
 
@@ -109,9 +115,13 @@ namespace rikitiki {
 			assert(opCode == frame.info.OpCode());
 			frameLength++;
 			size_t baseSize = data.size();
+			
 			if (frame.info.length) {
-				data.resize(baseSize + frame.info.length);
-				std::memcpy(&data[baseSize], frame.data, frame.info.length);
+				if (std::numeric_limits<size_t>::max() < baseSize + frame.info.length)
+					throw std::exception("Message sizes this large are not supported on x86 machines");
+
+				data.resize(baseSize + (size_t)frame.info.length);				
+				std::memcpy(&data[baseSize], frame.data, (size_t)frame.info.length);
 			}
 		}
 

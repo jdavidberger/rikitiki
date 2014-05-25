@@ -34,9 +34,9 @@ namespace rikitiki {
 		struct Frame {
 			FrameInfo info;
 			const unsigned char* data;
-			void Init(unsigned char, const unsigned char* data, size_t);
-			Frame(const unsigned char*, size_t);
-			Frame(unsigned char, const unsigned char* data, size_t);
+			void Init(unsigned char, const unsigned char* data, uint64_t);
+			Frame(const unsigned char*, uint64_t);
+			Frame(unsigned char, const unsigned char* data, uint64_t);
 		};
 
 		struct Message {
@@ -47,7 +47,7 @@ namespace rikitiki {
 			Message(const Frame& frame);
 		};
 
-		const static size_t MAX_FRAME = 4294967296;
+		const static size_t MAX_FRAME = (size_t)4294967295;
 		class WebsocketContext : public virtual RequestContext {
 		private:
 			virtual int raw_write(const unsigned char*, size_t) = 0;

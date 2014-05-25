@@ -28,6 +28,6 @@ ENDIF()
 
 IF(${USE_MONGOOSE})
 	add_library(mongoose mongoose/mongoose.h mongoose/mongoose.c)
-	SET_TARGET_PROPERTIES(mongoose PROPERTIES COMPILE_FLAGS "/MTd -wd4100")	
+	SET_TARGET_PROPERTIES(mongoose PROPERTIES COMPILE_FLAGS "/MTd -wd4100 -wd4668 -wd4255 -wd4706")	
         set_property(TARGET mongoose PROPERTY FOLDER "third")		
 ENDIF()

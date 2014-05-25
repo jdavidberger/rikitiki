@@ -11,7 +11,7 @@
 #include <cstring>
 
 namespace rikitiki {
-     auto operator <<(std::ostream& response, const wchar_t* obj) -> decltype(instance_of<std::ostream&>::value)
+	std::ostream& operator <<(std::ostream& response, const wchar_t* obj)
      {
           std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
           response << conv.to_bytes(obj);
