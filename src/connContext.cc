@@ -217,7 +217,7 @@ namespace rikitiki {
           return _post;
      }
 
-     Response::Response() : ResponseType(L""),
+	 Response::Response() : ResponseType(ContentType::ToString(ContentType::DEFAULT)),
           status(&HttpStatus::OK){}
 
      Response& Response::operator <<(const rikitiki::HttpStatus& t){

@@ -39,7 +39,7 @@ namespace rikitiki {
           class II7ConnContext : public II7RequestContext, public ConnContextWithWrite {
                IHttpContext* iis7ctx;
           public:
-               II7ConnContext(IHttpContext* _ctx) : II7RequestContext(_ctx->GetRequest()), iis7ctx(_ctx) {
+			  II7ConnContext(Server* server, IHttpContext* _ctx) : II7RequestContext(_ctx->GetRequest()), iis7ctx(_ctx), ConnContextWithWrite(server) {
 
                }
                virtual int rawWrite(const void* buffer, size_t length)  {
@@ -54,7 +54,7 @@ namespace rikitiki {
                }
                
                virtual void FillPayload() OVERRIDE{
-                    iis7ctx->GetRequest()->GetRawHttpRequest()->pEntityChunks
+
                }
 
           };
@@ -82,7 +82,7 @@ namespace rikitiki {
 
                REQUEST_NOTIFICATION_STATUS OnAcquireRequestState(IN IHttpContext * pHttpContext, IN OUT IHttpEventProvider * pProvider) OVERRIDE{
                     auto pt = pHttpContext;
-                    ConnContextRef_<II7ConnContext> ctx(new II7ConnContext(pt));
+                    ConnContextRef_<II7ConnContext> ctx(new II7ConnContext(this, pt));
                     auto handler = this->GetHandler(*ctx.get());
                     if (handler == 0)
                          return RQ_NOTIFICATION_FINISH_REQUEST;

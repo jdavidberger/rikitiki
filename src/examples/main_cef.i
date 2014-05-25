@@ -43,24 +43,6 @@ class DemoHandler : public CefClient,
     return rHandler;
   }
 
-  // CefDisplayHandler methods:
-  virtual void OnTitleChange(CefRefPtr<CefBrowser> browser, const CefString& title) {}
-
-  // CefLifeSpanHandler methods:
-  virtual void OnAfterCreated(CefRefPtr<CefBrowser> browser) {};
-  virtual bool DoClose(CefRefPtr<CefBrowser> browser) {return false;};
-  virtual void OnBeforeClose(CefRefPtr<CefBrowser> browser) {};
-
-  // CefLoadHandler methods:
-  virtual void OnLoadError(CefRefPtr<CefBrowser> browser,
-			   CefRefPtr<CefFrame> frame,
-			   ErrorCode errorCode,
-			   const CefString& errorText,
-			   const CefString& failedUrl) {};
-
-  // Request that all existing browser windows close.
-  void CloseAllBrowsers(bool force_close);
-
      bool IsClosing() const { return is_closing_; }
 
 private:
