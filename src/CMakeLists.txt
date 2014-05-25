@@ -15,7 +15,7 @@ macro( add_module module )
 
         IF(${USE_IIS7})
 			CONFIGURE_FILE(iis7_mod.i ${CMAKE_CURRENT_BINARY_DIR}/${module}_iis7_module.cc )	
-			add_library(${module}_IIS7Module ${module}_iis7_module.cc)
+			add_library(${module}_IIS7Module SHARED ${module}_iis7_module.cc)
 			target_link_libraries(${module}_IIS7Module rt_iis7)
 			set_property(TARGET ${module}_IIS7Module PROPERTY FOLDER "examples/IIS7")
        	ENDIF()

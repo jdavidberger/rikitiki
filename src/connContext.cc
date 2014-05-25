@@ -281,10 +281,26 @@ namespace rikitiki {
      }
      
      void ConnContextWithWrite::writeResponse() {
+		 std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+
+		 std::stringstream ss;
+		 std::string resp = response.response.str();
+		 ss << "HTTP/1.1 " << response.status->status << " " << response.status->name << "\r\n";
+		 ss << "Content-Length: " << resp.size() << "\r\n";
+		 ss << "Content-Type: " << conv.to_bytes(response.ResponseType) << "\r\n";
+		 for (auto it : response.headers){
+			 ss << conv.to_bytes(it.first) << ": " << conv.to_bytes(it.second) << "\r\n";
+		 }
+		 ss << "\r\n";
+		 ss << resp;
+		 std::string buffer = ss.str();
+
+		 rawWrite(buffer.c_str(), buffer.length());
 
      }
      void ConnContextWithWrite::Close() {
-          this->writeResponse();
+		 if(this->handled == true)
+			this->writeResponse();
      }
      ConnContextWithWrite::~ConnContextWithWrite() {
 
