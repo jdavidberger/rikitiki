@@ -1,3 +1,4 @@
+
 #include "rikitiki\iis7\server.h"
 
 namespace rikitiki {
@@ -14,10 +15,10 @@ namespace rikitiki {
 				mappedQs = true;
 			}
 
-			virtual void FillHeaders() OVERRIDE{
+				virtual void FillHeaders() OVERRIDE{
 				mappedHeaders = true;
 			}
-			virtual void FillRequestMethod() OVERRIDE{
+				virtual void FillRequestMethod() OVERRIDE{
 #define VERBSWITCH(V) case HttpVerb ## V: this->_method = V; break;
 				switch (request->GetRawHttpRequest()->Verb) {
 					VERBSWITCH(POST);
@@ -27,12 +28,29 @@ namespace rikitiki {
 					VERBSWITCH(PUT);
 					VERBSWITCH(TRACE);
 					VERBSWITCH(CONNECT);
+				case HttpVerbUNLOCK:
+				case HttpVerbMKCOL:
+				case HttpVerbTRACK:
+				case HttpVerbMOVE:
+				case HttpVerbCOPY:
+				case HttpVerbPROPFIND:
+				case HttpVerbPROPPATCH:
+				case HttpVerbLOCK:
+				case HttpVerbSEARCH:
+				case HttpVerbOPTIONS:
+					this->_method = OTHER;
+					break;
+				case HttpVerbInvalid:
+				case HttpVerbUnknown:
+				case HttpVerbUnparsed:
+
+				case HttpVerbMaximum:
 				default: this->_method = ANY;
 				}
 #undef VERBSWITCH
 
 			}
-			virtual const wchar_t* URI() {
+				virtual const wchar_t* URI() {
 				return request->GetRawHttpRequest()->CookedUrl.pAbsPath;
 			}
 		};
@@ -40,15 +58,16 @@ namespace rikitiki {
 			IHttpContext* iis7ctx;
 		public:
 			II7ConnContext(Server* server, IHttpContext* _ctx) : II7RequestContext(_ctx->GetRequest()), iis7ctx(_ctx), ConnContextWithWrite(server) {
-				
+
 			}
 			virtual void writeResponse() OVERRIDE{
 				iis7ctx->GetResponse()->SuppressHeaders();
 				ConnContextWithWrite::writeResponse();
 			}
-			virtual int rawWrite(const void* buffer, size_t length)  {
+
+				virtual size_t rawWrite(const void* buffer, size_t length)  {
 				HTTP_DATA_CHUNK c;
-				
+
 				c.DataChunkType = HttpDataChunkFromMemory;
 				c.FromMemory.pBuffer = (PVOID)buffer;
 				c.FromMemory.BufferLength = length;
@@ -80,15 +99,17 @@ namespace rikitiki {
 				*ppModule = this;
 				return S_OK;
 			}
-			virtual void Dispose() OVERRIDE {
+				virtual void Dispose() OVERRIDE{
 
 			}
-			
+
 			virtual void Terminate() OVERRIDE
 			{
 			}
 
 			REQUEST_NOTIFICATION_STATUS OnAcquireRequestState(IN IHttpContext * pHttpContext, IN OUT IHttpEventProvider * pProvider) OVERRIDE{
+				UNREFERENCED_PARAMETER(pProvider);
+
 				auto pt = pHttpContext;
 				REQUEST_NOTIFICATION_STATUS rtn = RQ_NOTIFICATION_CONTINUE;
 				{

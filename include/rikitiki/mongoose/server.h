@@ -12,8 +12,8 @@ namespace rikitiki {
           /**
              Mongoose wrapper. Contains base server functionality, plus also exposes Start/Stop methods.
              */
-          class MongooseServer : public rikitiki::websocket::Server {
-               mg_context *ctx;
+		 class MongooseServer : public rikitiki::Server, public rikitiki::websocket::Server {
+			   mg_context *ctx;
                std::vector<const char*> options;
                int port;
 #ifdef RT_USE_WEBSOCKET
@@ -26,6 +26,9 @@ namespace rikitiki {
                virtual websocket::WebsocketProcess* HandleWs(websocket::ConnectionHandle);
 #endif 
           public:                              
+			  using rikitiki::Server::Register;
+			  using rikitiki::websocket::Server::Register;
+
                std::string DocumentRoot;
                int Port();
                MongooseServer(int _port);

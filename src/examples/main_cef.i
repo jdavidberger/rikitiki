@@ -6,21 +6,18 @@
 using namespace rikitiki::examples;
 using namespace rikitiki::cef;
 
-#include <include/cef_client.h>
-#include <include/cef_app.h>
-#include <include/cef_client.h>
-
 #include <list>
 
 class DemoHandler : public CefClient,
      public CefDisplayHandler,
      public CefLifeSpanHandler,
-     public CefLoadHandler {
+     public CefLoadHandler,
+	 public CefInternalServer {
  public:
-  CefRefPtr<CefInternalServer> rHandler;
- DemoHandler() : rHandler(new CefInternalServer()) {
+  
+ DemoHandler()  {
   ${modstruct} module;
-  rHandler->Register(module);
+  Register(module);
   }
   ~DemoHandler() {}
 
@@ -40,7 +37,7 @@ class DemoHandler : public CefClient,
   }
 
   virtual CefRefPtr<CefRequestHandler> GetRequestHandler() OVERRIDE{
-    return rHandler;
+    return this;
   }
 
      bool IsClosing() const { return is_closing_; }
@@ -101,8 +98,10 @@ int APIENTRY wWinMain(HINSTANCE hInstance,
      HINSTANCE hPrevInstance,
      LPTSTR    lpCmdLine,
      int       nCmdShow) {
-
-     void* sandbox_info = NULL;
+	 
+	UNREFERENCED_PARAMETER(lpCmdLine);
+	UNREFERENCED_PARAMETER(nCmdShow);
+	UNREFERENCED_PARAMETER(hPrevInstance);
 
      // Provide CEF with command-line arguments.
      CefMainArgs main_args(hInstance);

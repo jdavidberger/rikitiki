@@ -32,10 +32,6 @@ namespace rikitiki {
           void Server::Register(WebModule& t){
                t.Register(*this);
           }
-		  void Server::Register(rikitiki::WebModule& t){
-			  t.Register(*this);
-		  }
-
           Server::~Server() {
 
           }

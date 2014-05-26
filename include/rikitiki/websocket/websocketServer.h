@@ -17,7 +17,7 @@ namespace rikitiki {
           class WebsocketContext;
           class WebsocketHandler;
           typedef void* ConnectionHandle; 
-          class Server : public rikitiki::Server {               
+          class Server {               
           protected:
                // map of unique ids and open processes. 
                std::map<ConnectionHandle, websocket::WebsocketProcess*> processes;
@@ -34,8 +34,6 @@ namespace rikitiki {
                // Websocket contexts should be able to close sockets.... but I wonder if this is truely necessary. 
                friend class WebsocketContext;
           public: 
-			  virtual void Register(rikitiki::WebModule& t) OVERRIDE;
-
 			  virtual void Register(WebModule& t);
                void AddWsHandler(WebsocketHandler* handler);
                virtual ~Server();

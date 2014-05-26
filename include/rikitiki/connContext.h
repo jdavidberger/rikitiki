@@ -217,7 +217,7 @@ namespace rikitiki {
           
      protected:
           virtual void writeResponse();
-          virtual int rawWrite(const void* buffer, size_t length) = 0;
+		  virtual size_t rawWrite(const void* buffer, size_t length) = 0;
 
      public:
           virtual void Close();

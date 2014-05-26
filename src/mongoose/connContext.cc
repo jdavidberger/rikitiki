@@ -61,8 +61,8 @@ namespace rikitiki {
 
                rawWrite(buffer.c_str(), buffer.length());
           }
-          int MongooseConnContext::rawWrite(const void* buffer, size_t length){
-               return mg_write(conn, buffer, length);
+		  size_t MongooseConnContext::rawWrite(const void* buffer, size_t length){
+               return (size_t)mg_write(conn, buffer, length);
           }
           void MongooseConnContext::Close() {
                ConnContextWithWrite::Close();
