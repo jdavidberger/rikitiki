@@ -70,7 +70,7 @@ namespace rikitiki {
 
 				c.DataChunkType = HttpDataChunkFromMemory;
 				c.FromMemory.pBuffer = (PVOID)buffer;
-				c.FromMemory.BufferLength = length;
+				c.FromMemory.BufferLength = (ULONG)length;
 				DWORD sent; BOOL completed;
 				// Note -- we should make this asyc at some point; figure out memory management detail with data chunk.
 				assert(S_OK == iis7ctx->GetResponse()->WriteEntityChunks(&c, 1, false, true, &sent, &completed));
