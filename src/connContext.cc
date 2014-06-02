@@ -309,7 +309,7 @@ namespace rikitiki {
 
 
 #define MATCH_METHOD_ENUM(eval)	{if(wcscmp(method, L#eval) == 0) return ConnContext::eval;}
-
+     
      ConnContext::Method strToMethod(const wchar_t* method){
           MATCH_METHOD_ENUM(GET);
           MATCH_METHOD_ENUM(POST);
@@ -323,6 +323,27 @@ namespace rikitiki {
           LOG(Server, Error) << "strToMethod failed on method '" << method << "'" << std::endl;
           return ConnContext::ANY;
      }
+
+#define MATCH_METHOD_STR(eval) case ConnContext::eval: return L#eval;
+     const wchar_t* methodToStr(ConnContext::Method method){
+          switch (method) {
+               MATCH_METHOD_STR(GET);
+               MATCH_METHOD_STR(POST);
+               MATCH_METHOD_STR(HEAD);
+               MATCH_METHOD_STR(PUT);
+               MATCH_METHOD_STR(DELETE);
+               MATCH_METHOD_STR(TRACE);
+               MATCH_METHOD_STR(OPTIONS);
+               MATCH_METHOD_STR(CONNECT);
+               MATCH_METHOD_STR(PATCH);               
+          case ConnContext::ANY:
+          case ConnContext::OTHER:
+          default:
+               LOG(Server, Error) << "methodToStr failed on str '" << method << "'" << std::endl;
+               return L"ANY";
+          }
+     }
+
      void mapQueryString(const wchar_t* _qs, std::map<std::wstring, std::wstring>& qs){
           if (_qs == NULL) return;
           std::wstring name;

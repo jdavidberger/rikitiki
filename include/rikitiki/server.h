@@ -15,19 +15,24 @@
 #include <rikitiki/log/log>
 #include <rikitiki/http_statuses.h>
 #include <memory>
+#pragma warning(disable:4265 4355)
+#include <future>
+#pragma warning(default:4265 4355)
 #ifdef RT_USE_CTEMPLATE
 #include <rikitiki/ctemplate/templatePreprocessor.h>
 #endif
 
 namespace rikitiki {
      class ConnContext;
-     class RequestContext;     
-	 class Socket;
+     class IRequest;
+     class RequestContext;
+     class Socket;
+     class Response;
      void CleanConnContext(ConnContext* ctx);
-     
+
      template <class T>
      class ConnContextRef_ : public std::shared_ptr<T> {
-     public: 
+     public:
           ConnContextRef_() {}
           ConnContextRef_(T*ptr) : std::shared_ptr<T>(ptr, CleanConnContext){}
      };
@@ -52,7 +57,7 @@ namespace rikitiki {
         Base handler class. These are checked in order whenever there is a request.
         */
      struct Handler {
-          
+
           virtual bool Handle(ConnContextRef ctx) = 0;
           virtual bool CanHandle(RequestContext& ctx) = 0;
           virtual bool visible() const = 0;
@@ -62,14 +67,14 @@ namespace rikitiki {
      };
 
      struct StaticContentHandler : public Handler {
-          std::wstring prefix; 
-          std::wstring path; 
-          std::map<std::wstring, std::wstring> mime_types; 
+          std::wstring prefix;
+          std::wstring path;
+          std::map<std::wstring, std::wstring> mime_types;
           StaticContentHandler(const std::wstring& prefix, const std::wstring& path);
-          virtual bool Handle(ConnContextRef ctx) ;
-          virtual bool CanHandle(RequestContext& ctx) ;
-          virtual bool visible() const ;
-          virtual std::wstring name() const ;
+          virtual bool Handle(ConnContextRef ctx);
+          virtual bool CanHandle(RequestContext& ctx);
+          virtual bool visible() const;
+          virtual std::wstring name() const;
           virtual ~StaticContentHandler();
      };
 
@@ -102,14 +107,15 @@ namespace rikitiki {
 
           void AddHandler(Handler& handler);
           void AddHandler(Handler* handler);
-          
-		  /*
-		  Provides an implementation specific socket which goes through the server. In most cases
-		  this will just open up a TCP/IP socket and return it. 
 
-		  This is mostly useful for testing -- it allows one test suite to hit every server implementation. 
-		  */
-		  virtual std::auto_ptr<Socket> GetDirectSocket();
+          /*
+          Provides an implementation specific socket which goes through the server. In most cases
+          this will just open up a TCP/IP socket and return it.
+
+          This is mostly useful for testing -- it allows one test suite to hit every server implementation.
+          */
+          //virtual std::auto_ptr<Socket> GetDirectSocket();
+          virtual std::future<std::shared_ptr<Response>> ProcessRequest(IRequest&) = 0;
 
           virtual void Register(WebModule& t);
      };

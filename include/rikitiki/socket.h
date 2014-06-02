@@ -6,8 +6,10 @@
 #pragma warning(disable:4265)
 #include <thread>
 #pragma warning(default:4265)
-typedef _W64 unsigned int UINT_PTR, *PUINT_PTR;
-typedef UINT_PTR        SOCKET;
+
+//typedef _W64 unsigned int UINT_PTR, *PUINT_PTR;
+typedef unsigned long long        SOCKET;
+
 
 namespace rikitiki {
 	struct Socket {

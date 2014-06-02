@@ -16,18 +16,31 @@ namespace rikitiki {
           /**
 	     Little bit of an odd one. This 'server' is actual intercepting requests from an embedded chromium window. 
              */
-		 class CefInternalServer : public rikitiki::websocket::Server, public rikitiki::Server, public CefRequestHandler{
+		 class CefInternalServer :   public rikitiki::websocket::Server, 
+                                             public rikitiki::Server, 
+                                             public CefRequestHandler,
+                                             public CefSchemeHandlerFactory {
             std::wstring hostname; // We have to pretend to be a host
             virtual websocket::WebsocketProcess* HandleWs(websocket::ConnectionHandle);
            public:               
-			   using rikitiki::Server::Register;
-			   using rikitiki::websocket::Server::Register;
-			   virtual std::auto_ptr<Socket> GetDirectSocket() OVERRIDE;
+                
+	       using rikitiki::Server::Register;
+	       using rikitiki::websocket::Server::Register;
+//			   virtual std::auto_ptr<Socket> GetDirectSocket() OVERRIDE;
                CefInternalServer(const std::wstring& _host = L"http://app/");
 	       virtual CefRefPtr<CefResourceHandler> GetResourceHandler(CefRefPtr<CefBrowser> browser,
 									CefRefPtr<CefFrame> frame,
 									CefRefPtr<CefRequest> request) OVERRIDE; 
-              
+               virtual std::future<std::shared_ptr<Response>> ProcessRequest(rikitiki::IRequest&) OVERRIDE;
+               virtual CefRefPtr<CefResourceHandler> Create(CefRefPtr<CefBrowser> browser,
+                    CefRefPtr<CefFrame> frame,
+                    const CefString& scheme_name,
+                    CefRefPtr<CefRequest> request)
+                    OVERRIDE {
+                    UNREFERENCED_PARAMETER(scheme_name);
+                    // Return a new resource handler instance to handle the request.
+                    return GetResourceHandler(browser, frame, request);
+               }
 
               IMPLEMENT_REFCOUNTING(CefInternalServer);
        };

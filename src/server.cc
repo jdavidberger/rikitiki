@@ -70,11 +70,7 @@ namespace rikitiki {
                }
           }
           return false;
-     }
-     
-	 std::auto_ptr<Socket> Server::GetDirectSocket() {
-		 return std::auto_ptr<Socket>(0);
-	 }
+     }     
 
      void Server::Register(WebModule& t){
           t.Register(*this);

@@ -5,10 +5,11 @@
 #include <cstring>
 #include <mxcomp\log.h>
 
+
 namespace rikitiki {
      namespace cef {
           void RequestContext::FillQueryString() {
-               
+
           }
           void RequestContext::FillHeaders() {
                CefRequest::HeaderMap map;

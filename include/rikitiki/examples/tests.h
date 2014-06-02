@@ -3,35 +3,67 @@
 #include <assert.h>
 #include <memory>
 
+
 namespace rikitiki {
-	namespace examples {
+     namespace examples {
 
-		void Test(const char* buffer, size_t length) {
-			UNREFERENCED_PARAMETER(length);
-			std::string payload(buffer);
-			
-			assert(std::string(buffer) == "Basic Test!");
-		}
+          void Test(std::shared_ptr<Response> response) {
+               std::string payload(response->response.str());
 
-		struct TestsModule FINAL : public WebModule {
-			std::auto_ptr<Socket> testSocket;
-			virtual ~TestsModule() {}
+               assert(payload == "Basic Test!");
+          }
 
-			void BasicTest(ConnContextRef ctx) {
-				ctx << "Basic test!";
-			}
-			void Register(rikitiki::Server& server) OVERRIDE {
-				server.AddHandler(CreateRoute<>::With(this, L"/basictest", &TestsModule::BasicTest));
+          void QueryStringTest(std::shared_ptr<Response> response) {
+               std::string payload(response->response.str());
 
-				testSocket = server.GetDirectSocket();
-				assert(testSocket.get() != 0);
-				
-				if (testSocket.get() != 0) {
-				testSocket->OnData = &Test;
-				testSocket->Send("GET /basictest HTTP/1.1\r\n\r\n");
-				}
-			}
+               assert(payload == "Saw: 42");
+          }
 
-		};
-	}
+          void HeaderTest(std::shared_ptr<Response> response) {
+               assert(response->headers[0].first == std::wstring(L"Test") &&
+                    response->headers[0].second == std::wstring(L"123"));                              
+          }
+          struct TestsModule FINAL : public WebModule {
+               std::auto_ptr<Socket> testSocket;
+               virtual ~TestsModule() {}
+
+               void BasicTest(ConnContextRef ctx) {
+                    ctx << "Basic Test!";
+               }
+               void QueryStringTest(ConnContextRef ctx, int num) {
+                    ctx << "Saw: " << num;
+               }
+               void HeaderTest(ConnContextRef ctx) {
+                    ctx << rikitiki::Header(L"Test", L"42") << "!";
+               }
+               void Register(rikitiki::Server& server) OVERRIDE{
+                    server.AddHandler(CreateRoute<>::With(this, L"/basictest", &TestsModule::BasicTest));
+                    server.AddHandler(CreateRoute<int>::With(this, L"/querystringtest/{num}", &TestsModule::QueryStringTest));
+                    server.AddHandler(CreateRoute<>::With(this, L"/headertest", &TestsModule::HeaderTest));
+
+                    SimpleRequest request;
+                    request.uri = L"basictest";
+                    request.method = IRequest::GET;
+                    {
+                         //std::shared_future<std::shared_ptr<Response>> future = server.ProcessRequest(request);
+                         //std::async([=] { Test(future.get()); });
+                    }
+                    
+                    request.uri = L"querystringtest/42";
+                    request.method = IRequest::GET;
+                    {
+                         //std::shared_future<std::shared_ptr<Response>> future = server.ProcessRequest(request);
+                         //std::async([=] { examples::QueryStringTest(future.get()); });
+                    }
+
+                    request.uri = L"headertest";
+                    request.method = IRequest::GET;
+                    {
+                         std::shared_future<std::shared_ptr<Response>> future = server.ProcessRequest(request);
+                         std::async([=] { examples::HeaderTest(future.get()); });
+                    }
+               }
+
+          };
+     }
 }

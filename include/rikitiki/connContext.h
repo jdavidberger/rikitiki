@@ -111,14 +111,50 @@ namespace rikitiki {
      typedef multimap<std::wstring, std::wstring> PostCollection;
      typedef std::map<std::wstring, std::wstring> CookieCollection;
 
-     /***
-        Request context object. Contains everything about the request; but has no methods to deal with responding to the request.
-        */
-     class RequestContext {     
-     public:
+     
+     class IRequest {
+     public: 
           enum Method {
                ANY = 0, GET = 1, POST = 2, HEAD = 3, PUT = 4, DELETE = 5, TRACE = 6, OPTIONS = 7, CONNECT = 8, PATCH = 9, OTHER
           };
+          virtual Method RequestMethod() = 0;
+          virtual HeaderCollection& Headers() = 0;
+          virtual CookieCollection& Cookies() = 0;
+          virtual QueryStringCollection& QueryString() = 0;
+          virtual const wchar_t* URI() = 0;
+     };
+
+     class SimpleRequest : public IRequest {
+     public:
+          virtual ~SimpleRequest(){}
+          Method method; 
+          virtual Method RequestMethod() { return method; };
+          HeaderCollection headers;
+          virtual HeaderCollection& Headers() {
+               return headers;
+          };
+
+          CookieCollection cookies; 
+          virtual CookieCollection& Cookies() {
+               return cookies;
+          };
+
+          QueryStringCollection queryString;
+          virtual QueryStringCollection& QueryString() {
+               return queryString;
+          };
+          std::wstring uri;
+          virtual const wchar_t* URI() {
+               return uri.data();
+          };
+     };
+
+     /***
+        Request context object. Contains everything about the request; but has no methods to deal with responding to the request.
+        */
+     class RequestContext : public IRequest {     
+     public:
+          typedef IRequest::Method Method;
      protected:
           bool mappedQs, mappedHeaders, mappedCookies;
           QueryStringCollection _qs;
@@ -222,7 +258,7 @@ namespace rikitiki {
      void mapContents(std::wstring& raw_content, PostCollection& post);
      void mapQueryString(const wchar_t* _qs, QueryStringCollection& qs);
      ConnContext::Method strToMethod(const wchar_t* method);
-
+     const wchar_t* methodToStr(ConnContext::Method method);
      ConnContext& operator>>(ConnContext&, std::wstring& t);
 #include "connContext.tcc"
 }
