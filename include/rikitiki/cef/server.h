@@ -22,7 +22,7 @@ namespace rikitiki {
            public:               
 			   using rikitiki::Server::Register;
 			   using rikitiki::websocket::Server::Register;
-
+			   virtual std::auto_ptr<Socket> GetDirectSocket() OVERRIDE;
                CefInternalServer(const std::wstring& _host = L"http://app/");
 	       virtual CefRefPtr<CefResourceHandler> GetResourceHandler(CefRefPtr<CefBrowser> browser,
 									CefRefPtr<CefFrame> frame,

@@ -10,7 +10,7 @@ namespace rikitiki {
     /** Simple example module of routing
      */
     struct HelloWorldModule : public rikitiki::WebModule {
-      void Register(Server& server){
+      void Register(Server& server) override {
 		server.AddHandler( CreateRoute<>::With(this, L"/hw/hello") );
                 server.AddHandler(CreateRoute<int>::With(this, L"/hw/{number}"));
                 server.AddHandler(CreateRoute<std::wstring>::With(this, L"/hw/{word}"));

@@ -8,8 +8,9 @@ using namespace rikitiki::examples;
 int main(){
   MongooseServer server(5000);
   ${modstruct} module;
+  server.Start();
   server.Register(module);
-  server.Run();
+  server.WaitForStop();
   return 0;
 }
 

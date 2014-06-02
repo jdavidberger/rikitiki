@@ -15,23 +15,24 @@ namespace rikitiki {
 		 class MongooseServer : public rikitiki::Server, public rikitiki::websocket::Server {
 			   mg_context *ctx;
                std::vector<const char*> options;
-               int port;
-#ifdef RT_USE_WEBSOCKET
+			   uint16_t port;
+
           private:
                static int _wsHandler(const struct mg_connection *conn);
                static void _wsReady(struct mg_connection *conn);
                static int _wsReceive(struct mg_connection *conn, int bits, char* data, size_t length);
           protected:
-               virtual void Close(websocket::WebsocketContext*);
-               virtual websocket::WebsocketProcess* HandleWs(websocket::ConnectionHandle);
-#endif 
+			  virtual void Close(websocket::WebsocketContext*) OVERRIDE;
+			   virtual websocket::WebsocketProcess* HandleWs(websocket::ConnectionHandle) OVERRIDE;
+
           public:                              
 			  using rikitiki::Server::Register;
 			  using rikitiki::websocket::Server::Register;
+			  virtual std::auto_ptr<Socket> GetDirectSocket() OVERRIDE;
 
                std::string DocumentRoot;
-               int Port();
-               MongooseServer(int _port);
+			   uint16_t Port();
+               MongooseServer(uint16_t _port);
 
                /** Blocking call to start the mongoose server. Sets up an interrupt handler to stop the server with siginterrupt.
                    If you have more than one server running, SIGINT shuts them all down.
@@ -39,6 +40,8 @@ namespace rikitiki {
                void Run();
                /** Non-blocking call to start the mongoose server.*/
                void Start();
+			   /** Wait for a started server to stop*/
+			   void WaitForStop();
                /** Stop a running server */
                void Stop();
           };

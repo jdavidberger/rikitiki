@@ -15,7 +15,6 @@
 #include <rikitiki/log/log>
 #include <rikitiki/http_statuses.h>
 #include <memory>
-
 #ifdef RT_USE_CTEMPLATE
 #include <rikitiki/ctemplate/templatePreprocessor.h>
 #endif
@@ -23,7 +22,7 @@
 namespace rikitiki {
      class ConnContext;
      class RequestContext;     
-
+	 class Socket;
      void CleanConnContext(ConnContext* ctx);
      
      template <class T>
@@ -104,6 +103,14 @@ namespace rikitiki {
           void AddHandler(Handler& handler);
           void AddHandler(Handler* handler);
           
+		  /*
+		  Provides an implementation specific socket which goes through the server. In most cases
+		  this will just open up a TCP/IP socket and return it. 
+
+		  This is mostly useful for testing -- it allows one test suite to hit every server implementation. 
+		  */
+		  virtual std::auto_ptr<Socket> GetDirectSocket();
+
           virtual void Register(WebModule& t);
      };
 

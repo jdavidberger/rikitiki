@@ -11,6 +11,7 @@ IF(${USE_CTEMPLATE})
 ENDIF()
 
 ADD_MODULE(headersTest)
+ADD_MODULE(tests)
 
 IF(${USE_REST})
 	ADD_MODULE(restAdv)

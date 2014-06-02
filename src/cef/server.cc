@@ -2,6 +2,7 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
 #include <rikitiki/cef/cef>
+#include <rikitiki\socket.h>
 #include <sstream>
 #include <codecvt>
 #include <string>
@@ -80,14 +81,15 @@ namespace rikitiki {
 
 			IMPLEMENT_REFCOUNTING(ResourceHandler);
 		};
-
-#ifdef RT_USE_WEBSOCKET
 		websocket::WebsocketProcess* CefInternalServer::HandleWs(websocket::ConnectionHandle) {
 			return 0;
 		}
-#endif
 		CefInternalServer::CefInternalServer(const std::wstring& _host) : hostname(_host) {
 
+		}
+
+		std::auto_ptr<Socket> CefInternalServer::GetDirectSocket(){
+			return std::auto_ptr<Socket>(0);
 		}
 
 		CefRefPtr<CefResourceHandler> CefInternalServer::GetResourceHandler(CefRefPtr<CefBrowser> browser,

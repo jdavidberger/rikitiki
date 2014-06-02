@@ -14,14 +14,7 @@
 #undef DELETE
 #define decltype(a,b) decltype(b) // VC++ does not get sane error messages yet I guess
 #endif
-
-#ifndef OVERRIDE
-#define OVERRIDE override
-#endif
-
-#ifndef UNREFERENCED_PARAMETER
-#define UNREFERENCED_PARAMETER(P) (P)
-#endif
+#include <mxcomp\useful_macros.h>
 
 namespace rikitiki {
      class Server;

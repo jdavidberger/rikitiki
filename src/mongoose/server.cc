@@ -16,8 +16,12 @@
 
 namespace rikitiki {
      namespace mongoose {
-          int MongooseServer::Port() { return port; }
-          MongooseServer::MongooseServer(int _port) : port(_port)  {
+		 std::auto_ptr<Socket> MongooseServer::GetDirectSocket() {
+			 return std::auto_ptr<Socket>(new TCPIPSocket(L"localhost", this->Port()));
+		 }
+
+		 uint16_t MongooseServer::Port() { return port; }
+		  MongooseServer::MongooseServer(uint16_t _port) : port(_port)  {
                ctx = 0;
 #ifdef RT_USE_CONFIGURATION
                if(Configuration::Global().exists("mongoose")){
@@ -100,22 +104,24 @@ namespace rikitiki {
                     signal(SIGINT, SIG_DFL); // Don't trap the signal forever; the next SIGINT should abort. 
                forcequit();
           }
+		  void MongooseServer::WaitForStop() {
+			  quit = 0;
+			  signal(SIGINT, signal_handler);
 
-          void MongooseServer::Run(){
-               quit = 0;
-               signal(SIGINT, signal_handler);
+			  // Possible race condition -- If we catch sigint and then a new server
+			  // starts up within the sleep window, this server will not stop. 
+			  // Won't address until a use case for that comes up though. 
+
+			  std::mutex m;
+			  std::unique_lock<std::mutex> l(m);
+			  while (!quit){ quit_cond.wait(l); }
+
+			  LOG(Mongoose, Debug) << "Caught sigint, shutting down server " << (void*)this << std::endl;
+			  Stop();
+		  }
+          void MongooseServer::Run(){               
                Start();
-
-               // Possible race condition -- If we catch sigint and then a new server
-               // starts up within the sleep window, this server will not stop. 
-               // Won't address until a use case for that comes up though. 
-
-               std::mutex m;
-               std::unique_lock<std::mutex> l(m);
-               while (!quit){ quit_cond.wait(l); }
-
-               LOG(Mongoose, Debug) << "Caught sigint, shutting down server " << (void*)this << std::endl;
-               Stop();
+			   WaitForStop();
           }
 
 
