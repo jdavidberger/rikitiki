@@ -2,26 +2,30 @@
 #include <rikitiki\socket.h>
 #include <assert.h>
 #include <memory>
-
-
+#pragma warning (disable: 4512 )
+#include <qunit.hpp>
+#pragma warning (default: 4512 )
 namespace rikitiki {
      namespace examples {
-
+          QUnit::UnitTest qunit(std::cerr, QUnit::verbose);
           void Test(std::shared_ptr<Response> response) {
                std::string payload(response->response.str());
-
-               assert(payload == "Basic Test!");
+               QUNIT_IS_EQUAL(payload, "Basic Test!");
           }
 
           void QueryStringTest(std::shared_ptr<Response> response) {
                std::string payload(response->response.str());
 
-               assert(payload == "Saw: 42");
+               QUNIT_IS_EQUAL(payload, "Saw: 42");
           }
 
           void HeaderTest(std::shared_ptr<Response> response) {
-               assert(response->headers[0].first == std::wstring(L"Test") &&
-                    response->headers[0].second == std::wstring(L"123"));                              
+               QUNIT_IS_TRUE(response->headers.size() > 0);
+
+               if (response->headers.size()) {
+                    QUNIT_IS_EQUAL(response->headers.back().first, std::wstring(L"Test"));
+                    QUNIT_IS_EQUAL(response->headers.back().second, std::wstring(L"42"));
+               }
           }
           struct TestsModule FINAL : public WebModule {
                std::auto_ptr<Socket> testSocket;
@@ -45,15 +49,15 @@ namespace rikitiki {
                     request.uri = L"basictest";
                     request.method = IRequest::GET;
                     {
-                         //std::shared_future<std::shared_ptr<Response>> future = server.ProcessRequest(request);
-                         //std::async([=] { Test(future.get()); });
+                         std::shared_future<std::shared_ptr<Response>> future = server.ProcessRequest(request);
+                         std::async([=] { Test(future.get()); });
                     }
                     
                     request.uri = L"querystringtest/42";
                     request.method = IRequest::GET;
                     {
-                         //std::shared_future<std::shared_ptr<Response>> future = server.ProcessRequest(request);
-                         //std::async([=] { examples::QueryStringTest(future.get()); });
+                         std::shared_future<std::shared_ptr<Response>> future = server.ProcessRequest(request);
+                         std::async([=] { examples::QueryStringTest(future.get()); });
                     }
 
                     request.uri = L"headertest";

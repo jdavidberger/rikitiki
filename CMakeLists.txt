@@ -85,6 +85,7 @@ include_directories(include)
 # Might need some of these...
 include_directories(third/mxcomp/include)
 include_directories(third/stencet/include)
+include_directories(third/qunit)
 
 set(rikitiki_INCLUDE_DIRS "${rikitiki_INCLUDE_DIRS};${CMAKE_CURRENT_SOURCE_DIR}/include;${CMAKE_CURRENT_SOURCE_DIR}/third/mxcomp/include;${CMAKE_CURRENT_SOURCE_DIR}/third/stencet/include")
 add_subdirectory(third)

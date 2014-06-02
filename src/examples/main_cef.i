@@ -8,52 +8,6 @@ using namespace rikitiki::cef;
 
 #include <list>
 
-class DemoHandler : public CefClient,
-     public CefDisplayHandler,
-     public CefLifeSpanHandler,
-     public CefLoadHandler,
-	 public CefInternalServer {
- public:
-  
- DemoHandler()  {
-  ${modstruct} module;
-  Register(module);
-  }
-  ~DemoHandler() {}
-
-  // Provide access to the single global instance of this object.
-  static DemoHandler* GetInstance();
-
-  // CefClient methods:
-  virtual CefRefPtr<CefDisplayHandler> GetDisplayHandler() OVERRIDE{
-    return this;
-  }
-  virtual CefRefPtr<CefLifeSpanHandler> GetLifeSpanHandler() OVERRIDE{
-    return this;
-  }
-    
-  virtual CefRefPtr<CefLoadHandler> GetLoadHandler() OVERRIDE{
-    return this;
-  }
-
-  virtual CefRefPtr<CefRequestHandler> GetRequestHandler() OVERRIDE{
-    return this;
-  }
-
-     bool IsClosing() const { return is_closing_; }
-
-private:
-     // List of existing browser windows. Only accessed on the CEF UI thread.
-     typedef std::list<CefRefPtr<CefBrowser> > BrowserList;
-     BrowserList browser_list_;
-
-     bool is_closing_;
-
-     // Include the default reference counting implementation.
-     IMPLEMENT_REFCOUNTING(DemoHandler);
-};
-
-
 class DemoApp : public CefApp,
      public CefBrowserProcessHandler {
 public:
@@ -65,7 +19,12 @@ public:
      // CefBrowserProcessHandler methods:
      virtual void OnContextInitialized() OVERRIDE {
        CefWindowInfo window_info;
-       
+
+       ${modstruct} module;
+       auto server = new CefInternalServer;
+       CefRegisterSchemeHandlerFactory("http", "app", server);
+       server->Register(module);
+              
 #if defined(OS_WIN)
        // On Windows we need to specify certain flags that will be passed to
        // CreateWindowEx().

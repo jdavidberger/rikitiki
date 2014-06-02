@@ -7,9 +7,10 @@ namespace rikitiki {
      More usefully, holds static members for every standard status type. 
    */
   class HttpStatus { 
+  public:
   HttpStatus(int s, const char* n) : status(s), name(n){} 
   HttpStatus(int s) : status(s), name(0){} 
-  public:
+  
     int status; 
     const char* name;
     static const HttpStatus Continue;

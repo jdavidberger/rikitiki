@@ -96,12 +96,14 @@ namespace rikitiki {
 
                mappedHeaders = true;
           }
+          void MongooseRequestContext::FillPayload() {
 
+          }
           void MongooseConnContext::FillPayload() {
                _payload.resize(512);
                size_t nth = 0;
-               do{
-                    _payload.resize(_payload.size() * 2);
+               do{                    
+                    _payload.resize(_payload.size() * 2);                            
                     nth += mg_read(conn, &_payload[nth], _payload.size() - nth);
                } while (nth == (int)_payload.size());
                _payload.resize(nth);

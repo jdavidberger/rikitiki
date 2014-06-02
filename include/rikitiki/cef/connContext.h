@@ -14,10 +14,13 @@ namespace rikitiki {
                virtual void FillQueryString() OVERRIDE;
                virtual void FillHeaders() OVERRIDE;
                virtual void FillRequestMethod() OVERRIDE;
-	       CefRefPtr<CefRequest> request;
+               virtual void FillPayload() OVERRIDE;
+               
+               CefRefPtr<CefRequest> request;
                std::wstring url; 
           public:
                RequestContext(CefRefPtr<CefRequest> req) : request(req) {}
+
 	       virtual const wchar_t* URI() OVERRIDE;
           };
 

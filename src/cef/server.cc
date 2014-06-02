@@ -17,7 +17,6 @@ namespace rikitiki {
                CefRefPtr<CefCallback> dataReady;
                void Close() {}
 
-               virtual void FillPayload() {};
                virtual void OnHeadersFinished() {
                     headersReady->Continue();
                }

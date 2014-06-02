@@ -149,7 +149,7 @@ namespace rikitiki {
           return _contentType;
      }
 
-     std::wstring& ConnContext::Payload() {
+     ByteStream& RequestContext::Payload() {
           if (!mappedPayload){
                this->FillPayload();
                assert(mappedPayload);
@@ -251,17 +251,18 @@ namespace rikitiki {
      }
      */
      ConnContext& operator>>(ConnContext& ctx, std::wstring& t){
-          t = ctx.Payload();
+          std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
+          t = conversion.from_bytes( ctx.Payload() );
           return ctx;
      }
      RequestContext::~RequestContext(){ }
-     RequestContext::RequestContext() : _method(ANY), mappedQs(false), mappedHeaders(false), mappedCookies(false) {}
+     RequestContext::RequestContext() :
+          mappedPayload(false), _method(ANY), mappedQs(false), mappedHeaders(false), mappedCookies(false) {}
 
      ConnContext::ConnContext(Server* _server) :
           handled(false),
           server(NULL),
           mappedPost(false),
-          mappedPayload(false),
           mappedContentType(false),
           headersDone(false),
           _accepts(0) {
@@ -271,7 +272,6 @@ namespace rikitiki {
           handled(false),
           server(NULL),
           mappedPost(false),
-          mappedPayload(false),
           mappedContentType(false),
           headersDone(false),
           _accepts(0) {}
@@ -405,7 +405,11 @@ namespace rikitiki {
                }
           }
      }
-     void mapContents(std::wstring& raw_content, PostCollection& post){
+     void mapContents(ByteStream& raw_content_stream, PostCollection& post){
+          std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
+
+          std::wstring raw_content = conversion.from_bytes(raw_content_stream);
+
           if (raw_content.size() == 0)
                return;
           if (raw_content.back() != L'&')

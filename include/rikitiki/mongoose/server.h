@@ -28,7 +28,8 @@ namespace rikitiki {
           public:                              
 			  using rikitiki::Server::Register;
 			  using rikitiki::websocket::Server::Register;
-			  virtual std::auto_ptr<Socket> GetDirectSocket() OVERRIDE;
+                          virtual std::future<std::shared_ptr<Response>> ProcessRequest(IRequest&) ;
+
 
                std::string DocumentRoot;
 			   uint16_t Port();

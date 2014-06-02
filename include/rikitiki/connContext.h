@@ -111,7 +111,9 @@ namespace rikitiki {
      typedef multimap<std::wstring, std::wstring> PostCollection;
      typedef std::map<std::wstring, std::wstring> CookieCollection;
 
-     
+
+     typedef std::basic_string<char> ByteStream;
+
      class IRequest {
      public: 
           enum Method {
@@ -122,6 +124,7 @@ namespace rikitiki {
           virtual CookieCollection& Cookies() = 0;
           virtual QueryStringCollection& QueryString() = 0;
           virtual const wchar_t* URI() = 0;
+          virtual const ByteStream& Payload() = 0;
      };
 
      class SimpleRequest : public IRequest {
@@ -147,6 +150,12 @@ namespace rikitiki {
           virtual const wchar_t* URI() {
                return uri.data();
           };
+
+          ByteStream payload;
+
+          ByteStream& Payload() {
+               return payload;
+          }
      };
 
      /***
@@ -156,18 +165,20 @@ namespace rikitiki {
      public:
           typedef IRequest::Method Method;
      protected:
-          bool mappedQs, mappedHeaders, mappedCookies;
+          bool mappedQs, mappedHeaders, mappedCookies, mappedPayload;
           QueryStringCollection _qs;
           HeaderCollection _headers;
           CookieCollection _cookies;
-
+          ByteStream _payload;
           Method _method;
 
           virtual void FillQueryString() = 0;
           virtual void FillHeaders() = 0;
           virtual void FillRequestMethod() = 0;
           virtual void FillCookies();
-          
+
+          virtual void FillPayload() = 0;
+
           RequestContext();
           virtual ~RequestContext();
 
@@ -182,6 +193,9 @@ namespace rikitiki {
           CookieCollection& Cookies();
           QueryStringCollection& QueryString();
           virtual const wchar_t* URI() = 0;
+
+          virtual ByteStream& Payload() OVERRIDE;
+
      };
 
      /**
@@ -193,14 +207,13 @@ namespace rikitiki {
         */
      class ConnContext : public virtual RequestContext {
      protected:
-          bool mappedPost, mappedPayload, mappedContentType;
+          bool mappedPost, mappedContentType;
           bool headersDone;
           PostCollection _post;
           std::multimap<double, ContentType::t>* _accepts;
           ContentType::t _contentType;
-          std::wstring _payload;
 
-          virtual void FillPayload() = 0;
+
           virtual void FillAccepts();
           virtual void FillContentType();          
           virtual void FillPost();
@@ -220,8 +233,6 @@ namespace rikitiki {
           PostCollection& Post();
           ContentType::t ContentType();
 
-          std::wstring& Payload();
-          
           virtual void Close() = 0;
           bool handled;
           virtual void OnHeadersFinished() {}
@@ -255,7 +266,7 @@ namespace rikitiki {
           virtual ~ConnContextWithWrite();
      };
 
-     void mapContents(std::wstring& raw_content, PostCollection& post);
+     void mapContents(ByteStream& raw_content, PostCollection& post);
      void mapQueryString(const wchar_t* _qs, QueryStringCollection& qs);
      ConnContext::Method strToMethod(const wchar_t* method);
      const wchar_t* methodToStr(ConnContext::Method method);

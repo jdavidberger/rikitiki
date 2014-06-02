@@ -18,6 +18,10 @@ namespace rikitiki {
                     _headers.insert(header);
                }
           }
+
+          void RequestContext::FillPayload() {
+
+          }
           void RequestContext::FillRequestMethod() {
                auto method = request->GetMethod();
                this->_method = strToMethod(method.c_str());

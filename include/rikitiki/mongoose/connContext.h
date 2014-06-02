@@ -16,6 +16,7 @@ namespace rikitiki {
                virtual void FillHeaders();               
                virtual void FillRequestMethod();
 
+               virtual void FillPayload();
                std::wstring uri;
           public:
                MongooseRequestContext(const mg_request_info*);
@@ -30,8 +31,8 @@ namespace rikitiki {
                mg_connection* conn;
 
           protected:
+
                virtual void FillPayload();
-               
           public:
                MongooseConnContext(Server* s, mg_connection* c);
                virtual void writeResponse() OVERRIDE;

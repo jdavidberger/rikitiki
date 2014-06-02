@@ -8,7 +8,7 @@
 #include <sstream>
 #include <signal.h>
 #include <mongoose.h>
-
+#include <rikitiki/socket.h>
 #pragma warning(disable:4265)
 #include <condition_variable>
 #include <thread>
@@ -16,12 +16,14 @@
 
 namespace rikitiki {
      namespace mongoose {
-		 std::auto_ptr<Socket> MongooseServer::GetDirectSocket() {
-			 return std::auto_ptr<Socket>(new TCPIPSocket(L"localhost", this->Port()));
-		 }
-
-		 uint16_t MongooseServer::Port() { return port; }
-		  MongooseServer::MongooseServer(uint16_t _port) : port(_port)  {
+          
+          std::future<std::shared_ptr<Response>> MongooseServer::ProcessRequest(IRequest& request) {
+               auto client = new SimpleRequestClient(L"localhost", this->Port());
+               client->MakeRequest(request);
+               return client->future();
+          }
+          uint16_t MongooseServer::Port() { return port; }
+          MongooseServer::MongooseServer(uint16_t _port) : port(_port)  {
                ctx = 0;
 #ifdef RT_USE_CONFIGURATION
                if(Configuration::Global().exists("mongoose")){
@@ -47,7 +49,7 @@ namespace rikitiki {
                auto ctx = new mongoose::MongooseWebsocketContext(this, (const struct mg_connection *)conn);
                websocket::WebsocketProcess* process = HandleWs(ctx);
                if (process) {
-                    return processes[conn] = process;                    
+                    return processes[conn] = process;
                }
                return 0;
           }
@@ -81,7 +83,7 @@ namespace rikitiki {
 
           void MongooseServer::Close(websocket::WebsocketContext* _ctx) {
                auto ctx = dynamic_cast<MongooseWebsocketContext*>(_ctx);
-               mg_connection * conn = ctx->conn; 
+               mg_connection * conn = ctx->conn;
                auto process = processes[conn];
                assert(process);
                process->OnClose();
@@ -99,29 +101,29 @@ namespace rikitiki {
                quit_cond.notify_all();
           }
           static void signal_handler(int sig){
-			  UNREFERENCED_PARAMETER(sig);
+               UNREFERENCED_PARAMETER(sig);
                if (quit == 1)
                     signal(SIGINT, SIG_DFL); // Don't trap the signal forever; the next SIGINT should abort. 
                forcequit();
           }
-		  void MongooseServer::WaitForStop() {
-			  quit = 0;
-			  signal(SIGINT, signal_handler);
+          void MongooseServer::WaitForStop() {
+               quit = 0;
+               signal(SIGINT, signal_handler);
 
-			  // Possible race condition -- If we catch sigint and then a new server
-			  // starts up within the sleep window, this server will not stop. 
-			  // Won't address until a use case for that comes up though. 
+               // Possible race condition -- If we catch sigint and then a new server
+               // starts up within the sleep window, this server will not stop. 
+               // Won't address until a use case for that comes up though. 
 
-			  std::mutex m;
-			  std::unique_lock<std::mutex> l(m);
-			  while (!quit){ quit_cond.wait(l); }
+               std::mutex m;
+               std::unique_lock<std::mutex> l(m);
+               while (!quit){ quit_cond.wait(l); }
 
-			  LOG(Mongoose, Debug) << "Caught sigint, shutting down server " << (void*)this << std::endl;
-			  Stop();
-		  }
-          void MongooseServer::Run(){               
+               LOG(Mongoose, Debug) << "Caught sigint, shutting down server " << (void*)this << std::endl;
+               Stop();
+          }
+          void MongooseServer::Run(){
                Start();
-			   WaitForStop();
+               WaitForStop();
           }
 
 
