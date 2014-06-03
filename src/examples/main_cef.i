@@ -31,9 +31,6 @@ public:
        window_info.SetAsPopup(NULL, "${modstruct} demo");
 #endif
 
-       // SimpleHandler implements browser-level callbacks.
-       CefRefPtr<DemoHandler> handler(new DemoHandler());
-
        // Specify CEF browser settings here.
        CefBrowserSettings browser_settings;
 
@@ -43,7 +40,7 @@ public:
        auto url = command_line->GetSwitchValue("url");
 
        // Create the first browser window.
-       CefBrowserHost::CreateBrowser(window_info, handler.get(), url,
+       CefBrowserHost::CreateBrowser(window_info, 0, url,
 				     browser_settings, NULL);     
      }
 

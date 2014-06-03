@@ -5,9 +5,10 @@
 #pragma warning (disable: 4512 )
 #include <qunit.hpp>
 #pragma warning (default: 4512 )
+#include <mxcomp/vsostream.h>
 namespace rikitiki {
      namespace examples {
-          QUnit::UnitTest qunit(std::cerr, QUnit::verbose);
+          QUnit::UnitTest qunit(mxcomp::vsdb, QUnit::verbose);
           void Test(std::shared_ptr<Response> response) {
                std::string payload(response->response.str());
                QUNIT_IS_EQUAL(payload, "Basic Test!");
@@ -21,11 +22,14 @@ namespace rikitiki {
 
           void HeaderTest(std::shared_ptr<Response> response) {
                QUNIT_IS_TRUE(response->headers.size() > 0);
-
-               if (response->headers.size()) {
-                    QUNIT_IS_EQUAL(response->headers.back().first, std::wstring(L"Test"));
-                    QUNIT_IS_EQUAL(response->headers.back().second, std::wstring(L"42"));
+               bool found = false;
+               for (auto hd : response->headers) {
+                    if (hd.first == L"Test") {
+                         found = true;
+                         QUNIT_IS_EQUAL(hd.second, std::wstring(L"42"));
+                    }                    
                }
+               QUNIT_IS_TRUE(found);
           }
           struct TestsModule FINAL : public WebModule {
                std::auto_ptr<Socket> testSocket;
@@ -40,6 +44,15 @@ namespace rikitiki {
                void HeaderTest(ConnContextRef ctx) {
                     ctx << rikitiki::Header(L"Test", L"42") << "!";
                }
+
+               void CookieTest(ConnContextRef ctx) {
+                    ctx << rikitiki::Cookie(L"Cookie", L"12345");
+               }
+
+               void StatusTest(ConnContextRef ctx) {
+                    ctx << rikitiki::HttpStatus::Moved_Permanently;
+               }
+
                void Register(rikitiki::Server& server) OVERRIDE{
                     server.AddHandler(CreateRoute<>::With(this, L"/basictest", &TestsModule::BasicTest));
                     server.AddHandler(CreateRoute<int>::With(this, L"/querystringtest/{num}", &TestsModule::QueryStringTest));
