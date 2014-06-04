@@ -9,8 +9,10 @@ ConnContext& ConnContext::operator <<(const T& obj) {
        OnHeadersFinished();
        headersDone = true;
   }
-  this->OnData();
+ 
   response << obj;
+  
+  this->OnData();
   return *this;
 }
 

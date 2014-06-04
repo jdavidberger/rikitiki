@@ -18,11 +18,16 @@ namespace rikitiki {
                void Close() {}
 
                virtual void OnHeadersFinished() {
-                    headersReady->Continue();
+                    if (headersReady) {
+                         headersReady->Continue();
+                         headersReady = 0;
+                    }
                }
                virtual void OnData() {
-                    if (dataReady.get() != 0)
+                    if (dataReady.get() != 0) {
                          dataReady->Continue();
+                         dataReady = 0; 
+                    }
                }
           };
 
@@ -33,6 +38,9 @@ namespace rikitiki {
                Server* server;
                ResourceHandler& operator = (const ResourceHandler&);
           public:
+               ~ResourceHandler() {
+
+               }
                ResourceHandler(Server* _server, Handler& _handler) : handler(_handler), server(_server) {
 
                }
@@ -42,6 +50,9 @@ namespace rikitiki {
                     ctx = ConnContextRef_<cef::ConnContext>(new ConnContext(server, request));
                     ctx->headersReady = callback;
                     handler.Handle(ctx);
+                    if (ctx.use_count() == 1) {
+                         callback->Continue(); 
+                    }
                     return true;
                }
 
@@ -64,9 +75,11 @@ namespace rikitiki {
                     int bytes_to_read,
                     int& bytes_read,
                     CefRefPtr<CefCallback> callback) OVERRIDE{
+                    std::lock_guard<std::mutex> lock(ctx->response.payloadWrite);
+
                     ctx->response.response.read((char*)data_out, bytes_to_read);
                     bytes_read = (int)ctx->response.response.gcount();
-
+                    ctx->response.response.clear();
                     ctx->dataReady = bytes_read == 0 ? callback : 0;
                     if (bytes_read)
                          return true;
@@ -107,16 +120,16 @@ namespace rikitiki {
                ReqClient() : response(new Response) {}
                std::promise<std::shared_ptr<Response>> promise;
                std::shared_ptr<Response> response;
-               virtual void OnRequestComplete(CefRefPtr< CefURLRequest > request) OVERRIDE {
+               virtual void OnRequestComplete(CefRefPtr< CefURLRequest > request) OVERRIDE{
                     UNREFERENCED_PARAMETER(request);
-                    CefResponse::HeaderMap headers; 
+                    CefResponse::HeaderMap headers;
                     request->GetResponse()->GetHeaderMap(headers);
                     for (auto it = headers.begin(); it != headers.end(); it++) {
                          response->headers.push_back(Header(std::wstring(it->first), std::wstring(it->second)));
                     }
                     promise.set_value(response);
                }
-               virtual bool GetAuthCredentials(bool isProxy, const CefString& host, int port, const CefString& realm, const CefString& scheme, CefRefPtr< CefAuthCallback > callback) OVERRIDE {
+                    virtual bool GetAuthCredentials(bool isProxy, const CefString& host, int port, const CefString& realm, const CefString& scheme, CefRefPtr< CefAuthCallback > callback) OVERRIDE{
                     UNREFERENCED_PARAMETER(isProxy);
                     UNREFERENCED_PARAMETER(host);
                     UNREFERENCED_PARAMETER(port);
@@ -125,18 +138,18 @@ namespace rikitiki {
                     UNREFERENCED_PARAMETER(callback);
                     return true;
                }
-               virtual void OnDownloadData(CefRefPtr< CefURLRequest > request, const void* data, size_t data_length) {
-                    std::string d((const char*)data, data_length);
-                    *response << d; 
-                    UNREFERENCED_PARAMETER(request);                    
+                    virtual void OnDownloadData(CefRefPtr< CefURLRequest > request, const void* data, size_t data_length) {
+                         std::string d((const char*)data, data_length);
+                         *response << d;
+                         UNREFERENCED_PARAMETER(request);
                }
-                    
+
                virtual void	OnDownloadProgress(CefRefPtr< CefURLRequest > request, uint64 current, uint64 total) {
                     UNREFERENCED_PARAMETER(request);
                     UNREFERENCED_PARAMETER(current);
                     UNREFERENCED_PARAMETER(total);
                }
-                    
+
                virtual void	OnUploadProgress(CefRefPtr< CefURLRequest > request, uint64 current, uint64 total) {
                     UNREFERENCED_PARAMETER(request);
                     UNREFERENCED_PARAMETER(current);
@@ -149,8 +162,8 @@ namespace rikitiki {
                auto request = CefRequest::Create();
                request->SetMethod(rikitiki::methodToStr(_request.RequestMethod()));
                request->SetURL(hostname + _request.URI());
-               
-               
+
+
                CefRefPtr<ReqClient> client = new ReqClient();
 
                // Start the request. MyRequestClient callbacks will be executed asynchronously.

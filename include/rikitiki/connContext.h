@@ -15,7 +15,9 @@
 #define decltype(a,b) decltype(b) // VC++ does not get sane error messages yet I guess
 #endif
 #include <mxcomp\useful_macros.h>
-
+#pragma warning (disable: 4265)
+#include <mutex>
+#pragma warning (default: 4265)
 namespace rikitiki {
      class Server;
      class ConnContext;
@@ -68,21 +70,29 @@ namespace rikitiki {
         Response class that handlers write to. Contains headers, response stream, status, etc.
         */
      struct Response {
+     private:
+          
+     public:
+          std::stringstream response;
           ContentType::t GetResponseType() const { return ContentType::FromString(ResponseType); }
           void SetResponseType(ContentType::t v) { ResponseType = ContentType::ToString(v);  }
           std::wstring ResponseType;
           std::vector<Header> headers;
           const HttpStatus* status;
-          std::stringstream response;
           void reset();
           Response();
-
+          std::mutex payloadWrite;
+          
           template <class T>
           auto operator <<(const T& obj) -> decltype(instance_of<std::stringstream>::value << obj, instance_of<Response&>::value)
           {
-               response << obj; return *this;
+               std::lock_guard<std::mutex> lock(payloadWrite);
+               response << obj; 
+               assert(response.good());
+               return *this;
           }
-
+          const std::stringstream& GetResponse() const;
+          std::stringstream& GetResponse();
           Response& operator <<(rikitiki::ContentType::t t);
           Response& operator <<(const rikitiki::Cookie& t);
           Response& operator <<(const rikitiki::HttpStatus& t);
