@@ -7,7 +7,11 @@ using namespace rikitiki::examples;
 using namespace rikitiki::cef;
 
 #include <list>
-
+class DemoClient : public CefClient {
+private:
+     // Include the default reference counting implementation.
+     IMPLEMENT_REFCOUNTING(DemoClient);
+};
 class DemoApp : public CefApp,
      public CefBrowserProcessHandler {
 public:
@@ -38,11 +42,11 @@ public:
 	 CefCommandLine::GetGlobalCommandLine();
 
        auto url = command_line->GetSwitchValue("url");
-		if(url.size())
+       if (url.empty())
 			url = "http://app/";
        // Create the first browser window.
-       CefBrowserHost::CreateBrowser(window_info, 0, url,
-				     browser_settings, NULL);     
+                CefBrowserHost::CreateBrowser(window_info, new DemoClient, url,
+				     browser_settings, NULL);       
      }
 
  private:

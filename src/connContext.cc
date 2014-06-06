@@ -311,7 +311,14 @@ namespace rikitiki {
      ConnContextWithWrite::~ConnContextWithWrite() {
           
      }
+     void ConnContext::Close() {
+          if (headersDone == false) {
+               OnHeadersFinished();
+               headersDone = true;
+          }
+     }
      void ConnContextWithWrite::Close() {          
+          ConnContext::Close();
           rawWrite("0\r\n\r\n", 5);
      }
      ConnContextWithWrite::ConnContextWithWrite(Server* s) : ConnContext(s) {}

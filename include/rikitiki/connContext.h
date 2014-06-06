@@ -243,7 +243,7 @@ namespace rikitiki {
           PostCollection& Post();
           ContentType::t ContentType();
 
-          virtual void Close() = 0;
+          virtual void Close();
           bool handled;
           virtual void OnHeadersFinished() {}
           virtual void OnData() {}

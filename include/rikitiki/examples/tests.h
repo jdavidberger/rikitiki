@@ -50,8 +50,19 @@ namespace rikitiki {
                }
                void HeadersTest(ConnContextRef ctx) {
                     ctx << rikitiki::Header(L"Test1", L"42");
+                    ctx << rikitiki::Header(L"Test", L"42") << "!";
+
+               }
+
+               static void AsyncTests(std::shared_ptr<Response> response) {
+                    std::string payload(response->response.str());
+                    QUNIT_IS_EQUAL(payload, "Testing");
+               }
+
+               void AsyncTests(ConnContextRef ctx) {
                     std::async([](ConnContextRef ctx) {
-                         ctx << rikitiki::Header(L"Test", L"42") << "!";
+                         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+                         ctx << "Testing"; 
                     }, ctx);
                }
 
@@ -89,29 +100,35 @@ namespace rikitiki {
                     request.uri = url;
                     numTests++;
                     request.method = IRequest::GET;
-                    {
-                         std::shared_future<std::shared_ptr<Response>> future = server.ProcessRequest(request);
-                         std::async([=] {
-                              testf(future.get());
-                              numTests--;
-                         });
-                    }
+                    
+                    std::shared_future<std::shared_ptr<Response>> future = server.ProcessRequest(request);
+                    std::async([=] {
+                         testf(future.get());
+                         numTests--;
+                    });
+                    
                }
-               void Register(rikitiki::Server& server) OVERRIDE{
+
+               void StartTests(ConnContextRef ctx) {
                     numTests = 0;
+                    auto& server = *ctx->server;
+                    SetupTest(server, L"BasicTest", &TestsModule::BasicTest);
+                    SetupTest(server, L"QueryStringTest/42", &TestsModule::QueryStringTest);
+                    SetupTest(server, L"StatusTest", &TestsModule::StatusTest);
+                    SetupTest(server, L"CookiesTest", &TestsModule::CookiesTest);
+                    SetupTest(server, L"AsyncTests", &TestsModule::AsyncTests);
+                    SetupTest(server, L"HeadersTest", &TestsModule::HeadersTest);
+                    this->operator()(ctx);
+               }
+
+               void Register(rikitiki::Server& server) OVERRIDE{
                     server.AddHandler(CreateRoute<>::With(this, L"/BasicTest", &TestsModule::BasicTest));
                     server.AddHandler(CreateRoute<int>::With(this, L"/QueryStringTest/{num}", &TestsModule::QueryStringTest));
                     server.AddHandler(CreateRoute<>::With(this, L"/HeadersTest", &TestsModule::HeadersTest));
                     server.AddHandler(CreateRoute<>::With(this, L"/StatusTest", &TestsModule::StatusTest));
                     server.AddHandler(CreateRoute<>::With(this, L"/CookiesTest", &TestsModule::CookiesTest));
-                    
-                    SetupTest(server, L"BasicTest", &TestsModule::BasicTest);
-                    SetupTest(server, L"QueryStringTest/42", &TestsModule::QueryStringTest);
-                    SetupTest(server, L"StatusTest", &TestsModule::StatusTest);
-                    SetupTest(server, L"CookiesTest", &TestsModule::CookiesTest);
-                    
-                    SetupTest(server, L"HeadersTest", &TestsModule::HeadersTest);
-
+                    server.AddHandler(CreateRoute<>::With(this, L"/AsyncTests", &TestsModule::AsyncTests));                    
+                    server.AddHandler(CreateRoute<>::With(this, L"/StartTests", &TestsModule::StartTests));
                     server.AddHandler(CreateRoute<>::With(this, L"/"));
                }
 

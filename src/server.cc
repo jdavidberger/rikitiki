@@ -16,7 +16,8 @@
 namespace rikitiki {
 
      void CleanConnContext(ConnContext* ctx) {
-          ctx->Close();
+          if (ctx->handled)
+               ctx->Close();
           delete ctx;
      }
 
