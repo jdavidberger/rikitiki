@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 namespace rikitiki {
   /**
@@ -8,11 +9,12 @@ namespace rikitiki {
    */
   class HttpStatus { 
   public:
-  HttpStatus(int s, const char* n) : status(s), name(n){} 
-  HttpStatus(int s) : status(s), name(0){} 
+  HttpStatus(int s, const std::string& n = "", bool _managed = false) : status(s), name(n), managed(_managed) {}   
   
     int status; 
-    const char* name;
+    std::string name;
+    bool managed; 
+
     static const HttpStatus Continue;
     static const HttpStatus Switching_Protocols;
     static const HttpStatus Processing;

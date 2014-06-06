@@ -131,6 +131,7 @@ namespace rikitiki {
                mg_callbacks callbacks;
                memset(&callbacks, 0, sizeof(callbacks));
                callbacks.begin_request = &_handler;
+               
 #ifdef USE_WEBSOCKET
                callbacks.websocket_connect = &_wsHandler;
                callbacks.websocket_ready = &_wsReady;
@@ -141,6 +142,7 @@ namespace rikitiki {
                std::string __port = _port.str();
                options.clear();
                options.push_back("listening_ports"), options.push_back(__port.c_str());
+               options.push_back("enable_keep_alive"), options.push_back("yes");
                if (DocumentRoot.size())
                     options.push_back("document_root"), options.push_back(&DocumentRoot[0]);
                options.push_back(NULL);

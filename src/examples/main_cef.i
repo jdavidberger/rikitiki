@@ -38,7 +38,8 @@ public:
 	 CefCommandLine::GetGlobalCommandLine();
 
        auto url = command_line->GetSwitchValue("url");
-
+		if(url.size())
+			url = "http://app/";
        // Create the first browser window.
        CefBrowserHost::CreateBrowser(window_info, 0, url,
 				     browser_settings, NULL);     

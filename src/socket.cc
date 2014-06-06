@@ -74,6 +74,7 @@ namespace rikitiki {
                          running = false;
                          for (auto l : listeners)
                               l->OnClose();
+                         closesocket(_socket);
                          return;
                     }
                     else {

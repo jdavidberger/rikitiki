@@ -11,7 +11,7 @@
 #include <cstring>
 
 namespace rikitiki {
-	std::ostream& operator <<(std::ostream& response, const wchar_t* obj)
+     std::ostream& operator <<(std::ostream& response, const wchar_t* obj)
      {
           std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
           response << conv.to_bytes(obj);
@@ -132,7 +132,7 @@ namespace rikitiki {
           mapContents(Payload(), _post);
           mappedPost = true;
      }
-     
+
      std::multimap<double, ContentType::t>& ConnContext::Accepts(){
           if (_accepts == 0){
                FillAccepts();
@@ -217,7 +217,7 @@ namespace rikitiki {
           return _post;
      }
 
-	 Response::Response() : ResponseType(ContentType::ToString(ContentType::DEFAULT)),
+     Response::Response() : ResponseType(ContentType::ToString(ContentType::DEFAULT)),
           status(&HttpStatus::OK){}
 
      Response& Response::operator <<(const rikitiki::HttpStatus& t){
@@ -245,14 +245,14 @@ namespace rikitiki {
      }
      /*
      ConnContext& ConnContext::operator<<(std::function<void(std::wostream&)> f){
-          handled = true;
-          f(response.response);
-          return *this;
+     handled = true;
+     f(response.response);
+     return *this;
      }
      */
      ConnContext& operator>>(ConnContext& ctx, std::wstring& t){
           std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
-          t = conversion.from_bytes( ctx.Payload() );
+          t = conversion.from_bytes(ctx.Payload());
           return ctx;
      }
      RequestContext::~RequestContext(){ }
@@ -268,7 +268,7 @@ namespace rikitiki {
           _accepts(0) {
           server = _server;
      }
-     ConnContext::ConnContext() : 
+     ConnContext::ConnContext() :
           handled(false),
           server(NULL),
           mappedPost(false),
@@ -279,37 +279,46 @@ namespace rikitiki {
      ConnContext::~ConnContext(){
           delete _accepts;
      }
+     void ConnContextWithWrite::OnHeadersFinished() {
+          std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+          std::stringstream ss;
+          ss << "HTTP/1.1 " << response.status->status << " " << response.status->name << "\r\n";
+          ss << "Content-Type: " << conv.to_bytes(response.ResponseType) << "\r\n";
+          ss << "Transfer-Encoding: chunked" << "\r\n";
+          for (auto it : response.headers){
+               ss << conv.to_bytes(it.first) << ": " << conv.to_bytes(it.second) << "\r\n";
+          }
+          ss << "\r\n";
+          std::string buffer = ss.str();
+
+          rawWrite(buffer.c_str(), buffer.length());
+
+     }
+     void ConnContextWithWrite::OnData() {
+          std::stringstream ss;
+          response.response.swap(ss);
+          std::string buffer = ss.str();
+          auto len = buffer.size();
+          if (len == 0)
+               return;
+
+          std::stringstream resp;
+          resp << std::hex << len << "\r\n" << buffer << "\r\n";
+          buffer = resp.str();
+          rawWrite(buffer.c_str(), buffer.length());
+     }
      
-     void ConnContextWithWrite::writeResponse() {
-		 std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-
-		 std::stringstream ss;
-		 std::string resp = response.response.str();
-		 ss << "HTTP/1.1 " << response.status->status << " " << response.status->name << "\r\n";
-		 ss << "Content-Length: " << resp.size() << "\r\n";
-		 ss << "Content-Type: " << conv.to_bytes(response.ResponseType) << "\r\n";
-		 for (auto it : response.headers){
-			 ss << conv.to_bytes(it.first) << ": " << conv.to_bytes(it.second) << "\r\n";
-		 }
-		 ss << "\r\n";
-		 ss << resp;
-		 std::string buffer = ss.str();
-
-		 rawWrite(buffer.c_str(), buffer.length());
-
-     }
-     void ConnContextWithWrite::Close() {
-		 if(this->handled == true)
-			this->writeResponse();
-     }
      ConnContextWithWrite::~ConnContextWithWrite() {
-
+          
+     }
+     void ConnContextWithWrite::Close() {          
+          rawWrite("0\r\n\r\n", 5);
      }
      ConnContextWithWrite::ConnContextWithWrite(Server* s) : ConnContext(s) {}
 
 
 #define MATCH_METHOD_ENUM(eval)	{if(wcscmp(method, L#eval) == 0) return ConnContext::eval;}
-     
+
      ConnContext::Method strToMethod(const wchar_t* method){
           MATCH_METHOD_ENUM(GET);
           MATCH_METHOD_ENUM(POST);
@@ -335,7 +344,7 @@ namespace rikitiki {
                MATCH_METHOD_STR(TRACE);
                MATCH_METHOD_STR(OPTIONS);
                MATCH_METHOD_STR(CONNECT);
-               MATCH_METHOD_STR(PATCH);               
+               MATCH_METHOD_STR(PATCH);
           case ConnContext::ANY:
           case ConnContext::OTHER:
           default:
@@ -375,7 +384,11 @@ namespace rikitiki {
                _qs++;
           }
      }
-
+     ConnContext& ConnContext::operator <<(const HttpStatus& obj) {
+          handled = true;
+          response << obj;
+          return *this;
+     }
      ConnContext& ConnContext::operator <<(const Cookie& obj) {
           handled = true;
           response << obj;
@@ -435,7 +448,7 @@ namespace rikitiki {
                     post.insert(PostContent(name, value));
                     curl_free(value);
 #endif
-                    l_it = it+1;
+                    l_it = it + 1;
                     break;
                }
           }

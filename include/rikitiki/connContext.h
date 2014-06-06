@@ -71,23 +71,23 @@ namespace rikitiki {
         */
      struct Response {
      private:
-          
+
      public:
           std::stringstream response;
           ContentType::t GetResponseType() const { return ContentType::FromString(ResponseType); }
-          void SetResponseType(ContentType::t v) { ResponseType = ContentType::ToString(v);  }
+          void SetResponseType(ContentType::t v) { ResponseType = ContentType::ToString(v); }
           std::wstring ResponseType;
           std::vector<Header> headers;
           const HttpStatus* status;
           void reset();
           Response();
           std::mutex payloadWrite;
-          
+
           template <class T>
           auto operator <<(const T& obj) -> decltype(instance_of<std::stringstream>::value << obj, instance_of<Response&>::value)
           {
                std::lock_guard<std::mutex> lock(payloadWrite);
-               response << obj; 
+               response << obj;
                assert(response.good());
                return *this;
           }
@@ -125,7 +125,7 @@ namespace rikitiki {
      typedef std::basic_string<char> ByteStream;
 
      class IRequest {
-     public: 
+     public:
           enum Method {
                ANY = 0, GET = 1, POST = 2, HEAD = 3, PUT = 4, DELETE = 5, TRACE = 6, OPTIONS = 7, CONNECT = 8, PATCH = 9, OTHER
           };
@@ -140,14 +140,14 @@ namespace rikitiki {
      class SimpleRequest : public IRequest {
      public:
           virtual ~SimpleRequest(){}
-          Method method; 
+          Method method;
           virtual Method RequestMethod() { return method; };
           HeaderCollection headers;
           virtual HeaderCollection& Headers() {
                return headers;
           };
 
-          CookieCollection cookies; 
+          CookieCollection cookies;
           virtual CookieCollection& Cookies() {
                return cookies;
           };
@@ -171,7 +171,7 @@ namespace rikitiki {
      /***
         Request context object. Contains everything about the request; but has no methods to deal with responding to the request.
         */
-     class RequestContext : public IRequest {     
+     class RequestContext : public IRequest {
      public:
           typedef IRequest::Method Method;
      protected:
@@ -196,7 +196,7 @@ namespace rikitiki {
           This function exists so the raw conncontext drivers can just kick down unsanitized header data and this function
           does the right thing. Namely that means lower-casing it.
           */
-          HeaderCollection::value_type& AddRequestHeader(const std::wstring&, const std::wstring&);          
+          HeaderCollection::value_type& AddRequestHeader(const std::wstring&, const std::wstring&);
      public:
           Method RequestMethod();
           HeaderCollection& Headers();
@@ -225,9 +225,9 @@ namespace rikitiki {
 
 
           virtual void FillAccepts();
-          virtual void FillContentType();          
+          virtual void FillContentType();
           virtual void FillPost();
-          
+
           friend class Server;
 
 
@@ -248,6 +248,7 @@ namespace rikitiki {
           virtual void OnHeadersFinished() {}
           virtual void OnData() {}
 
+          ConnContext& operator <<(const HttpStatus& obj);
           ConnContext& operator <<(const Cookie& obj);
           ConnContext& operator <<(const Header& obj);
 
@@ -261,19 +262,18 @@ namespace rikitiki {
 
           Response response;
      };
-     
+
      class ConnContextWithWrite : public ConnContext {
      private:
-          
+
      protected:
-          virtual void writeResponse();
-		  virtual size_t rawWrite(const void* buffer, size_t length) = 0;
-
+          virtual size_t rawWrite(const void* buffer, size_t length) = 0;
+          virtual void OnHeadersFinished() OVERRIDE;
+          virtual void OnData() OVERRIDE;
      public:
-          virtual void Close();
-
           ConnContextWithWrite(Server* s);
           virtual ~ConnContextWithWrite();
+          virtual void Close() OVERRIDE;
      };
 
      void mapContents(ByteStream& raw_content, PostCollection& post);

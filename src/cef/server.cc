@@ -26,7 +26,7 @@ namespace rikitiki {
                virtual void OnData() {
                     if (dataReady.get() != 0) {
                          dataReady->Continue();
-                         dataReady = 0; 
+                         //dataReady = 0; 
                     }
                }
           };
@@ -68,6 +68,7 @@ namespace rikitiki {
                     response->GetHeaderMap(map);
                     for (auto it = ctx->response.headers.begin(); it != ctx->response.headers.end(); it++)
                          map.insert(*it);
+                    response->SetHeaderMap(map);
                     response->SetMimeType(ctx->response.ResponseType);
                }
 
@@ -123,6 +124,7 @@ namespace rikitiki {
                virtual void OnRequestComplete(CefRefPtr< CefURLRequest > request) OVERRIDE{
                     UNREFERENCED_PARAMETER(request);
                     CefResponse::HeaderMap headers;
+                    response->status = new HttpStatus(request->GetResponse()->GetStatus(), request->GetResponse()->GetStatusText());
                     request->GetResponse()->GetHeaderMap(headers);
                     for (auto it = headers.begin(); it != headers.end(); it++) {
                          response->headers.push_back(Header(std::wstring(it->first), std::wstring(it->second)));
