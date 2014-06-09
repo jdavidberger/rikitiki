@@ -20,7 +20,9 @@ namespace rikitiki {
                ctx->Close();
           delete ctx;
      }
-
+     bool Handler::Handle(ConnContextRef ctx) {
+          return ctx->handled = true;           
+     }
      std::string Handler::desc() const {
           return "";
      }
@@ -127,6 +129,7 @@ namespace rikitiki {
 
      }
      bool StaticContentHandler::Handle(ConnContextRef ctx) {
+          Handler::Handle(ctx);
           std::wstring relpath(ctx->URI() + prefix.length());
           std::wstring mime = L"text/html";
           auto idx = relpath.rfind(L".");

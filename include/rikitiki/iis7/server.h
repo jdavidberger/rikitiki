@@ -8,6 +8,7 @@
 #pragma warning (default: 4365 4574 4263 4264 )
 #include <rikitiki\rikitiki>
 
+#pragma comment(lib, "Ws2_32") // I know, I hate this too but noone is building for IIS outside of VS
 namespace rikitiki {
      namespace iis7 {
           Server* CreateServer(DWORD _dwServerVersion, IHttpModuleRegistrationInfo * _pModuleInfo, IHttpServer * _pHttpServer);

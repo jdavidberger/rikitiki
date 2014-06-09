@@ -14,7 +14,8 @@ namespace rikitiki {
           static std::atomic_int numTests;
 
           QUnit::UnitTest qunit(test_results, QUnit::verbose);
-          
+          std::vector<std::future<void>> active_tests; 
+
           struct TestsModule FINAL : public WebModule {
           
                std::auto_ptr<Socket> testSocket;
@@ -51,7 +52,6 @@ namespace rikitiki {
                void HeadersTest(ConnContextRef ctx) {
                     ctx << rikitiki::Header(L"Test1", L"42");
                     ctx << rikitiki::Header(L"Test", L"42") << "!";
-
                }
 
                static void AsyncTests(std::shared_ptr<Response> response) {
@@ -83,9 +83,10 @@ namespace rikitiki {
                void operator () (ConnContextRef ctx) {
                     ctx << "<html><body>";
                     std::async([](ConnContextRef ctx) {
+
                          ctx << "<div>";
                          while (numTests != 0) {
-                              std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                             std::this_thread::sleep_for(std::chrono::milliseconds(100));
                              ctx << ".";
                          }
                          ctx << "</div>";
@@ -102,11 +103,10 @@ namespace rikitiki {
                     request.method = IRequest::GET;
                     
                     std::shared_future<std::shared_ptr<Response>> future = server.ProcessRequest(request);
-                    std::async([=] {
+                    active_tests.push_back(std::async([=] {
                          testf(future.get());
                          numTests--;
-                    });
-                    
+                    }));                    
                }
 
                void StartTests(ConnContextRef ctx) {

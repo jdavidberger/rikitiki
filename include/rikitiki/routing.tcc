@@ -106,6 +106,7 @@ bool Route_<P, T...>::CanHandle(RequestContext& ctx){
 
 template <typename P, typename... T> 
 bool Route_<P,T...>::Handle(ConnContextRef ctx){
+     Handler::Handle(ctx); 
   if( method != ConnContext::ANY && method != ctx->RequestMethod() ) {
     return false;
   }
@@ -143,12 +144,13 @@ bool Route_<P>::CanHandle(RequestContext& ctx){
 
 template <typename P> 
 bool Route_<P>::Handle(ConnContextRef ctx){
+     Handler::Handle(ctx);
   bool shouldAttempt = 
     wcscmp(route.c_str(), ctx->URI()) == 0 &&
     (method == ConnContext::ANY ||
      method == ctx->RequestMethod());
   
-  if(shouldAttempt){
+  if(shouldAttempt){       
     LOG(Web, Verbose) << "Using route " << route << ", " << method << std::endl;
     (parent->*f)(ctx);
     return true;

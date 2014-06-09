@@ -56,8 +56,13 @@ namespace rikitiki {
           };
           class II7ConnContext : public II7RequestContext, public ConnContextWithWrite {
                IHttpContext* iis7ctx;
+               bool async; 
+
           public:
-               II7ConnContext(Server* server, IHttpContext* _ctx) : II7RequestContext(_ctx->GetRequest()), iis7ctx(_ctx), ConnContextWithWrite(server) {
+               II7ConnContext(Server* server, IHttpContext* _ctx) : II7RequestContext(_ctx->GetRequest()), 
+                                                                      iis7ctx(_ctx), 
+                                                                      async(false),
+                                                                      ConnContextWithWrite(server) {
 
                }
                virtual void OnHeadersFinished() OVERRIDE{
@@ -71,16 +76,22 @@ namespace rikitiki {
 
                     iis7ctx->GetResponse()->SetStatus((USHORT)response.status->status, response.status->name.c_str());
                }
+               void SetAsync() {
+                    async = true; 
+               }
                virtual void Close() OVERRIDE {
                     ConnContext::Close();
                     rawWrite("", 0);
+                    iis7ctx->SetRequestHandled();
+                    if (async)
+                         iis7ctx->IndicateCompletion(RQ_NOTIFICATION_FINISH_REQUEST);
                }
                virtual void OnData() OVERRIDE{
                     std::stringstream ss;
                     response.response.swap(ss);
                     std::string buffer = ss.str();
                     
-                    rawWrite(buffer.c_str(), buffer.length());
+                    rawWrite(buffer.c_str(), buffer.length());                    
                }
                virtual size_t rawWrite(const void* buffer, size_t length)  {
                     HTTP_DATA_CHUNK c;
@@ -90,7 +101,9 @@ namespace rikitiki {
                     c.FromMemory.BufferLength = (ULONG)length;
                     DWORD sent; BOOL completed;
                     // Note -- we should make this asyc at some point; figure out memory management detail with data chunk.
-                    assert(S_OK == iis7ctx->GetResponse()->WriteEntityChunks(&c, 1, false, true, &sent, &completed));
+                    BOOL moreData = length > 0; 
+                    assert(S_OK == iis7ctx->GetResponse()->WriteEntityChunks(&c, 1, false, moreData, &sent, &completed));
+                    
                     return sent;
                }
 
@@ -132,11 +145,16 @@ namespace rikitiki {
                     UNREFERENCED_PARAMETER(pProvider);
                     
                     REQUEST_NOTIFICATION_STATUS rtn = RQ_NOTIFICATION_CONTINUE;
-                    {
-                         ConnContextRef_<II7ConnContext> ctx(new II7ConnContext(this, pHttpContext));
-                         auto handler = this->GetHandler(*ctx.get());
-                         if (handler != 0 && (handler->Handle(ctx) == true))
-                              rtn = ctx.use_count() == 1 ? RQ_NOTIFICATION_FINISH_REQUEST : RQ_NOTIFICATION_PENDING;
+                    ConnContextRef_<II7ConnContext> ctx(new II7ConnContext(this, pHttpContext));
+                    auto handler = this->GetHandler(*ctx.get());
+                    if (handler != 0 && (handler->Handle(ctx) == true)) {
+                         if (ctx.use_count() == 1) {
+                              rtn = RQ_NOTIFICATION_FINISH_REQUEST;
+                         }
+                         else {
+                              ctx->SetAsync();
+                              rtn = RQ_NOTIFICATION_PENDING;
+                         }
                     }
                     return rtn;
                }

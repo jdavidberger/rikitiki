@@ -17,3 +17,5 @@ bin/*
 test/output/*
 include/rikitiki/config.h
 bin2/*
+third/cef/cef3/out/*
+*/#*#

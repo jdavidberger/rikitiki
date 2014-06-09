@@ -10,6 +10,7 @@
 
 #include <mxcomp/macros.h>
 #include <mxcomp/tuple_ext.h>
+#include <mxcomp/useful_macros.h>
 #include <tuple>
 
 #include <rikitiki/log/log>
@@ -58,7 +59,7 @@ namespace rikitiki {
         */
      struct Handler {
 
-          virtual bool Handle(ConnContextRef ctx) = 0;
+          virtual bool Handle(ConnContextRef ctx);
           virtual bool CanHandle(RequestContext& ctx) = 0;
           virtual bool visible() const = 0;
           virtual std::wstring name() const = 0;
@@ -71,8 +72,8 @@ namespace rikitiki {
           std::wstring path;
           std::map<std::wstring, std::wstring> mime_types;
           StaticContentHandler(const std::wstring& prefix, const std::wstring& path);
-          virtual bool Handle(ConnContextRef ctx);
-          virtual bool CanHandle(RequestContext& ctx);
+          virtual bool Handle(ConnContextRef ctx) OVERRIDE;
+          virtual bool CanHandle(RequestContext& ctx) OVERRIDE;
           virtual bool visible() const;
           virtual std::wstring name() const;
           virtual ~StaticContentHandler();
