@@ -8,6 +8,7 @@
 #include <future>
 #pragma warning(default:4265 4355)
 #include <sstream>
+#include <rikitiki\Response.h>
 
 //typedef _W64 unsigned int UINT_PTR, *PUINT_PTR;
 typedef unsigned long long        SOCKET;
@@ -17,7 +18,7 @@ namespace rikitiki {
      struct SocketListener {
           virtual ~SocketListener() {};
           virtual void OnClose() = 0;
-          virtual void OnData(const char*, size_t length) = 0;
+          virtual bool OnData(const char*, size_t length) = 0;
      };
 
 	struct Socket {
@@ -50,12 +51,7 @@ namespace rikitiki {
              const wchar_t* host;
              std::stringstream localBuffer; 
 
-             enum StateT {
-                  STATUS,
-                  HEADERS, 
-                  PAYLOAD
-             };
-             StateT state;
+             ResponseBuilder builder; 
         public:
              
              ~SimpleRequestClient();
@@ -63,7 +59,9 @@ namespace rikitiki {
              SimpleRequestClient(wchar_t* host, uint16_t port = 80);
              void MakeRequest(IRequest& request);
              virtual void OnClose();
-             virtual void OnData(const char*, size_t length);
-             std::future<std::shared_ptr<Response>> future();
+             virtual bool OnData(const char*, size_t length);
+             std::future<std::shared_ptr<Response>> future() {
+                  return promise.get_future();
+             }
         };
 }

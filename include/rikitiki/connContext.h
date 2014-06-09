@@ -10,21 +10,18 @@
 #include "content_handler.h"
 #include <locale>
 #include <codecvt>
+#include <rikitiki/Request.h>
+#include <rikitiki/Response.h>
+
 #ifdef _MSC_VER
 #undef DELETE
 #define decltype(a,b) decltype(b) // VC++ does not get sane error messages yet I guess
 #endif
 #include <mxcomp\useful_macros.h>
-#pragma warning (disable: 4265)
-#include <mutex>
-#pragma warning (default: 4265)
+
 namespace rikitiki {
      class Server;
      class ConnContext;
-
-
-     std::ostream& operator <<(std::ostream& response, const wchar_t* obj);
-     std::ostream& operator <<(std::ostream& response, const std::wstring& obj);
 
      /** Thrown from within handlers to immediately stop handler execution.
      Note that throwing an exception will treat the request as handled, by design.
@@ -36,136 +33,6 @@ namespace rikitiki {
           If no status is set, Internal_Server_Error is returned.
           */
           const HttpStatus* status;
-     };
-
-     typedef std::pair<std::wstring, std::wstring> wstringpair;
-
-     /**
-        Headers are just string pairs
-        We can't just typedef it since we want to pass it around with stream operators
-        */
-     struct Header : public wstringpair {
-          Header(const std::wstring& name, const std::wstring& value);
-     };
-
-     /**
-        Things parsed out of the response, ala forms
-        We can't just typedef it since we want to pass it around with stream operators
-        */
-     struct PostContent : public wstringpair {
-          PostContent(const std::wstring& name, const std::wstring& value);
-     };
-
-     /**
-        Cookies are key value pairs too.
-        TODO: Add expiration, domain, etc
-        */
-     struct Cookie : public wstringpair {
-          Cookie(const std::wstring& name, const std::wstring& value,
-               const std::wstring& Domain = L"", const std::wstring& Path = L"/",
-               const std::wstring& Expires = L"", bool secure = false, bool httpOnly = false);
-     };
-
-     /**
-        Response class that handlers write to. Contains headers, response stream, status, etc.
-        */
-     struct Response {
-     private:
-
-     public:
-          std::stringstream response;
-          ContentType::t GetResponseType() const { return ContentType::FromString(ResponseType); }
-          void SetResponseType(ContentType::t v) { ResponseType = ContentType::ToString(v); }
-          std::wstring ResponseType;
-          std::vector<Header> headers;
-          const HttpStatus* status;
-          void reset();
-          Response();
-          std::mutex payloadWrite;
-
-          template <class T>
-          auto operator <<(const T& obj) -> decltype(instance_of<std::stringstream>::value << obj, instance_of<Response&>::value)
-          {
-               std::lock_guard<std::mutex> lock(payloadWrite);
-               response << obj;
-               assert(response.good());
-               return *this;
-          }
-          const std::stringstream& GetResponse() const;
-          std::stringstream& GetResponse();
-          Response& operator <<(rikitiki::ContentType::t t);
-          Response& operator <<(const rikitiki::Cookie& t);
-          Response& operator <<(const rikitiki::HttpStatus& t);
-          Response& operator <<(const rikitiki::Header& t);
-     };
-
-     /**
-        The normal multimap, but with an operator[] defined.
-        */
-     template <typename T1, typename T2>
-     struct multimap : public std::multimap<T1, T2> {
-          T2& operator[](const T1&);
-          template <typename S>
-          bool hasValue(const T1& key, S& rtn) {
-               typename rikitiki::multimap<T1, T2>::iterator it = this->find(key);
-               if (it != this->end()){
-                    rtn = it->second;
-                    return true;
-               }
-               return false;
-          }
-     };
-
-     typedef multimap<std::wstring, std::wstring> HeaderCollection;
-     typedef std::map<std::wstring, std::wstring> QueryStringCollection;
-     typedef multimap<std::wstring, std::wstring> PostCollection;
-     typedef std::map<std::wstring, std::wstring> CookieCollection;
-
-
-     typedef std::basic_string<char> ByteStream;
-
-     class IRequest {
-     public:
-          enum Method {
-               ANY = 0, GET = 1, POST = 2, HEAD = 3, PUT = 4, DELETE = 5, TRACE = 6, OPTIONS = 7, CONNECT = 8, PATCH = 9, OTHER
-          };
-          virtual Method RequestMethod() = 0;
-          virtual HeaderCollection& Headers() = 0;
-          virtual CookieCollection& Cookies() = 0;
-          virtual QueryStringCollection& QueryString() = 0;
-          virtual const wchar_t* URI() = 0;
-          virtual const ByteStream& Payload() = 0;
-     };
-
-     class SimpleRequest : public IRequest {
-     public:
-          virtual ~SimpleRequest(){}
-          Method method;
-          virtual Method RequestMethod() { return method; };
-          HeaderCollection headers;
-          virtual HeaderCollection& Headers() {
-               return headers;
-          };
-
-          CookieCollection cookies;
-          virtual CookieCollection& Cookies() {
-               return cookies;
-          };
-
-          QueryStringCollection queryString;
-          virtual QueryStringCollection& QueryString() {
-               return queryString;
-          };
-          std::wstring uri;
-          virtual const wchar_t* URI() {
-               return uri.data();
-          };
-
-          ByteStream payload;
-
-          ByteStream& Payload() {
-               return payload;
-          }
      };
 
      /***

@@ -10,7 +10,7 @@
 #include <Ws2tcpip.h>
 #pragma warning (default: 4365 4574 4263 4264 )
 #endif
-
+#include <rikitiki\Response.h>
 #include <rikitiki\rikitiki>
 #include <sstream>
 
@@ -67,31 +67,42 @@ namespace rikitiki {
           }
           running = true;
           pollingThread = std::thread([=]() {
-               char buffer[512];
-               while (running) {
+               char buffer[512];               
+               while (running) {                    
                     int readBytes = recv(_socket, buffer, sizeof(buffer), 0);
                     if (readBytes <= 0) {
                          running = false;
                          for (auto l : listeners)
                               l->OnClose();
-                         closesocket(_socket);
-                         return;
+                         running = false;
                     }
                     else {
-                         for (auto l : listeners)
-                              l->OnData(buffer, (size_t)readBytes);
+                         for (std::size_t i = 0; i < listeners.size(); i++){
+                              auto l = listeners[i];
+                              if (l->OnData(buffer, (size_t)readBytes)) { // OnData returns true when message is finished
+                                   l->OnClose();
+                                   listeners[i] = listeners.back();
+                                   listeners.pop_back();
+                                   i--;
+                              }
+                              running = false;
+                         }
                     }
                }
+               closesocket(_socket);
           });
      }
 
      size_t TCPIPSocket::Send(const char* buffer, size_t length) {
           return (size_t)send(_socket, buffer, (int)length, 0);
      }
+
+#endif
+
      SimpleRequestClient::~SimpleRequestClient() {
           
      }
-     SimpleRequestClient::SimpleRequestClient(wchar_t* _host, uint16_t port) : host(_host), socket(_host, port), response(new Response()), state(STATUS) {
+     SimpleRequestClient::SimpleRequestClient(wchar_t* _host, uint16_t port) : host(_host), socket(_host, port), response(new Response()), builder(response.get()) {
           socket.listeners.push_back(this);
      }
      void SimpleRequestClient::MakeRequest(IRequest& request) {
@@ -109,65 +120,8 @@ namespace rikitiki {
      void SimpleRequestClient::OnClose() {
           promise.set_value(response);
      }
-     void SimpleRequestClient::OnData(const char* data, size_t length) {
-          switch (state) {
-          case STATUS: {
-               data += 9; // 'HTTP/1.1 '
-               length -= 9;
-               std::string buff;
-               while (*data != ' ' && *data != '\n' && length > 0) {
-                    buff += *data; 
-                    data++;
-                    length--;
-               }
-               while (*data == ' ') {
-                    data++;
-                    length--;
-               }
+     bool SimpleRequestClient::OnData(const char* data, size_t length) {
+          return builder.OnData(data, length);
+     }
 
-               auto status = atoi(&buff[0]);
-               buff.clear();
-               while (*data != ' ' && *data != '\n' && length > 0) {
-                    buff += *data;
-                    data++;
-                    length--;
-               }
-               while (*data == '\n' || *data == '\r' || *data == ' ') {
-                    data++;
-                    length--;
-               }
-          
-               response->status = new HttpStatus(status, &buff[0]);
-          }
-               state = HEADERS;
-          case HEADERS:
-          do {
-               std::wstring name, value;
-               while (*data != ':' && *data != '\n' && length > 0) {
-                    name += (wchar_t)*data;
-                    data++;
-                    length--;
-               }
-               while (*data == ' ' || *data == ':') {
-                    data++;
-                    length--;
-               }
-               while (*data != ' ' && *data != '\n'&& *data != '\r' && length > 0) {
-                    value += (wchar_t)*data;
-                    data++;
-                    length--;
-               }
-               data += 2; length -= 2;
-               response->headers.push_back(rikitiki::Header(name, value));
-          } while (*data != '\n' && *data != '\r');
-          data += 2; length -= 2;
-               state = PAYLOAD;
-          case PAYLOAD:
-               response->response.write(data, (std::streamsize)length);
-          }          
-     }
-     std::future<std::shared_ptr<Response>> SimpleRequestClient::future() {
-          return promise.get_future();
-     }
 }
-#endif

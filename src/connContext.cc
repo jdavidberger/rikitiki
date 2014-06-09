@@ -20,26 +20,6 @@ namespace rikitiki {
      std::ostream& operator <<(std::ostream& response, const std::wstring& obj) {
           return response << obj.c_str();
      }
-     Header::Header(const std::wstring& name, const std::wstring& value) : wstringpair(name, value){}
-
-     PostContent::PostContent(const std::wstring& name, const std::wstring& value) : wstringpair(name, value){}
-
-     Cookie::Cookie(const std::wstring& name, const std::wstring& value,
-          const std::wstring& Domain, const std::wstring& Path,
-          const std::wstring& Expires, bool secure, bool httpOnly) {
-          first = name;
-          second = value + L"; ";
-          //    if(Domain.size())
-          second += L"Domain=" + Domain + L"; ";
-          if (Path.size())
-               second += L"Path=" + Path + L"; ";
-          if (Expires.size())
-               second += L"Expires=" + Expires + L"; ";
-          if (secure)
-               second += L"Secure; ";
-          if (httpOnly)
-               second += L"HttpOnly";
-     }
 
      ConnContext::Method RequestContext::RequestMethod() {
           if (_method == ANY){
@@ -93,6 +73,7 @@ namespace rikitiki {
           }
           return b;
      }
+     
      void ConnContext::FillAccepts() {
           _accepts = new std::multimap<double, ContentType::t>();
           const wchar_t* b;
@@ -217,32 +198,6 @@ namespace rikitiki {
           return _post;
      }
 
-     Response::Response() : ResponseType(ContentType::ToString(ContentType::DEFAULT)),
-          status(&HttpStatus::OK){}
-
-     Response& Response::operator <<(const rikitiki::HttpStatus& t){
-          status = &t;
-          return *this;
-     }
-
-     void Response::reset(){
-          response.clear();
-          headers.clear();
-     }
-
-     Response& Response::operator <<(rikitiki::ContentType::t t){
-          ResponseType = ContentType::ToString(t);
-          return *this;
-     }
-
-     Response& Response::operator <<(const rikitiki::Cookie& cookie){
-          return *this << Header(L"Set-Cookie", cookie.first + L"=" + cookie.second);
-     }
-
-     Response& Response::operator <<(const rikitiki::Header& header){
-          headers.push_back(header);
-          return *this;
-     }
      /*
      ConnContext& ConnContext::operator<<(std::function<void(std::wostream&)> f){
      handled = true;

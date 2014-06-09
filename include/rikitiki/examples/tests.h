@@ -21,6 +21,7 @@ namespace rikitiki {
                std::auto_ptr<Socket> testSocket;
                virtual ~TestsModule() {}
 
+               // Make sure we can roundtrip out a payload
                static void BasicTest(std::shared_ptr<Response> response) {
                     std::string payload(response->response.str());
                     QUNIT_IS_EQUAL(payload, "Basic Test!");
@@ -29,6 +30,7 @@ namespace rikitiki {
                     ctx << "Basic Test!";
                }
                
+               // Make sure whatever ingests route does a good job of it. 
                void QueryStringTest(ConnContextRef ctx, int num) {
                     ctx << "Saw: " << num;
                }
@@ -38,6 +40,7 @@ namespace rikitiki {
                     QUNIT_IS_EQUAL(payload, "Saw: 42");
                }
 
+               // Make sure we can set a handler. 
                static void HeadersTest(std::shared_ptr<Response> response) {
                     QUNIT_IS_TRUE(response->headers.size() > 0);
                     bool found = false;
@@ -54,11 +57,11 @@ namespace rikitiki {
                     ctx << rikitiki::Header(L"Test", L"42") << "!";
                }
 
+               // Makes ure that the use case where we run async and respond later is handled. 
                static void AsyncTests(std::shared_ptr<Response> response) {
                     std::string payload(response->response.str());
                     QUNIT_IS_EQUAL(payload, "Testing");
                }
-
                void AsyncTests(ConnContextRef ctx) {
                     std::async([](ConnContextRef ctx) {
                          std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -66,6 +69,7 @@ namespace rikitiki {
                     }, ctx);
                }
 
+               // Do cookie test -- need some more framework stuff. 
                static void CookiesTest(std::shared_ptr<Response> response) {
                     
                }
@@ -73,6 +77,7 @@ namespace rikitiki {
                     ctx << rikitiki::Cookie(L"Cookie", L"12345");
                }
 
+               // Make sure we can set the status string however
                static void StatusTest(std::shared_ptr<Response> response) {
                     QUNIT_IS_EQUAL(rikitiki::HttpStatus::Moved_Permanently.status, response->status->status);
                }
@@ -80,6 +85,7 @@ namespace rikitiki {
                     ctx << rikitiki::HttpStatus::Moved_Permanently;
                }
 
+               // Main page -- show all the tests. Might have to wait on them to finish. 
                void operator () (ConnContextRef ctx) {
                     ctx << "<html><body>";
                     std::async([](ConnContextRef ctx) {
@@ -96,6 +102,7 @@ namespace rikitiki {
                     }, ctx);
                }
 
+               // Set up a test to be run. 
                void SetupTest(rikitiki::Server& server, const std::wstring& url, void(*testf)(std::shared_ptr<Response>)) {
                     SimpleRequest request;
                     request.uri = url;
@@ -109,6 +116,7 @@ namespace rikitiki {
                     }));                    
                }
 
+               // Run all known tests, then go try to get the status page (Will likely take a second to get results back, an they wont be ordered)
                void StartTests(ConnContextRef ctx) {
                     numTests = 0;
                     auto& server = *ctx->server;
