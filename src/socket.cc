@@ -112,7 +112,7 @@ namespace rikitiki {
           req << rikitiki::methodToStr(request.RequestMethod()) << L" /" << request.URI() << L" HTTP/1.1" << std::endl;
           req << L"Host: " << host << std::endl;
           req << std::endl << std::endl;
-          req << conversion.from_bytes(request.Payload());
+          req << conversion.from_bytes(request.Payload().str());
 
           std::string utf8 = conversion.to_bytes(req.str());
           socket.Send(utf8.data(), utf8.size());

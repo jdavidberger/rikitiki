@@ -23,7 +23,7 @@ namespace rikitiki {
 
                // Make sure we can roundtrip out a payload
                static void BasicTest(std::shared_ptr<Response> response) {
-                    std::string payload(response->response.str());
+                    std::string payload(response->payload.str());
                     QUNIT_IS_EQUAL(payload, "Basic Test!");
                }
                void BasicTest(ConnContextRef ctx) {
@@ -35,7 +35,7 @@ namespace rikitiki {
                     ctx << "Saw: " << num;
                }
                static void QueryStringTest(std::shared_ptr<Response> response) {
-                    std::string payload(response->response.str());
+                    std::string payload(response->payload.str());
 
                     QUNIT_IS_EQUAL(payload, "Saw: 42");
                }
@@ -59,7 +59,7 @@ namespace rikitiki {
 
                // Makes ure that the use case where we run async and respond later is handled. 
                static void AsyncTests(std::shared_ptr<Response> response) {
-                    std::string payload(response->response.str());
+                    std::string payload(response->payload.str());
                     QUNIT_IS_EQUAL(payload, "Testing");
                }
                void AsyncTests(ConnContextRef ctx) {

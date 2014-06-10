@@ -2,6 +2,7 @@
 
 #include <string>
 #include <map>
+#include <sstream>
 
 #ifdef _MSC_VER
 #undef DELETE
@@ -59,8 +60,8 @@ namespace rikitiki {
      typedef multimap<std::wstring, std::wstring> PostCollection;
      typedef std::map<std::wstring, std::wstring> CookieCollection;
 
-     typedef std::basic_string<char> ByteStream;
-
+     //typedef std::basic_string<char> ByteStream;
+     typedef std::basic_stringstream<char> ByteStream;
      class IRequest {
      public:
           enum Method {

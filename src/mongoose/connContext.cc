@@ -81,13 +81,16 @@ namespace rikitiki {
 
           }
           void MongooseConnContext::FillPayload() {
-               _payload.resize(512);
+               std::string payload;
+               payload.resize(512);
                size_t nth = 0;
                do{                    
-                    _payload.resize(_payload.size() * 2);                            
-                    nth += mg_read(conn, &_payload[nth], _payload.size() - nth);
-               } while (nth == (int)_payload.size());
-               _payload.resize(nth);
+                    payload.resize(payload.size() * 2);                            
+                    nth += mg_read(conn, &payload[nth], payload.size() - nth);
+               } while (nth == (int)payload.size());
+               payload.resize(nth);
+
+               _payload.write(&payload[0], (std::streamsize)payload.size());
                mappedPayload = true;
           }
 

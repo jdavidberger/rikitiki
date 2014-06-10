@@ -16,6 +16,21 @@
 
 namespace rikitiki {
 
+     namespace Encoding {
+          enum t {
+               UNKNOWN,
+               chunked,
+               compress,
+               deflate,
+               gzip,
+               identity,
+               OTHER
+          };
+          
+          t FromString(const wchar_t*);
+          const wchar_t* ToString(t);
+     }
+
      std::ostream& operator <<(std::ostream& response, const wchar_t* obj);
      std::ostream& operator <<(std::ostream& response, const std::wstring& obj);
 
@@ -26,25 +41,34 @@ namespace rikitiki {
      private:
 
      public:
-          std::stringstream response;
+          Response();
+          ~Response();
+
+          ByteStream payload;
+          uint64_t ContentLength;
+          Encoding::t TransferEncoding; 
+          
+          
+          
           ContentType::t GetResponseType() const { return ContentType::FromString(ResponseType); }
           void SetResponseType(ContentType::t v) { ResponseType = ContentType::ToString(v); }
-          std::wstring ResponseType;
+          std::wstring ResponseType;          
           std::vector<Header> headers;
+
           const HttpStatus* status;
           void reset();
-          Response();
+
           std::mutex payloadWrite;
 
           template <class T> auto operator <<(const T& obj) -> decltype(instance_of<std::stringstream>::value << obj, instance_of<Response&>::value)
           {
                std::lock_guard<std::mutex> lock(payloadWrite);
-               response << obj;
-               assert(response.good());
+               payload << obj;
+               assert(payload.good());
                return *this;
           }
-          const std::stringstream& GetResponse() const;
-          std::stringstream& GetResponse();
+          /*const std::stringstream& GetResponse() const;
+          std::stringstream& GetResponse();*/
           Response& operator <<(rikitiki::ContentType::t t);
           Response& operator <<(const rikitiki::Cookie& t);
           Response& operator <<(const rikitiki::HttpStatus& t);

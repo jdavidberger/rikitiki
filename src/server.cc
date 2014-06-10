@@ -64,7 +64,7 @@ namespace rikitiki {
                          handlers[i]->Handle(ctx);
                }
                catch (HandlerException& ex) {
-                    LOG(Server, Debug) << "Error encountered: " << ctx->response.response.str() << std::endl;
+                    LOG(Server, Debug) << "Error encountered: " << ctx->response.payload.str() << std::endl;
                     ctx << (ex.status == 0 ? HttpStatus::Internal_Server_Error : *(ex.status));
                     return true;
                }
@@ -150,7 +150,7 @@ namespace rikitiki {
 
           if (file.good()) {
                ctx->handled = true;
-               ctx->response.response << file.rdbuf();               
+               ctx->response.payload << file.rdbuf();               
                return true;
           }
           

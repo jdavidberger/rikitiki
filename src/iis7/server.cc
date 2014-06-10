@@ -88,7 +88,7 @@ namespace rikitiki {
                }
                virtual void OnData() OVERRIDE{
                     std::stringstream ss;
-                    response.response.swap(ss);
+                    response.payload.swap(ss);
                     std::string buffer = ss.str();
                     
                     rawWrite(buffer.c_str(), buffer.length());                    

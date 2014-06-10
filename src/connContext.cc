@@ -201,13 +201,13 @@ namespace rikitiki {
      /*
      ConnContext& ConnContext::operator<<(std::function<void(std::wostream&)> f){
      handled = true;
-     f(response.response);
+     f(response.payload);
      return *this;
      }
      */
      ConnContext& operator>>(ConnContext& ctx, std::wstring& t){
           std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
-          t = conversion.from_bytes(ctx.Payload());
+          t = conversion.from_bytes(ctx.Payload().str());
           return ctx;
      }
      RequestContext::~RequestContext(){ }
@@ -251,7 +251,7 @@ namespace rikitiki {
      }
      void ConnContextWithWrite::OnData() {
           std::stringstream ss;
-          response.response.swap(ss);
+          response.payload.swap(ss);
           std::string buffer = ss.str();
           auto len = buffer.size();
           if (len == 0)
@@ -383,7 +383,7 @@ namespace rikitiki {
      void mapContents(ByteStream& raw_content_stream, PostCollection& post){
           std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
 
-          std::wstring raw_content = conversion.from_bytes(raw_content_stream);
+          std::wstring raw_content = conversion.from_bytes(raw_content_stream.str());
 
           if (raw_content.size() == 0)
                return;

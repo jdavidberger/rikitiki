@@ -78,9 +78,9 @@ namespace rikitiki {
                     CefRefPtr<CefCallback> callback) OVERRIDE{
                     std::lock_guard<std::mutex> lock(ctx->response.payloadWrite);
 
-                    ctx->response.response.read((char*)data_out, bytes_to_read);
-                    bytes_read = (int)ctx->response.response.gcount();
-                    ctx->response.response.clear();
+                    ctx->response.payload.read((char*)data_out, bytes_to_read);
+                    bytes_read = (int)ctx->response.payload.gcount();
+                    ctx->response.payload.clear();
                     ctx->dataReady = bytes_read == 0 ? callback : 0;
                     if (bytes_read)
                          return true;

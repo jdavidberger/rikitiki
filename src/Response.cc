@@ -5,7 +5,7 @@
 
 namespace rikitiki {
      Response::Response() : ResponseType(ContentType::ToString(ContentType::DEFAULT)),
-     status(&HttpStatus::OK){}
+     status(&HttpStatus::OK), TransferEncoding(Encoding::UNKNOWN), ContentLength((uint64_t)-1) {}
 
      Response& Response::operator <<(const rikitiki::HttpStatus& t){
           status = &t;
@@ -13,7 +13,7 @@ namespace rikitiki {
      }
 
      void Response::reset(){
-          response.clear();
+          payload.clear();
           headers.clear();
      }
 
@@ -27,7 +27,30 @@ namespace rikitiki {
           return *this << header;
      }
 
+     Response::~Response() {
+
+     }
+     Encoding::t Encoding::FromString(const wchar_t * str) {
+          if (wcscmp(str, L"chunked") == 0)
+               return Encoding::chunked; 
+          if (wcscmp(str, L"compress") == 0)
+               return Encoding::compress;
+          if (wcscmp(str, L"deflate") == 0)
+               return Encoding::deflate;
+          if (wcscmp(str, L"gzip") == 0)
+               return Encoding::gzip;
+          if (wcscmp(str, L"identity") == 0)
+               return Encoding::identity;
+          return Encoding::OTHER;
+     }
      Response& Response::operator <<(const rikitiki::Header& header){
+          if (header.first.compare(L"Content-Length") == 0) {
+               ContentLength = (uint64_t)_wtoi(&header.second[0]);
+          }
+          else if (header.first.compare(L"Transfer-Encoding") == 0) {
+               TransferEncoding = Encoding::FromString(&header.second[0]);
+          }
+
           headers.push_back(header);
           return *this;
      }
@@ -102,9 +125,7 @@ namespace rikitiki {
                
                data = readWord(data, end, buffer); // Status text 
                
-               response->status = new HttpStatus(status, buffer);
-
-               
+               response->status = new HttpStatus(status, buffer);              
                expectLinefeed(data, end);
           }
           state = HEADERS;
@@ -115,20 +136,29 @@ namespace rikitiki {
                     std::string buffer2;
                     data = readHeaderName(data, end, buffer);
                     data = readHeaderValue(data, end, buffer2);
-                    if (buffer == "Content-Length")
-                         expectedSize = (std::size_t)atoi(&buffer2[0]);
-
-                    response->headers.push_back(rikitiki::Header(conversion.from_bytes(&buffer[0]), 
-                                                                 conversion.from_bytes(&buffer2[0])));
+                    auto header = rikitiki::Header(conversion.from_bytes(&buffer[0]), conversion.from_bytes(&buffer2[0]));
+                    *response << header;
                     data += 2; // Burn \r\n
                } while (*data != '\n' && *data != '\r');
                expectLinefeed(data, end);
 
                state = PAYLOAD;
           case PAYLOAD:
-               response->response.write(data, end - data);
-               if (response->response.str().size() >= expectedSize)
+               if (data == end)
+                    return false;
+               if (response->TransferEncoding == Encoding::chunked) {                             
+                    auto exp_size = strtol(data, (char**)&data, 16);
+                    data += 2; // burn \r\n
+                    response->payload.write(data, exp_size);
+                    if (exp_size == 0)
+                         state = FINISHED;
+               }
+               else {
+                    response->payload.write(data, end - data);
+               }
+               if (response->ContentLength != (uint64_t)-1 && response->payload.str().size() >= response->ContentLength)
                     state = FINISHED;
+                
                break;
           case FINISHED:
                throw new std::exception("Unexpected input");
