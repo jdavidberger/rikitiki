@@ -88,6 +88,7 @@ namespace rikitiki {
                // Main page -- show all the tests. Might have to wait on them to finish. 
                void operator () (ConnContextRef ctx) {
                     ctx << "<html><body>";
+                    ctx << "<a href='StartTests'>Start tests</a>";
                     std::async([](ConnContextRef ctx) {
 
                          ctx << "<div>";
@@ -120,6 +121,7 @@ namespace rikitiki {
                void StartTests(ConnContextRef ctx) {
                     numTests = 0;
                     auto& server = *ctx->server;
+                    test_results.str("");
                     SetupTest(server, L"BasicTest", &TestsModule::BasicTest);
                     SetupTest(server, L"QueryStringTest/42", &TestsModule::QueryStringTest);
                     SetupTest(server, L"StatusTest", &TestsModule::StatusTest);

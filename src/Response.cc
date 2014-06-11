@@ -146,12 +146,16 @@ namespace rikitiki {
           case PAYLOAD:
                if (data == end)
                     return false;
-               if (response->TransferEncoding == Encoding::chunked) {                             
-                    auto exp_size = strtol(data, (char**)&data, 16);
-                    data += 2; // burn \r\n
-                    response->payload.write(data, exp_size);
-                    if (exp_size == 0)
-                         state = FINISHED;
+               if (response->TransferEncoding == Encoding::chunked) {       
+                    while (data < end) {
+                         auto exp_size = strtol(data, (char**)&data, 16);
+                         data += 2; // burn \r\n
+                         response->payload.write(data, exp_size);
+                         data += exp_size; 
+                         data += 2; 
+                         if (exp_size == 0)
+                              state = FINISHED;
+                    }
                }
                else {
                     response->payload.write(data, end - data);

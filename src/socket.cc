@@ -84,8 +84,9 @@ namespace rikitiki {
                                    listeners[i] = listeners.back();
                                    listeners.pop_back();
                                    i--;
+                                   running = false;
                               }
-                              running = false;
+
                          }
                     }
                }
