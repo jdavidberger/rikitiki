@@ -234,12 +234,19 @@ namespace rikitiki {
      ConnContext::~ConnContext(){
           delete _accepts;
      }
-     void ConnContextWithWrite::OnHeadersFinished() {
+     void ConnContextWithWrite::WriteHeaders() {
           std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
           std::stringstream ss;
           ss << "HTTP/1.1 " << response.status->status << " " << response.status->name << "\r\n";
           ss << "Content-Type: " << conv.to_bytes(response.ResponseType) << "\r\n";
-          ss << "Transfer-Encoding: chunked" << "\r\n";
+          
+          if(response.TransferEncoding == Encoding::chunked) {
+               ss << "Transfer-Encoding: chunked" << "\r\n";                
+          }
+          else if (response.ContentLength != -1) {
+               ss << "Content-Length: " << response.ContentLength << "\r\n";
+          }
+          
           for (auto it : response.headers){
                ss << conv.to_bytes(it.first) << ": " << conv.to_bytes(it.second) << "\r\n";
           }
@@ -247,20 +254,26 @@ namespace rikitiki {
           std::string buffer = ss.str();
 
           rawWrite(buffer.c_str(), buffer.length());
-
+     }
+     void ConnContextWithWrite::OnHeadersFinished() {
+          if (response.TransferEncoding == Encoding::chunked || response.ContentLength != -1) {
+               WriteHeaders();
+          }          
      }
      void ConnContextWithWrite::OnData() {
-          std::stringstream ss;
-          response.payload.swap(ss);
-          std::string buffer = ss.str();
-          auto len = buffer.size();
-          if (len == 0)
-               return;
+          if (response.TransferEncoding == Encoding::chunked) {
+               std::stringstream ss;
+               response.payload.swap(ss);
+               std::string buffer = ss.str();
+               auto len = buffer.size();
+               if (len == 0)
+                    return;
 
-          std::stringstream resp;
-          resp << std::hex << len << "\r\n" << buffer << "\r\n";
-          buffer = resp.str();
-          rawWrite(buffer.c_str(), buffer.length());
+               std::stringstream resp;
+               resp << std::hex << len << "\r\n" << buffer << "\r\n";
+               buffer = resp.str();
+               rawWrite(buffer.c_str(), buffer.length());
+          }
      }
      
      ConnContextWithWrite::~ConnContextWithWrite() {
@@ -270,11 +283,18 @@ namespace rikitiki {
           if (headersDone == false) {
                OnHeadersFinished();
                headersDone = true;
-          }
+          }          
      }
      void ConnContextWithWrite::Close() {          
           ConnContext::Close();
-          rawWrite("0\r\n\r\n", 5);
+          if (response.TransferEncoding != Encoding::chunked) {
+               auto body = response.payload.str();
+               response.ContentLength = body.size();
+               WriteHeaders();
+               rawWrite(&body[0], body.size());
+          } else {
+               rawWrite("0\r\n\r\n", 5);
+          }
      }
      ConnContextWithWrite::ConnContextWithWrite(Server* s) : ConnContext(s) {}
 

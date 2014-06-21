@@ -144,8 +144,7 @@ namespace rikitiki {
 
                state = PAYLOAD;
           case PAYLOAD:
-               if (data == end)
-                    return false;
+               if (data != end) {
                if (response->TransferEncoding == Encoding::chunked) {       
                     while (data < end) {
                          auto exp_size = strtol(data, (char**)&data, 16);
@@ -160,6 +159,8 @@ namespace rikitiki {
                else {
                     response->payload.write(data, end - data);
                }
+               }
+
                if (response->ContentLength != (uint64_t)-1 && response->payload.str().size() >= response->ContentLength)
                     state = FINISHED;
                 

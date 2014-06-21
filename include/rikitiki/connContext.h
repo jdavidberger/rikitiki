@@ -135,6 +135,7 @@ namespace rikitiki {
 
      protected:
           virtual size_t rawWrite(const void* buffer, size_t length) = 0;
+          virtual void WriteHeaders();           
           virtual void OnHeadersFinished() OVERRIDE;
           virtual void OnData() OVERRIDE;
      public:

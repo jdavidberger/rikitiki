@@ -48,8 +48,6 @@ namespace rikitiki {
           uint64_t ContentLength;
           Encoding::t TransferEncoding; 
           
-          
-          
           ContentType::t GetResponseType() const { return ContentType::FromString(ResponseType); }
           void SetResponseType(ContentType::t v) { ResponseType = ContentType::ToString(v); }
           std::wstring ResponseType;          
@@ -75,6 +73,7 @@ namespace rikitiki {
           Response& operator <<(const rikitiki::Header& t);
      };
 
+     /* Build a response object from a raw string of bytes. */
      struct ResponseBuilder {
           enum StateT {
                STATUS,
