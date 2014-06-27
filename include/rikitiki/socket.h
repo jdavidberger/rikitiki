@@ -3,15 +3,15 @@
 
 #include <mxcomp\useful_macros.h>
 #include <memory>
-#pragma warning(disable:4265 4355)
+#pragma warning(disable:4265 4355 4062)
 #include <thread>
 #include <future>
-#pragma warning(default:4265 4355)
+#pragma warning(default:4265 4355 4062)
 #include <sstream>
 #include <rikitiki\Response.h>
 
-//typedef _W64 unsigned int UINT_PTR, *PUINT_PTR;
-typedef unsigned long long        SOCKET;
+typedef _W64 unsigned int UINT_PTR, *PUINT_PTR;
+typedef UINT_PTR SOCKET;
 
 
 namespace rikitiki {
@@ -37,7 +37,7 @@ namespace rikitiki {
 		bool running; 
 #endif
 	public:
-		TCPIPSocket(wchar_t* host, uint16_t port = 80);
+		TCPIPSocket(const wchar_t* host, uint16_t port = 80);
 		virtual ~TCPIPSocket();
 		virtual size_t Send(const char*, size_t length) OVERRIDE;
 	};
@@ -56,7 +56,7 @@ namespace rikitiki {
              
              ~SimpleRequestClient();
 
-             SimpleRequestClient(wchar_t* host, uint16_t port = 80);
+             SimpleRequestClient(const wchar_t* host, uint16_t port = 80);
              void MakeRequest(IRequest& request);
              virtual void OnClose();
              virtual bool OnData(const char*, size_t length);

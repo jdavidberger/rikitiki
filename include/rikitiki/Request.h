@@ -75,10 +75,22 @@ namespace rikitiki {
           virtual const ByteStream& Payload() = 0;
      };
 
+     template <typename class T>
+     struct URL_ {
+          std::basic_string<T> uri; 
+          const T *start, *end,
+               *protocolStart,
+               *hostStart,
+               *resourceStart;
+          URL_(const std::basic_string<T>& uri);
+     };
+     typedef URL_<char > URL;
+     typedef URL_<wchar_t > wURL;
+
      class SimpleRequest : public IRequest {
      public:
           virtual ~SimpleRequest(){}
-          Method method;
+          Method method = GET;
           virtual Method RequestMethod() { return method; };
           HeaderCollection headers;
           virtual HeaderCollection& Headers() {

@@ -10,14 +10,8 @@
 namespace rikitiki {
      namespace mongoose {
           static inline std::wstring toWString(const char* str) {
-               auto size = strlen(str);
-               std::wstring rtn(size, L'\0');
-#ifdef _MSC_VER
-			   mbstowcs_s(&size, &rtn[0], size, str, size);
-#else
-               mbstowcs(&rtn[0], str, size);
-#endif
-               return rtn;
+               std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
+               return conversion.from_bytes(str);
           }
 
 

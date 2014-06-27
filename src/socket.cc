@@ -30,7 +30,7 @@ namespace rikitiki {
           pollingThread.join();
      }
 
-     TCPIPSocket::TCPIPSocket(wchar_t * host, uint16_t port) : running(false) {
+     TCPIPSocket::TCPIPSocket(const wchar_t * host, uint16_t port) : running(false) {
 
           WSADATA wsaData;
           int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -103,7 +103,7 @@ namespace rikitiki {
      SimpleRequestClient::~SimpleRequestClient() {
           
      }
-     SimpleRequestClient::SimpleRequestClient(wchar_t* _host, uint16_t port) : host(_host), socket(_host, port), response(new Response()), builder(response.get()) {
+     SimpleRequestClient::SimpleRequestClient(const wchar_t* _host, uint16_t port) : host(_host), socket(_host, port), response(new Response()), builder(response.get()) {
           socket.listeners.push_back(this);
      }
      void SimpleRequestClient::MakeRequest(IRequest& request) {

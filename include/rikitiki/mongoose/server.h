@@ -2,10 +2,12 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 #pragma once
 #include <rikitiki\server.h>
-#include <mongoose.h>
 #include <rikitiki\websocket\websocket>
 
-
+extern "C" {
+     struct mg_context;
+     struct mg_connection;
+}
 namespace rikitiki {
      
      namespace mongoose {

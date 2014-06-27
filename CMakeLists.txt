@@ -111,7 +111,7 @@ add_custom_target(release
 set_property(TARGET helgrind PROPERTY FOLDER "testing")
 set_property(TARGET memcheck PROPERTY FOLDER "testing")	
 set_property(TARGET release PROPERTY FOLDER "testing")
-set_property(TARGET test PROPERTY FOLDER "testing")
+set_property(TARGET tests PROPERTY FOLDER "testing")
 
 export(PACKAGE rikitiki)
 install(DIRECTORY include/rikitiki DESTINATION include)

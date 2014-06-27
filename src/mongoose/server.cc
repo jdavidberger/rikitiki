@@ -2,12 +2,18 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
 #include <rikitiki/mongoose/mongoose>
+#include <mongoose.h>
+
 #include <rikitiki/configuration/configuration>
 #include <rikitiki\websocket\websocketProcess.h>
 #include <rikitiki\server.h>
+
+
 #include <sstream>
+#pragma warning(disable:4062)
 #include <signal.h>
-#include <mongoose.h>
+#pragma warning(default:4062)
+
 #include <rikitiki/socket.h>
 #pragma warning(disable:4265)
 #include <condition_variable>

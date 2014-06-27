@@ -50,6 +50,9 @@ namespace rikitiki {
           else if (header.first.compare(L"Transfer-Encoding") == 0) {
                TransferEncoding = Encoding::FromString(&header.second[0]);
           }
+          else if (header.first.compare(L"Content-Type") == 0) {
+               ResponseType = header.second;
+          }
 
           headers.push_back(header);
           return *this;
@@ -111,8 +114,46 @@ namespace rikitiki {
           return skipWhitespace(wordEnd, end);
      }
 
-     ResponseBuilder::ResponseBuilder(Response* _response) : response(_response), expectedSize((std::size_t) - 1), state(STATUS) {}
+     ResponseBuilder::ResponseBuilder(Response* _response) : response(_response), 
+          expectedSize((std::size_t) - 1), state(STATUS), bufferMode(NEWLINE) {}
      bool ResponseBuilder::OnData(const char* data, std::size_t length) {
+          const char* end = &data[length];
+
+          while (data < end) {
+               switch (bufferMode) {
+               case NONE:
+                    return OnBufferedData(data, (size_t)(end - data));
+               case NEWLINE: {
+                    auto newLinePos = strpbrk(data, "\r\n");
+                    if (newLinePos == 0) // can't process yet; kick out
+                         goto cant_process;
+
+                    newLinePos++;
+                    if (newLinePos[0] == '\r' || newLinePos[0] == '\n')
+                         newLinePos++;
+                    expectedSize = (size_t)(buffer.size() + newLinePos - data);
+               }
+               case LENGTH:
+                    if (expectedSize - buffer.size() <= (size_t)(end - data)) {
+                         auto remaining = expectedSize - buffer.size();
+                         buffer += std::string(data, data + remaining);
+                         data = data + remaining;
+                         bool rtn = OnBufferedData(&buffer[0], buffer.size());
+                         buffer.clear();                         
+                         if (rtn)
+                              return true;
+                    }
+                    else {
+                         goto cant_process;
+                    }
+               }
+          }
+          cant_process:
+          buffer += std::string(data, end);
+          return false;
+     }
+     
+     bool ResponseBuilder::OnBufferedData(const char* data, std::size_t length) {
           std::string buffer;
           const char* end = &data[length];
           switch (state) {
@@ -129,36 +170,45 @@ namespace rikitiki {
                expectLinefeed(data, end);
           }
           state = HEADERS;
-
+          return false;
           case HEADERS:
-               do {
+               
+               if (data[0] == '\r' || data[0] == '\n') {
+                    data += 2; 
+                    state = PAYLOAD;
+                    bufferMode = response->TransferEncoding == Encoding::chunked ? NEWLINE : NONE;
+               } else {
                     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
                     std::string buffer2;
                     data = readHeaderName(data, end, buffer);
                     data = readHeaderValue(data, end, buffer2);
                     auto header = rikitiki::Header(conversion.from_bytes(&buffer[0]), conversion.from_bytes(&buffer2[0]));
                     *response << header;
-                    data += 2; // Burn \r\n
-               } while (*data != '\n' && *data != '\r');
-               expectLinefeed(data, end);
-
-               state = PAYLOAD;
+                    data += 2; // Burn \r\n                    
+              }
+               return false;
+          case CHUNK_PAYLOAD: {
+               response->payload.write(data, expectedSize  - 2);
+               if (expectedSize - 2 == 0)
+                    state = FINISHED;
+               else
+                    state = PAYLOAD;
+               bufferMode = NEWLINE;
+               break;
+          }
           case PAYLOAD:
                if (data != end) {
-               if (response->TransferEncoding == Encoding::chunked) {       
-                    while (data < end) {
-                         auto exp_size = strtol(data, (char**)&data, 16);
-                         data += 2; // burn \r\n
-                         response->payload.write(data, exp_size);
-                         data += exp_size; 
-                         data += 2; 
-                         if (exp_size == 0)
-                              state = FINISHED;
+                    if (response->TransferEncoding == Encoding::chunked) {       
+                              expectedSize = (size_t)strtol(data, (char**)&data, 16) + 2;
+                              data += 2; // burn \r\n
+                              bufferMode = LENGTH;
+                              state = CHUNK_PAYLOAD;
+                              return false;
                     }
-               }
-               else {
-                    response->payload.write(data, end - data);
-               }
+                    else {
+                         bufferMode = NONE;
+                         response->payload.write(data, end - data);
+                    }
                }
 
                if (response->ContentLength != (uint64_t)-1 && response->payload.str().size() >= response->ContentLength)

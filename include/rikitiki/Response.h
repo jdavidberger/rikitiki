@@ -74,17 +74,28 @@ namespace rikitiki {
      };
 
      /* Build a response object from a raw string of bytes. */
-     struct ResponseBuilder {
+     class ResponseBuilder {
           enum StateT {
                STATUS,
                HEADERS,
                PAYLOAD,
+               CHUNK_PAYLOAD,
                FINISHED
           };
           StateT state;
+          enum BufferModeT {
+               LENGTH,
+               NEWLINE,
+               NONE
+          };
+          BufferModeT bufferMode;
           std::size_t expectedSize;
-          bool OnData(const char*, std::size_t length);
+          std::string buffer; 
+          
+          bool OnBufferedData(const char*, std::size_t length);
+     public:
           Response* response;
+          bool OnData(const char*, std::size_t length);
           ResponseBuilder(Response*);          
      };
 }

@@ -16,9 +16,9 @@
 #include <rikitiki/log/log>
 #include <rikitiki/http_statuses.h>
 #include <memory>
-#pragma warning(disable:4265 4355)
+#pragma warning(disable:4265 4355 4062)
 #include <future>
-#pragma warning(default:4265 4355)
+#pragma warning(default:4265 4355 4062)
 #ifdef RT_USE_CTEMPLATE
 #include <rikitiki/ctemplate/templatePreprocessor.h>
 #endif

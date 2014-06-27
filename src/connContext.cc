@@ -274,6 +274,13 @@ namespace rikitiki {
                buffer = resp.str();
                rawWrite(buffer.c_str(), buffer.length());
           }
+          else if (response.ContentLength != -1) {
+               std::stringstream ss;
+               response.payload.swap(ss);
+               std::string buffer = ss.str();
+               rawWrite(buffer.c_str(), buffer.length());
+          }
+
      }
      
      ConnContextWithWrite::~ConnContextWithWrite() {
@@ -287,12 +294,13 @@ namespace rikitiki {
      }
      void ConnContextWithWrite::Close() {          
           ConnContext::Close();
-          if (response.TransferEncoding != Encoding::chunked) {
+          if (response.TransferEncoding != Encoding::chunked && response.ContentLength == -1) {
                auto body = response.payload.str();
                response.ContentLength = body.size();
                WriteHeaders();
                rawWrite(&body[0], body.size());
-          } else {
+          }
+          else if (response.TransferEncoding == Encoding::chunked){
                rawWrite("0\r\n\r\n", 5);
           }
      }
