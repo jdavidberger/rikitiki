@@ -78,6 +78,8 @@ set(RT_SRC ${RT_INC} ${RT_SRC})
 SOURCE_GROUP("Source\\Base"  FILES ${RT_SRC})
 SOURCE_GROUP("Include\\Base" FILES ${RT_INC})
 
+add_source_directory(utils)	
+
 IF(${WIN32})
 	set (RT_LIBS mxcomp)
 ELSE()

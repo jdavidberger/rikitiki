@@ -60,7 +60,7 @@ namespace rikitiki {
              void MakeRequest(IRequest& request);
              virtual void OnClose();
              virtual bool OnData(const char*, size_t length);
-             std::future<std::shared_ptr<Response>> future() {
+             std::future<std::shared_ptr<Response>> future() {                
                   return promise.get_future();
              }
         };
