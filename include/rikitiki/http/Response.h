@@ -1,11 +1,13 @@
 #pragma once
 
 #include <string>
-#include <rikitiki\Request.h>
 #include <sstream>
-#include <rikitiki\content_types.h>
 #include <vector>
-#include <rikitiki\http_statuses.h>
+#include <rikitiki\http\Request.h>
+#include <rikitiki\http\content_types.h>
+#include <rikitiki\http\http_statuses.h>
+#include <mxcomp\useful_macros.h>
+
 #pragma warning (disable: 4265)
 #include <mutex>
 #pragma warning (default: 4265)
@@ -37,22 +39,29 @@ namespace rikitiki {
      /**
      Response class that handlers write to. Contains headers, response stream, status, etc.
      */
-     struct Response {
+     struct Response : public IMessage {
      private:
-
+           HeaderCollection headers;
+           ByteStream body;
      public:
           Response();
           ~Response();
-
-          ByteStream payload;
           uint64_t ContentLength;
           Encoding::t TransferEncoding; 
           
           ContentType::t GetResponseType() const { return ContentType::FromString(ResponseType); }
           void SetResponseType(ContentType::t v) { ResponseType = ContentType::ToString(v); }
-          std::wstring ResponseType;          
-          std::vector<Header> headers;
+          std::wstring ResponseType;  
 
+          virtual HeaderCollection& Headers() OVERRIDE {
+               return headers;
+          };
+
+          virtual ByteStream& Body() OVERRIDE {
+               return body;
+          }
+
+          
           const HttpStatus* status;
           void reset();
 
@@ -61,8 +70,8 @@ namespace rikitiki {
           template <class T> auto operator <<(const T& obj) -> decltype(instance_of<std::stringstream>::value << obj, instance_of<Response&>::value)
           {
                std::lock_guard<std::mutex> lock(payloadWrite);
-               payload << obj;
-               assert(payload.good());
+               Body() << obj;
+               assert(Body().good());
                return *this;
           }
           /*const std::stringstream& GetResponse() const;
@@ -70,7 +79,8 @@ namespace rikitiki {
           Response& operator <<(rikitiki::ContentType::t t);
           Response& operator <<(const rikitiki::Cookie& t);
           Response& operator <<(const rikitiki::HttpStatus& t);
-          Response& operator <<(const rikitiki::Header& t);
+          virtual Response& operator <<(const rikitiki::Header& t) OVERRIDE;
+
      };
 
      /* Build a response object from a raw string of bytes. */

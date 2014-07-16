@@ -66,7 +66,7 @@ namespace rikitiki {
 
                     CefRequest::HeaderMap map;
                     response->GetHeaderMap(map);
-                    for (auto it = ctx->response.headers.begin(); it != ctx->response.headers.end(); it++)
+                    for (auto it = ctx->response.Headers().begin(); it != ctx->response.Headers().end(); it++)
                          map.insert(*it);
                     response->SetHeaderMap(map);
                     response->SetMimeType(ctx->response.ResponseType);
@@ -78,9 +78,9 @@ namespace rikitiki {
                     CefRefPtr<CefCallback> callback) OVERRIDE{
                     std::lock_guard<std::mutex> lock(ctx->response.payloadWrite);
 
-                    ctx->response.payload.read((char*)data_out, bytes_to_read);
-                    bytes_read = (int)ctx->response.payload.gcount();
-                    ctx->response.payload.clear();
+                    ctx->response.Body().read((char*)data_out, bytes_to_read);
+                    bytes_read = (int)ctx->response.Body().gcount();
+                    ctx->response.Body().clear();
                     ctx->dataReady = bytes_read == 0 ? callback : 0;
                     if (bytes_read)
                          return true;
@@ -127,7 +127,7 @@ namespace rikitiki {
                     response->status = new HttpStatus(request->GetResponse()->GetStatus(), request->GetResponse()->GetStatusText());
                     request->GetResponse()->GetHeaderMap(headers);
                     for (auto it = headers.begin(); it != headers.end(); it++) {
-                         response->headers.push_back(Header(std::wstring(it->first), std::wstring(it->second)));
+                         response->Headers().push_back(Header(std::wstring(it->first), std::wstring(it->second)));
                     }
                     promise.set_value(response);
                }

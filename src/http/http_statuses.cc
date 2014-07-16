@@ -1,4 +1,4 @@
-#include <rikitiki/http_statuses.h>
+#include <rikitiki/http/http_statuses.h>
 
 namespace rikitiki {    
   const HttpStatus HttpStatus::Continue(100, "Continue",true);

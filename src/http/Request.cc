@@ -1,4 +1,4 @@
-#include <rikitiki\Request.h>
+#include <rikitiki\http\Request.h>
 
 namespace rikitiki {
      Header::Header(const std::wstring& name, const std::wstring& value) : wstringpair(name, value){}

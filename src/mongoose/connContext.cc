@@ -84,7 +84,7 @@ namespace rikitiki {
                } while (nth == (int)payload.size());
                payload.resize(nth);
 
-               _payload.write(&payload[0], (std::streamsize)payload.size());
+               _body.write(&payload[0], (std::streamsize)payload.size());
                mappedPayload = true;
           }
 

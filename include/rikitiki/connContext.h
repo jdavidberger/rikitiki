@@ -5,13 +5,13 @@
 #include <map>
 #include <string>
 #include <sstream>
-#include "http_statuses.h"
+#include <rikitiki/http/http_statuses.h>
 #include <mxcomp/reflection.h>
 #include "content_handler.h"
 #include <locale>
 #include <codecvt>
-#include <rikitiki/Request.h>
-#include <rikitiki/Response.h>
+#include <rikitiki/http/Request.h>
+#include <rikitiki/http/Response.h>
 
 #ifdef _MSC_VER
 #undef DELETE
@@ -46,7 +46,7 @@ namespace rikitiki {
           QueryStringCollection _qs;
           HeaderCollection _headers;
           CookieCollection _cookies;
-          ByteStream _payload;
+          ByteStream _body;
           Method _method;
 
           virtual void FillQueryString() = 0;
@@ -65,13 +65,13 @@ namespace rikitiki {
           */
           HeaderCollection::value_type& AddRequestHeader(const std::wstring&, const std::wstring&);
      public:
-          Method RequestMethod();
-          HeaderCollection& Headers();
-          CookieCollection& Cookies();
-          QueryStringCollection& QueryString();
+          virtual Method& RequestMethod();
+          virtual HeaderCollection& Headers();
+          virtual CookieCollection& Cookies();
+          virtual QueryStringCollection& QueryString();
           virtual const wchar_t* URI() = 0;
 
-          virtual ByteStream& Payload() OVERRIDE;
+          virtual ByteStream& Body() OVERRIDE;
 
      };
 

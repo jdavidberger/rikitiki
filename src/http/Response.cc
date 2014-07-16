@@ -1,4 +1,4 @@
-#include <rikitiki/Response.h>
+#include <rikitiki/http/Response.h>
 #include <assert.h>
 #include <locale>
 #include <codecvt>
@@ -13,7 +13,7 @@ namespace rikitiki {
      }
 
      void Response::reset(){
-          payload.clear();
+          body.clear();
           headers.clear();
      }
 
@@ -53,8 +53,7 @@ namespace rikitiki {
           else if (header.first.compare(L"Content-Type") == 0) {
                ResponseType = header.second;
           }
-
-          headers.push_back(header);
+          IMessage::operator<<(header);
           return *this;
      }
 
@@ -175,7 +174,7 @@ namespace rikitiki {
                
                if (data[0] == '\r' || data[0] == '\n') {
                     data += 2; 
-                    state = PAYLOAD;
+                    state = response->ContentLength == 0 ? FINISHED : PAYLOAD;
                     bufferMode = response->TransferEncoding == Encoding::chunked ? NEWLINE : NONE;
                } else {
                     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
@@ -186,9 +185,9 @@ namespace rikitiki {
                     *response << header;
                     data += 2; // Burn \r\n                    
               }
-               return false;
+               return state == FINISHED;
           case CHUNK_PAYLOAD: {
-               response->payload.write(data, expectedSize  - 2);
+               response->Body().write(data, (std::streamsize)(expectedSize  - 2));
                if (expectedSize - 2 == 0)
                     state = FINISHED;
                else
@@ -207,11 +206,11 @@ namespace rikitiki {
                     }
                     else {
                          bufferMode = NONE;
-                         response->payload.write(data, end - data);
+                         response->Body().write(data, end - data);
                     }
                }
 
-               if (response->ContentLength != (uint64_t)-1 && response->payload.str().size() >= response->ContentLength)
+               if (response->ContentLength != (uint64_t)-1 && response->Body().str().size() >= response->ContentLength)
                     state = FINISHED;
                 
                break;

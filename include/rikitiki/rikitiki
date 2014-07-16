@@ -6,5 +6,6 @@
 #include <rikitiki/routing.h>
 #include <rikitiki/stream_helpers.h>
 #include <rikitiki/content_handler.h>
-#include <rikitiki/Request.h>
-#include <rikitiki/Response.h>
+#include <rikitiki/http/Request.h>
+#include <rikitiki/http/Response.h>
+#include <rikitiki/StaticContentHandler.h>

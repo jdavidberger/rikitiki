@@ -8,9 +8,13 @@
 #include <future>
 #pragma warning(default:4265 4355 4062)
 #include <sstream>
-#include <rikitiki\Response.h>
+#include <rikitiki/http/Response.h>
 
-typedef _W64 unsigned int UINT_PTR, *PUINT_PTR;
+#pragma warning(disable: 4668)
+#include <basetsd.h>
+#pragma warning(default: 4668)
+
+//typedef _W64 unsigned int UINT_PTR, *PUINT_PTR;
 typedef UINT_PTR SOCKET;
 
 

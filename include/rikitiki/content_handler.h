@@ -1,6 +1,6 @@
 #pragma once
 
-#include "content_types.h"
+#include <rikitiki/http/content_types.h>
 #include <vector>
 #include <map>
 #include <array>

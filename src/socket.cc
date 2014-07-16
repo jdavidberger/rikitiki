@@ -10,7 +10,7 @@
 #include <Ws2tcpip.h>
 #pragma warning (default: 4365 4574 4263 4264 )
 #endif
-#include <rikitiki\Response.h>
+#include <rikitiki/http/Response.h>
 #include <rikitiki\rikitiki>
 #include <sstream>
 
@@ -113,7 +113,7 @@ namespace rikitiki {
           req << rikitiki::methodToStr(request.RequestMethod()) << L" /" << request.URI() << L" HTTP/1.1" << std::endl;
           req << L"Host: " << host << std::endl;
           req << std::endl << std::endl;
-          req << conversion.from_bytes(request.Payload().str());
+          req << conversion.from_bytes(request.Body().str());
 
           std::string utf8 = conversion.to_bytes(req.str());
           socket.Send(utf8.data(), utf8.size());

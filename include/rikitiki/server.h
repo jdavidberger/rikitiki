@@ -6,7 +6,7 @@
 #include <rikitiki/config.h>
 #include <vector>
 #include <sstream>
-#include "content_types.h"
+#include <rikitiki/http/content_types.h>
 
 #include <mxcomp/macros.h>
 #include <mxcomp/tuple_ext.h>
@@ -14,7 +14,7 @@
 #include <tuple>
 
 #include <rikitiki/log/log>
-#include <rikitiki/http_statuses.h>
+#include <rikitiki/http/http_statuses.h>
 #include <memory>
 #pragma warning(disable:4265 4355 4062)
 #include <future>
@@ -65,18 +65,6 @@ namespace rikitiki {
           virtual std::wstring name() const = 0;
           virtual std::string desc() const;
           virtual ~Handler();
-     };
-
-     struct StaticContentHandler : public Handler {
-          std::wstring prefix;
-          std::wstring path;
-          std::map<std::wstring, std::wstring> mime_types;
-          StaticContentHandler(const std::wstring& prefix, const std::wstring& path);
-          virtual bool Handle(ConnContextRef ctx) OVERRIDE;
-          virtual bool CanHandle(RequestContext& ctx) OVERRIDE;
-          virtual bool visible() const;
-          virtual std::wstring name() const;
-          virtual ~StaticContentHandler();
      };
 
      class Server;

@@ -68,7 +68,7 @@ namespace rikitiki {
                virtual void OnHeadersFinished() OVERRIDE{
                     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
-                    for (auto header : response.headers) {
+                    for (auto header : response.Headers()) {
                          std::string name = converter.to_bytes(header.first.c_str());
                          std::string value = converter.to_bytes(header.second.c_str());
                          iis7ctx->GetResponse()->SetHeader(name.c_str(), value.c_str(), (USHORT)value.length(), true);
@@ -88,7 +88,7 @@ namespace rikitiki {
                }
                virtual void OnData() OVERRIDE{
                     std::stringstream ss;
-                    response.payload.swap(ss);
+                    response.Body().swap(ss);
                     std::string buffer = ss.str();
                     
                     rawWrite(buffer.c_str(), buffer.length());                    
@@ -124,6 +124,44 @@ namespace rikitiki {
 
                }
 
+               virtual
+                    REQUEST_NOTIFICATION_STATUS
+                    OnBeginRequest(
+                    _In_ IHttpContext *         pHttpContext,
+                    _In_ IHttpEventProvider *   pProvider
+                    ) OVERRIDE{
+                    UNREFERENCED_PARAMETER(pProvider);
+                    UNREFERENCED_PARAMETER(pHttpContext);
+
+                    REQUEST_NOTIFICATION_STATUS rtn = RQ_NOTIFICATION_CONTINUE;
+                    ConnContextRef_<II7ConnContext> ctx(new II7ConnContext(this, pHttpContext));
+                    auto handler = this->GetHandler(*ctx.get());
+                    if (handler != 0 && (handler->Handle(ctx) == true)) {
+                         if (ctx.use_count() == 1) {
+                              rtn = RQ_NOTIFICATION_FINISH_REQUEST;
+                         }
+                         else {
+                              ctx->SetAsync();
+                              rtn = RQ_NOTIFICATION_PENDING;
+                         }
+                    }
+                    return rtn;
+               }
+
+               virtual
+                    REQUEST_NOTIFICATION_STATUS
+                    OnPostBeginRequest(
+                    _In_ IHttpContext *         pHttpContext,
+                    _In_ IHttpEventProvider *   pProvider
+                    )
+               {
+                    UNREFERENCED_PARAMETER(pHttpContext);
+                    UNREFERENCED_PARAMETER(pProvider);
+
+                    return RQ_NOTIFICATION_CONTINUE;
+               }
+
+
                virtual HRESULT GetHttpModule(OUT CHttpModule **ppModule, IN IModuleAllocator *) OVERRIDE
                {
                     *ppModule = this;
@@ -141,24 +179,6 @@ namespace rikitiki {
 
                std::wstring domain;
 
-               REQUEST_NOTIFICATION_STATUS OnAcquireRequestState(IN IHttpContext * pHttpContext, IN OUT IHttpEventProvider * pProvider) OVERRIDE{
-                    UNREFERENCED_PARAMETER(pProvider);
-                    
-                    REQUEST_NOTIFICATION_STATUS rtn = RQ_NOTIFICATION_CONTINUE;
-                    ConnContextRef_<II7ConnContext> ctx(new II7ConnContext(this, pHttpContext));
-                    auto handler = this->GetHandler(*ctx.get());
-                    if (handler != 0 && (handler->Handle(ctx) == true)) {
-                         if (ctx.use_count() == 1) {
-                              rtn = RQ_NOTIFICATION_FINISH_REQUEST;
-                         }
-                         else {
-                              ctx->SetAsync();
-                              rtn = RQ_NOTIFICATION_PENDING;
-                         }
-                    }
-                    return rtn;
-               }
-
                virtual std::future<std::shared_ptr<Response>> ProcessRequest(IRequest& request) OVERRIDE{
                     auto client = new SimpleRequestClient(L"localhost", 80);                    
                     client->MakeRequest(request);
@@ -167,7 +187,7 @@ namespace rikitiki {
           };
           Server* CreateServer(DWORD dwServerVersion, IHttpModuleRegistrationInfo * pModuleInfo, IHttpServer * pHttpServer) {
                auto rtn = new IIS7Server(dwServerVersion, pModuleInfo, pHttpServer);
-               pModuleInfo->SetRequestNotifications(rtn, RQ_ACQUIRE_REQUEST_STATE, 0);
+               pModuleInfo->SetRequestNotifications(rtn, RQ_BEGIN_REQUEST, RQ_BEGIN_REQUEST);
                return rtn;
           }
 

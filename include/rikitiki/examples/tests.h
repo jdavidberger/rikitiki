@@ -23,7 +23,7 @@ namespace rikitiki {
 
                // Make sure we can roundtrip out a payload
                static void BasicTest(std::shared_ptr<Response> response) {
-                    std::string payload(response->payload.str());
+                    std::string payload(response->Body().str());
                     QUNIT_IS_EQUAL(payload, "Basic Test!");
                }
                void BasicTest(ConnContextRef ctx) {
@@ -35,16 +35,16 @@ namespace rikitiki {
                     ctx << "Saw: " << num;
                }
                static void QueryStringTest(std::shared_ptr<Response> response) {
-                    std::string payload(response->payload.str());
+                    std::string payload(response->Body().str());
 
                     QUNIT_IS_EQUAL(payload, "Saw: 42");
                }
 
                // Make sure we can set a handler. 
                static void HeadersTest(std::shared_ptr<Response> response) {
-                    QUNIT_IS_TRUE(response->headers.size() > 0);
+                    QUNIT_IS_TRUE(response->Headers().size() > 0);
                     bool found = false;
-                    for (auto hd : response->headers) {
+                    for (auto hd : response->Headers()) {
                          if (hd.first == L"Test") {
                               found = true;
                               QUNIT_IS_EQUAL(hd.second, std::wstring(L"42"));
@@ -59,7 +59,7 @@ namespace rikitiki {
 
                // Makes ure that the use case where we run async and respond later is handled. 
                static void AsyncTests(std::shared_ptr<Response> response) {
-                    std::string payload(response->payload.str());
+                    std::string payload(response->Body().str());
                     QUNIT_IS_EQUAL(payload, "Testing");
                }
                void AsyncTests(ConnContextRef ctx) {
@@ -108,11 +108,12 @@ namespace rikitiki {
                     SimpleRequest request;
                     request.uri = url;
                     numTests++;
-                    request.method = IRequest::GET;
-                    
+                    request.RequestMethod() = IRequest::GET;
+                    LOG(Tests, Info) << url << " Started." << std::endl;
                     std::shared_future<std::shared_ptr<Response>> future = server.ProcessRequest(request);
                     active_tests.push_back(std::async([=] {
                          testf(future.get());
+                         LOG(Tests, Info) << url << " done." << std::endl;
                          numTests--;
                     }));                    
                }
@@ -140,6 +141,8 @@ namespace rikitiki {
                     server.AddHandler(CreateRoute<>::With(this, L"/AsyncTests", &TestsModule::AsyncTests));                    
                     server.AddHandler(CreateRoute<>::With(this, L"/StartTests", &TestsModule::StartTests));
                     server.AddHandler(CreateRoute<>::With(this, L"/"));
+
+                    server.AddHandler(new StaticContentHandler(L"/static/", L"c:\\"));
                }
 
           };

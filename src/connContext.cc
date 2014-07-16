@@ -21,7 +21,7 @@ namespace rikitiki {
           return response << obj.c_str();
      }
 
-     ConnContext::Method RequestContext::RequestMethod() {
+     ConnContext::Method& RequestContext::RequestMethod() {
           if (_method == ANY){
                this->FillRequestMethod();
                assert(_method != ANY);
@@ -110,7 +110,7 @@ namespace rikitiki {
      }
 
      void ConnContext::FillPost(){
-          mapContents(Payload(), _post);
+          mapContents(Body(), _post);
           mappedPost = true;
      }
 
@@ -130,12 +130,12 @@ namespace rikitiki {
           return _contentType;
      }
 
-     ByteStream& RequestContext::Payload() {
+     ByteStream& RequestContext::Body() {
           if (!mappedPayload){
                this->FillPayload();
                assert(mappedPayload);
           }
-          return _payload;
+          return _body;
      }
 
      HeaderCollection::value_type& RequestContext::AddRequestHeader(const std::wstring& _name, const std::wstring& value){
@@ -201,13 +201,13 @@ namespace rikitiki {
      /*
      ConnContext& ConnContext::operator<<(std::function<void(std::wostream&)> f){
      handled = true;
-     f(response.payload);
+     f(response.Body());
      return *this;
      }
      */
      ConnContext& operator>>(ConnContext& ctx, std::wstring& t){
           std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
-          t = conversion.from_bytes(ctx.Payload().str());
+          t = conversion.from_bytes(ctx.Body().str());
           return ctx;
      }
      RequestContext::~RequestContext(){ }
@@ -247,7 +247,7 @@ namespace rikitiki {
                ss << "Content-Length: " << response.ContentLength << "\r\n";
           }
           
-          for (auto it : response.headers){
+          for (auto it : response.Headers()){
                ss << conv.to_bytes(it.first) << ": " << conv.to_bytes(it.second) << "\r\n";
           }
           ss << "\r\n";
@@ -263,7 +263,7 @@ namespace rikitiki {
      void ConnContextWithWrite::OnData() {
           if (response.TransferEncoding == Encoding::chunked) {
                std::stringstream ss;
-               response.payload.swap(ss);
+               response.Body().swap(ss);
                std::string buffer = ss.str();
                auto len = buffer.size();
                if (len == 0)
@@ -276,7 +276,7 @@ namespace rikitiki {
           }
           else if (response.ContentLength != -1) {
                std::stringstream ss;
-               response.payload.swap(ss);
+               response.Body().swap(ss);
                std::string buffer = ss.str();
                rawWrite(buffer.c_str(), buffer.length());
           }
@@ -295,7 +295,7 @@ namespace rikitiki {
      void ConnContextWithWrite::Close() {          
           ConnContext::Close();
           if (response.TransferEncoding != Encoding::chunked && response.ContentLength == -1) {
-               auto body = response.payload.str();
+               auto body = response.Body().str();
                response.ContentLength = body.size();
                WriteHeaders();
                rawWrite(&body[0], body.size());
