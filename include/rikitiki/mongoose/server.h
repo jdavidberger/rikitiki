@@ -24,17 +24,16 @@ namespace rikitiki {
                std::vector<const char*> options;
                uint16_t port;
 
+#ifdef USE_WEBSOCKET
           private:
                static int _wsHandler(const struct mg_connection *conn);
                static void _wsReady(struct mg_connection *conn);
                static int _wsReceive(struct mg_connection *conn, int bits, char* data, size_t length);
           protected:
-#ifdef USE_WEBSOCKET
                virtual void Close(websocket::WebsocketContext*) OVERRIDE;
                virtual websocket::WebsocketProcess* HandleWs(websocket::ConnectionHandle) OVERRIDE;
           public:
                using rikitiki::websocket::Server::Register;
-
 #endif
           public:
                using rikitiki::Server::Register;

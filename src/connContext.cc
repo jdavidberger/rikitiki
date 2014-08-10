@@ -386,7 +386,7 @@ namespace rikitiki {
 
           std::replace(raw_content.begin(), raw_content.end(), L'+', L' ');
           auto l_it = raw_content.begin();
-          std::wstring name, value;
+          std::wstring name;
           for (auto it = raw_content.begin(); it != raw_content.end(); it++){
                switch (*it){
                case L'=':
@@ -398,7 +398,7 @@ namespace rikitiki {
 #ifdef _MSC_VER
                     std::wstring value;
                     unescapeString(&*l_it, &*it, value);
-                    post.insert(PostContent(name, value.c_str()));
+                    post.insert(PostContent(name, value));
 #else 
                     char* value = curl_unescape(&*l_it, it - l_it);
                     post.insert(PostContent(name, value));

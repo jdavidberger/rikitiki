@@ -29,9 +29,9 @@ namespace rikitiki {
                virtual void FillRequestMethod(Request::Method&) const OVERRIDE;
           };
 
-          class MongooseResponse : public virtual OResponse {
+          class MongooseResponse : public virtual OResponseWriter {
                mg_connection* conn;
-               using OMessage::WriteData;
+               using OMessageWriter::WriteData;
                virtual size_t WriteData(const char*, size_t) OVERRIDE;
           public:
                MongooseResponse(mg_connection* c);

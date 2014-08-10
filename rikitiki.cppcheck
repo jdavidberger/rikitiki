@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="1">
+    <includedir>
+        <dir name="include/"/>
+    </includedir>    
+    <exclude>
+        <path name="third/"/>        
+		<path name="build/"/>        
+		<path name="build64/"/>        
+    </exclude>
+</project>

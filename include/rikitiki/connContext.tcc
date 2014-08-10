@@ -26,7 +26,7 @@ namespace rikitiki {
            int i = -1;      
            if(t.second == ContentType::ALL){
 	     i = 0;
-	     while(handlers[i] == NULL && i < (int)handlers.size()) i++;
+	     while(i < (int)handlers.size() && handlers[i] == NULL) i++;
            } else {
 	     i = (int)t.second;
            }

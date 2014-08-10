@@ -207,7 +207,10 @@ namespace rikitiki {
           return WriteData("HTTP/1.1 ") +
                WriteData(status->StartString() + "\r\n");
      }
-
+     OResponseWriter& OResponseWriter::operator << (const rikitiki::HttpStatus& t) {
+          status = &t;
+          return *this;
+     }
 
      OResponseMemory& OResponseMemory::operator << (const rikitiki::HttpStatus& t) {
           Response::operator<<(t);

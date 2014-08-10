@@ -15,6 +15,6 @@ namespace rikitiki {
           auto lastSpace = startLine.rfind(' ');
           std::wstring method(startLine.data(), &startLine[firstSpace]);
           std::wstring uri(&startLine[firstSpace], &startLine[lastSpace]);
-          SetRequestMethod(RequestMethod::FromString(uri.data()));
+          SetRequestMethod(RequestMethod::FromString(&method[0]));
      }
 }

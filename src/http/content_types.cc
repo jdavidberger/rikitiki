@@ -16,7 +16,7 @@ namespace rikitiki {
 		t FromString(const std::wstring& type){			
 			if (type == L"")
 				return DEFAULT;
-			if (types.size() == 0){
+			if (types.empty()){
 				for (auto _type = (int)ALL; _type < (int)MAX; _type++)
 					types[ToString((t)_type)] = (t)_type;
 			}
@@ -113,7 +113,7 @@ namespace rikitiki {
                 std::wistream& operator >>(std::wistream& s, t& _t) {
                      std::wstring str;
                      s >> str;
-                     _t = FromString(str.data());
+                     _t = FromString(str);
                      return s;
                 }
         }
