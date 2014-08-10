@@ -109,5 +109,12 @@ namespace rikitiki {
 				return L"unknown";
 			}
 		}
-	}
+                
+                std::wistream& operator >>(std::wistream& s, t& _t) {
+                     std::wstring str;
+                     s >> str;
+                     _t = FromString(str.data());
+                     return s;
+                }
+        }
 }

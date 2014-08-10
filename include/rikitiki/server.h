@@ -3,6 +3,8 @@
 
 #pragma once 
 
+#include <rikitiki\http\Request.h>
+
 #include <rikitiki/config.h>
 #include <vector>
 #include <sstream>
@@ -26,7 +28,7 @@
 namespace rikitiki {
      class ConnContext;
      class IRequest;
-     class RequestContext;
+     class Request;
      class Socket;
      class Response;
      void CleanConnContext(ConnContext* ctx);
@@ -35,7 +37,9 @@ namespace rikitiki {
      class ConnContextRef_ : public std::shared_ptr<T> {
      public:
           ConnContextRef_() {}
-          ConnContextRef_(T*ptr) : std::shared_ptr<T>(ptr, CleanConnContext){}
+          ConnContextRef_(T*ptr) : std::shared_ptr<T>(ptr, CleanConnContext){
+               LOG(Server, Debug) << "Created Context Ref " << (void*)this << std::endl;
+          }
      };
 
      typedef std::shared_ptr<ConnContext> ConnContextRef;
@@ -43,14 +47,14 @@ namespace rikitiki {
      template <class T>
      std::shared_ptr<ConnContext>& operator<<(std::shared_ptr<ConnContext>& me, T& t)
      {
-          *me << t;
+          me->response << t;
           return me;
      }
 
      template <class T>
      std::shared_ptr<ConnContext>& operator<<(std::shared_ptr<ConnContext>& me, const T& t)
      {
-          *me << t;
+          me->response << t;
           return me;
      }
 
@@ -58,9 +62,8 @@ namespace rikitiki {
         Base handler class. These are checked in order whenever there is a request.
         */
      struct Handler {
-
           virtual bool Handle(ConnContextRef ctx);
-          virtual bool CanHandle(RequestContext& ctx) = 0;
+          virtual bool CanHandle(Request&) = 0;
           virtual bool visible() const = 0;
           virtual std::wstring name() const = 0;
           virtual std::string desc() const;
@@ -92,7 +95,7 @@ namespace rikitiki {
           void AddPreprocessor( rikitiki::ctemplates::TemplatePreprocessor*);
 #endif
           bool Handle(ConnContextRef ctx);
-          Handler* GetHandler(RequestContext& ctx);
+          Handler* GetHandler(Request& ctx);
 
           void AddHandler(Handler& handler);
           void AddHandler(Handler* handler);
@@ -104,7 +107,7 @@ namespace rikitiki {
           This is mostly useful for testing -- it allows one test suite to hit every server implementation.
           */
           //virtual std::auto_ptr<Socket> GetDirectSocket();
-          virtual std::future<std::shared_ptr<Response>> ProcessRequest(IRequest&) = 0;
+          virtual std::future<std::shared_ptr<Response>> ProcessRequest(Request&) = 0;
 
           virtual void Register(WebModule& t);
      };

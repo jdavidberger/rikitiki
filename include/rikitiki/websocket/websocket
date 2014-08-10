@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef USE_WEBSOCKET
 #include "websocketServer.h"
 #include "websocketProcess.h"
 #include "websocketContext.h"
+#endif

@@ -14,6 +14,7 @@ namespace rikitiki {
     int status; 
     std::string name;
     bool managed; 
+    std::string StartString() const;
 
     static const HttpStatus Continue;
     static const HttpStatus Switching_Protocols;

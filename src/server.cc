@@ -16,6 +16,7 @@
 namespace rikitiki {
 
      void CleanConnContext(ConnContext* ctx) {
+          LOG(Server, Debug) << "Cleaning " << (void*)ctx << std::endl;
           if (ctx->handled)
                ctx->Close();
           delete ctx;
@@ -34,6 +35,7 @@ namespace rikitiki {
      Server::Server(){
           register_modules();
      }
+
      Server::~Server(){
           for (size_t i = 0; i < handlers.size(); i++){
                delete handlers[i];
@@ -49,7 +51,7 @@ namespace rikitiki {
 #endif
 
      }
-     Handler* Server::GetHandler(RequestContext& ctx) {
+     Handler* Server::GetHandler(Request& ctx) {
           for (size_t i = 0; i < handlers.size(); i++){
                if (handlers[i]->CanHandle(ctx))
                     return handlers[i];
@@ -60,11 +62,11 @@ namespace rikitiki {
      bool Server::Handle(ConnContextRef ctx) {
           for (size_t i = 0; i < handlers.size(); i++){
                try {
-                    if (handlers[i]->CanHandle(*ctx.get()))
+                    if (handlers[i]->CanHandle(ctx->request))
                          handlers[i]->Handle(ctx);
                }
                catch (HandlerException& ex) {
-                    LOG(Server, Debug) << "Error encountered: " << ctx->response.Body().str() << std::endl;
+                    LOG(Server, Debug) << "Error encountered: " << ex.status << std::endl;
                     ctx << (ex.status == 0 ? HttpStatus::Internal_Server_Error : *(ex.status));
                     return true;
                }

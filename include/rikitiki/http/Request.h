@@ -5,50 +5,43 @@
 #include <sstream>
 #include <mxcomp\useful_macros.h>
 #include "Message.h"
+#include "Enums.h"
+#include <rikitiki\http\Header.h>
 
-#ifdef _MSC_VER
-#undef DELETE
-#endif
-
-namespace rikitiki {
-     /**
-     Things parsed out of the response, ala forms
-     We can't just typedef it since we want to pass it around with stream operators
-     */
-     struct PostContent : public wstringpair {
-          PostContent(const std::wstring& name, const std::wstring& value);
-     };
-
-     /**
-     Cookies are key value pairs too.
-     TODO: Add expiration, domain, etc
-     */
-     struct Cookie : public wstringpair {
-          Cookie(const std::wstring& name, const std::wstring& value,
-               const std::wstring& Domain = L"", const std::wstring& Path = L"/",
-               const std::wstring& Expires = L"", bool secure = false, bool httpOnly = false);
-     };
-
-     typedef std::map<std::wstring, std::wstring> QueryStringCollection;
-     typedef multimap<std::wstring, std::wstring> PostCollection;
-     typedef std::map<std::wstring, std::wstring> CookieCollection;
+namespace rikitiki {     
 
      // http://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html
-     class IRequest : public IMessage {
-     public:
-          enum Method {
-               ANY = 0, GET = 1, POST = 2, HEAD = 3, PUT = 4, DELETE = 5, TRACE = 6, OPTIONS = 7, CONNECT = 8, PATCH = 9, OTHER
-          };
-          virtual Method& RequestMethod() = 0;
-          virtual const wchar_t* URI() = 0;
+     class Request : public virtual Message {
+     public:          
+          typedef RequestMethod::t Method;
+          virtual RequestMethod::t RequestMethod() const = 0;
+          virtual void SetRequestMethod(RequestMethod::t) = 0;
 
-          virtual CookieCollection& Cookies() = 0;
+          virtual const wchar_t* URI() const = 0;
+
           virtual QueryStringCollection& QueryString() = 0;          
+
+          virtual void SetStartline(const std::wstring&) OVERRIDE;
+          virtual std::wstring Startline() const OVERRIDE;
+     };
+     
+     struct IRequest : public virtual IMessage, public virtual Request {
+     
      };
 
-     class SimpleRequest : public IRequest {
+
+
+     template <class T> struct IRequest_ : public IMessage_< T >, public IRequest {
+          virtual RequestMethod::t RequestMethod();
+          virtual const wchar_t* URI();
+
+          virtual CookieCollection& Cookies();
+          virtual QueryStringCollection& QueryString();
+     };
+     
+     class SimpleRequest : public Request {
      private:
-          Method method = GET;
+          RequestMethod::t method = RequestMethod::GET;
           HeaderCollection headers;
           CookieCollection cookies;
           QueryStringCollection queryString;
@@ -58,8 +51,12 @@ namespace rikitiki {
      public:
           std::wstring uri;
           virtual ~SimpleRequest(){}
-          virtual Method& RequestMethod() { return method; };
-     
+          virtual RequestMethod::t RequestMethod() const OVERRIDE { 
+               return method; 
+          };
+          void SetRequestMethod(RequestMethod::t r) {
+               method = r;
+          }
           virtual HeaderCollection& Headers() OVERRIDE {
                return headers;
           };
@@ -72,7 +69,7 @@ namespace rikitiki {
                return queryString;
           };
           
-          virtual const wchar_t* URI() OVERRIDE {
+          virtual const wchar_t* URI() const OVERRIDE {
                return uri.data();
           };
 

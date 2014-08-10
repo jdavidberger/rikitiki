@@ -11,6 +11,18 @@
 #include <cstring>
 
 namespace rikitiki {
+     void type_conversion_error(ConnContext& ctx, void** handlers){
+          std::wstring accepts;
+          for (auto _type = 0; _type < (int)ContentType::MAX; _type++)
+               if (handlers[_type]){
+               if (accepts.size())
+                    accepts += L", ";
+               accepts += ContentType::ToString((ContentType::t)_type);
+               }
+          ctx << Header(L"Accept", accepts);
+          throw rikitiki::HandlerException(HttpStatus::Not_Acceptable);
+     }
+
      std::ostream& operator <<(std::ostream& response, const wchar_t* obj)
      {
           std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
@@ -21,12 +33,8 @@ namespace rikitiki {
           return response << obj.c_str();
      }
 
-     ConnContext::Method& RequestContext::RequestMethod() {
-          if (_method == ANY){
-               this->FillRequestMethod();
-               assert(_method != ANY);
-          }
-          return _method;
+     std::wostream& operator <<(std::wostream& response, const std::string& obj) {
+          return response << obj.c_str();
      }
 
      static inline const wchar_t* read_to_name(const wchar_t* b){
@@ -73,7 +81,7 @@ namespace rikitiki {
           }
           return b;
      }
-     
+     /*
      void ConnContext::FillAccepts() {
           _accepts = new std::multimap<double, ContentType::t>();
           const wchar_t* b;
@@ -122,29 +130,31 @@ namespace rikitiki {
           return *_accepts;
      }
 
-     ContentType::t ConnContext::ContentType() {
-          if (!mappedContentType){
-               this->FillContentType();
-               assert(mappedContentType);
-          }
+     ContentType::t ConnContext::ContentType() const {
           return _contentType;
      }
+     */
 
+     /*
      ByteStream& RequestContext::Body() {
-          if (!mappedPayload){
-               this->FillPayload();
-               assert(mappedPayload);
-          }
-          return _body;
+     if (!mappedPayload){
+     this->FillPayload();
+     assert(mappedPayload);
      }
+     return _body;
+     }
+
+
 
      HeaderCollection::value_type& RequestContext::AddRequestHeader(const std::wstring& _name, const std::wstring& value){
           std::wstring name(_name);
           std::transform(name.begin(), name.end(), name.begin(), ::towlower);
-          auto& newHeader = *_headers.insert(std::make_pair(name, value));
-          return newHeader;
+          return _headers.insert(std::make_pair(name, value));          
      }
+     */
 
+
+     /*
      HeaderCollection& RequestContext::Headers(){
           if (!mappedHeaders){
                this->FillHeaders();
@@ -169,11 +179,10 @@ namespace rikitiki {
      }
 
      void RequestContext::FillCookies(){
-          auto range = Headers().equal_range(L"cookie");
-          for (auto it = range.first; it != range.second; it++){
-               LOG(Server, Debug) << "Req. cookie: " << it->first << " = " << it->second << std::endl;
-               if (it->second.size() == 0) continue;
-               const wchar_t* n = &it->second[0];
+          auto range = Headers().GetList(L"cookie");
+          for (auto it = range.begin(); it != range.end(); it++){
+               // LOG(Server, Debug) << "Req. cookie: " << it->first << " = " << it->second << std::endl;               
+               const wchar_t* n = &(*it)[0];
                const wchar_t *ne, *ve;
                do {
                     n = read_to_name(n);
@@ -189,7 +198,6 @@ namespace rikitiki {
           mappedCookies = true;
      }
 
-
      PostCollection& ConnContext::Post() {
           if (!mappedPost){
                this->FillPost();
@@ -198,55 +206,42 @@ namespace rikitiki {
           return _post;
      }
 
-     /*
      ConnContext& ConnContext::operator<<(std::function<void(std::wostream&)> f){
      handled = true;
      f(response.Body());
      return *this;
      }
-     */
      ConnContext& operator>>(ConnContext& ctx, std::wstring& t){
           std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
-          t = conversion.from_bytes(ctx.Body().str());
+          t = conversion.from_bytes(ctx.request.Body().str());
           return ctx;
      }
-     RequestContext::~RequestContext(){ }
-     RequestContext::RequestContext() :
-          mappedPayload(false), _method(ANY), mappedQs(false), mappedHeaders(false), mappedCookies(false) {}
 
-     ConnContext::ConnContext(Server* _server) :
+     */
+     
+     ConnContext::ConnContext(Server* _server, Request& _request, OResponse& _response) :
           handled(false),
-          server(NULL),
-          mappedPost(false),
-          mappedContentType(false),
-          headersDone(false),
-          _accepts(0) {
+          server(NULL), request(_request), response(_response) {
           server = _server;
      }
-     ConnContext::ConnContext() :
-          handled(false),
-          server(NULL),
-          mappedPost(false),
-          mappedContentType(false),
-          headersDone(false),
-          _accepts(0) {}
 
      ConnContext::~ConnContext(){
-          delete _accepts;
+          
      }
+     /*
      void ConnContextWithWrite::WriteHeaders() {
           std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
           std::stringstream ss;
           ss << "HTTP/1.1 " << response.status->status << " " << response.status->name << "\r\n";
-          ss << "Content-Type: " << conv.to_bytes(response.ResponseType) << "\r\n";
-          
+          //ss << "Content-Type: " << conv.to_bytes(response.ContentType) << "\r\n";
+          //
           if(response.TransferEncoding == Encoding::chunked) {
                ss << "Transfer-Encoding: chunked" << "\r\n";                
           }
           else if (response.ContentLength != -1) {
                ss << "Content-Length: " << response.ContentLength << "\r\n";
           }
-          
+          //
           for (auto it : response.Headers()){
                ss << conv.to_bytes(it.first) << ": " << conv.to_bytes(it.second) << "\r\n";
           }
@@ -256,12 +251,12 @@ namespace rikitiki {
           rawWrite(buffer.c_str(), buffer.length());
      }
      void ConnContextWithWrite::OnHeadersFinished() {
-          if (response.TransferEncoding == Encoding::chunked || response.ContentLength != -1) {
+          if (response.TransferEncoding() == Encoding::chunked || response.ContentLength() != -1) {
                WriteHeaders();
           }          
      }
      void ConnContextWithWrite::OnData() {
-          if (response.TransferEncoding == Encoding::chunked) {
+          if (response.TransferEncoding() == Encoding::chunked) {
                std::stringstream ss;
                response.Body().swap(ss);
                std::string buffer = ss.str();
@@ -274,7 +269,7 @@ namespace rikitiki {
                buffer = resp.str();
                rawWrite(buffer.c_str(), buffer.length());
           }
-          else if (response.ContentLength != -1) {
+          else if (response.ContentLength() != -1) {
                std::stringstream ss;
                response.Body().swap(ss);
                std::string buffer = ss.str();
@@ -286,62 +281,32 @@ namespace rikitiki {
      ConnContextWithWrite::~ConnContextWithWrite() {
           
      }
-     void ConnContext::Close() {
+     */
+     void ConnContext::Close() {      
+          response.Done();
+          /*
           if (headersDone == false) {
                OnHeadersFinished();
                headersDone = true;
-          }          
+          } 
+          */
      }
+     /*
      void ConnContextWithWrite::Close() {          
           ConnContext::Close();
-          if (response.TransferEncoding != Encoding::chunked && response.ContentLength == -1) {
+          if (response.TransferEncoding() != Encoding::chunked && response.ContentLength() == -1) {
                auto body = response.Body().str();
-               response.ContentLength = body.size();
+               response.ContentLength(body.size());
                WriteHeaders();
                rawWrite(&body[0], body.size());
           }
-          else if (response.TransferEncoding == Encoding::chunked){
+          else if (response.TransferEncoding() == Encoding::chunked){
                rawWrite("0\r\n\r\n", 5);
           }
      }
-     ConnContextWithWrite::ConnContextWithWrite(Server* s) : ConnContext(s) {}
-
-
-#define MATCH_METHOD_ENUM(eval)	{if(wcscmp(method, L#eval) == 0) return ConnContext::eval;}
-
-     ConnContext::Method strToMethod(const wchar_t* method){
-          MATCH_METHOD_ENUM(GET);
-          MATCH_METHOD_ENUM(POST);
-          MATCH_METHOD_ENUM(HEAD);
-          MATCH_METHOD_ENUM(PUT);
-          MATCH_METHOD_ENUM(DELETE);
-          MATCH_METHOD_ENUM(TRACE);
-          MATCH_METHOD_ENUM(OPTIONS);
-          MATCH_METHOD_ENUM(CONNECT);
-          MATCH_METHOD_ENUM(PATCH);
-          LOG(Server, Error) << "strToMethod failed on method '" << method << "'" << std::endl;
-          return ConnContext::ANY;
-     }
-
-#define MATCH_METHOD_STR(eval) case ConnContext::eval: return L#eval;
-     const wchar_t* methodToStr(ConnContext::Method method){
-          switch (method) {
-               MATCH_METHOD_STR(GET);
-               MATCH_METHOD_STR(POST);
-               MATCH_METHOD_STR(HEAD);
-               MATCH_METHOD_STR(PUT);
-               MATCH_METHOD_STR(DELETE);
-               MATCH_METHOD_STR(TRACE);
-               MATCH_METHOD_STR(OPTIONS);
-               MATCH_METHOD_STR(CONNECT);
-               MATCH_METHOD_STR(PATCH);
-          case ConnContext::ANY:
-          case ConnContext::OTHER:
-          default:
-               LOG(Server, Error) << "methodToStr failed on str '" << method << "'" << std::endl;
-               return L"ANY";
-          }
-     }
+     ConnContextWithWrite::ConnContextWithWrite(Server* s, Request& r) : ConnContext(s, r) {}
+     */
+     /*
 
      void mapQueryString(const wchar_t* _qs, std::map<std::wstring, std::wstring>& qs){
           if (_qs == NULL) return;
@@ -374,6 +339,7 @@ namespace rikitiki {
                _qs++;
           }
      }
+     */
      ConnContext& ConnContext::operator <<(const HttpStatus& obj) {
           handled = true;
           response << obj;

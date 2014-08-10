@@ -12,11 +12,8 @@
 #include <codecvt>
 #include <rikitiki/http/Request.h>
 #include <rikitiki/http/Response.h>
+#include <rikitiki/requestContext.h>
 
-#ifdef _MSC_VER
-#undef DELETE
-#define decltype(a,b) decltype(b) // VC++ does not get sane error messages yet I guess
-#endif
 #include <mxcomp\useful_macros.h>
 
 namespace rikitiki {
@@ -35,101 +32,63 @@ namespace rikitiki {
           const HttpStatus* status;
      };
 
-     /***
-        Request context object. Contains everything about the request; but has no methods to deal with responding to the request.
-        */
-     class RequestContext : public IRequest {
-     public:
-          typedef IRequest::Method Method;
-     protected:
-          bool mappedQs, mappedHeaders, mappedCookies, mappedPayload;
-          QueryStringCollection _qs;
-          HeaderCollection _headers;
-          CookieCollection _cookies;
-          ByteStream _body;
-          Method _method;
-
-          virtual void FillQueryString() = 0;
-          virtual void FillHeaders() = 0;
-          virtual void FillRequestMethod() = 0;
-          virtual void FillCookies();
-
-          virtual void FillPayload() = 0;
-
-          RequestContext();
-          virtual ~RequestContext();
-
-          /**\brief This is a conv. function to add REQUEST headers, not response headers (use the stream operator for that).
-          This function exists so the raw conncontext drivers can just kick down unsanitized header data and this function
-          does the right thing. Namely that means lower-casing it.
-          */
-          HeaderCollection::value_type& AddRequestHeader(const std::wstring&, const std::wstring&);
-     public:
-          virtual Method& RequestMethod();
-          virtual HeaderCollection& Headers();
-          virtual CookieCollection& Cookies();
-          virtual QueryStringCollection& QueryString();
-          virtual const wchar_t* URI() = 0;
-
-          virtual ByteStream& Body() OVERRIDE;
-
-     };
-
      /**
         Connection Context object. This is the main object in which handlers use both to read request data and
         write response data.
 
         In general, you can just stream ('<<') whatever you want into it, and there should be an override that
         does the right thing.
-        */
-     class ConnContext : public virtual RequestContext {
+        */    
+     class ConnContext {
      protected:
-          bool mappedPost, mappedContentType;
-          bool headersDone;
-          PostCollection _post;
-          std::multimap<double, ContentType::t>* _accepts;
-          ContentType::t _contentType;
-
-
-          virtual void FillAccepts();
-          virtual void FillContentType();
-          virtual void FillPost();
-
           friend class Server;
 
-
-          ConnContext(Server*);
-          ConnContext();
-          ConnContext(ConnContext&) = delete;
-          ConnContext& operator=(const ConnContext& rhs) = delete;
-
+          ConnContext(Server*, Request&, OResponse&);
+          
      public:
+          ConnContext& operator=(const ConnContext&) = delete;
           virtual ~ConnContext();
           Server* server;
-          std::multimap<double, ContentType::t>& Accepts();
-          PostCollection& Post();
-          ContentType::t ContentType();
-
+          
           virtual void Close();
           bool handled;
-          virtual void OnHeadersFinished() {}
-          virtual void OnData() {}
 
           ConnContext& operator <<(const HttpStatus& obj);
           ConnContext& operator <<(const Cookie& obj);
           ConnContext& operator <<(const Header& obj);
-
           ConnContext& operator <<(std::function<void(std::wostream&)>);
           template <class T> ConnContext& operator <<(const T& obj);
 
           template <class T>
           typename std::enable_if<  std::is_class<typename valid_conversions<T>::In>::value,
                ConnContext&>::type operator <<(T&);
+          
           template <class T> auto operator >>(T&) -> decltype(valid_conversions<T>::In::Instance(), instance_of<ConnContext>::value);
 
-          Response response;
-     };
+          HeaderCollection& Headers() {
+               return request.Headers();
+          };
+          ByteStream& Body() {
+               return request.Body();
+          };
+          CookieCollection& Cookies() {
+               return request.Cookies();
+          }
+          QueryStringCollection& QueryString() {
+               return request.QueryString();
+          }
+          RequestMethod::t RequestMethod() const {
+               return request.RequestMethod();
+          };
+          const wchar_t* URI() const {
+               return request.URI();
+          }
 
+          void AddRequestListener(MessageListener*);
+          Request& request ;
+          OResponse& response ;
+     };
+     /*
      class ConnContextWithWrite : public ConnContext {
      private:
 
@@ -139,22 +98,16 @@ namespace rikitiki {
           virtual void OnHeadersFinished() OVERRIDE;
           virtual void OnData() OVERRIDE;
      public:
-          ConnContextWithWrite(Server* s);
+          ConnContextWithWrite(Server* s, Request& r);
           virtual ~ConnContextWithWrite();
           virtual void Close() OVERRIDE;
      };
-
+     */
      void mapContents(ByteStream& raw_content, PostCollection& post);
      void mapQueryString(const wchar_t* _qs, QueryStringCollection& qs);
-     ConnContext::Method strToMethod(const wchar_t* method);
-     const wchar_t* methodToStr(ConnContext::Method method);
+     //Request::Method strToMethod(const wchar_t* method);
+     //const wchar_t* methodToStr(Request::Method method);
      ConnContext& operator>>(ConnContext&, std::wstring& t);
-#include "connContext.tcc"
 }
 
-#ifdef _MSC_VER
-#undef DELETE
-#undef decltype
-#endif
-
-//#include "ctemplate/connContext_ext.h"
+#include "connContext.tcc"

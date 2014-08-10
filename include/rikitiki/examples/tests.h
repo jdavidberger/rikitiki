@@ -43,19 +43,40 @@ namespace rikitiki {
                // Make sure we can set a handler. 
                static void HeadersTest(std::shared_ptr<Response> response) {
                     QUNIT_IS_TRUE(response->Headers().size() > 0);
-                    bool found = false;
-                    for (auto hd : response->Headers()) {
-                         if (hd.first == L"Test") {
-                              found = true;
-                              QUNIT_IS_EQUAL(hd.second, std::wstring(L"42"));
-                         }
+                    auto value = response->Headers().Get(L"Test");
+                    bool found = value != 0;
+                    if (found) {
+                         QUNIT_IS_EQUAL(*value, std::wstring(L"42"));
                     }
+                    
+                    auto list = response->Headers().GetList(L"A");
+                    QUNIT_IS_TRUE(list.size() == 3);
+                    if (list.size() == 3) {
+                         QUNIT_IS_TRUE(list[0] == L"a");
+                         QUNIT_IS_TRUE(list[1] == L"b");
+                         QUNIT_IS_TRUE(list[2] == L"c");
+                    }
+
                     QUNIT_IS_TRUE(found);
                }
                void HeadersTest(ConnContextRef ctx) {
+                    ctx << rikitiki::Header(L"A", L"a");
                     ctx << rikitiki::Header(L"Test1", L"42");
-                    ctx << rikitiki::Header(L"Test", L"42") << "!";
+                    ctx << rikitiki::Header(L"Test", L"42");
+                    ctx << rikitiki::Header(L"A", L"b");
+                    ctx << rikitiki::Header(L"A", L"c") << "!";
                }
+
+               // Make sure we can send a payload with the request
+               static void PayloadTest(std::shared_ptr<Response> response) {
+                    QUNIT_IS_EQUAL("tset a si siht", response->Body().str());
+               }
+               void PayloadTest(ConnContextRef ctx) {
+                    auto str = ctx->Body().str();
+                    std::reverse(str.begin(), str.end());
+                    ctx << str;
+               }
+
 
                // Makes ure that the use case where we run async and respond later is handled. 
                static void AsyncTests(std::shared_ptr<Response> response) {
@@ -104,11 +125,18 @@ namespace rikitiki {
                }
 
                // Set up a test to be run. 
-               void SetupTest(rikitiki::Server& server, const std::wstring& url, void(*testf)(std::shared_ptr<Response>)) {
+               void SetupTest(rikitiki::Server& server, const std::wstring& url, void(*testf)(std::shared_ptr<Response>), const std::string& payload = "") {
                     SimpleRequest request;
-                    request.uri = url;
+                    request.uri = L"/" + url;
+                    if (payload.size()) {
+                         request.Body().write(payload.data(), (std::streamsize)payload.size());
+                         request.SetContentLength(payload.size());
+                         request.SetRequestMethod(RequestMethod::POST);
+                    }
+                    else {
+                         request.SetRequestMethod(RequestMethod::GET);
+                    }
                     numTests++;
-                    request.RequestMethod() = IRequest::GET;
                     LOG(Tests, Info) << url << " Started." << std::endl;
                     std::shared_future<std::shared_ptr<Response>> future = server.ProcessRequest(request);
                     active_tests.push_back(std::async([=] {
@@ -123,19 +151,27 @@ namespace rikitiki {
                     numTests = 0;
                     auto& server = *ctx->server;
                     test_results.str("");
+
+                    SetupTest(server, L"PayloadTest", &TestsModule::PayloadTest, "this is a test");
                     SetupTest(server, L"BasicTest", &TestsModule::BasicTest);
                     SetupTest(server, L"QueryStringTest/42", &TestsModule::QueryStringTest);
                     SetupTest(server, L"StatusTest", &TestsModule::StatusTest);
                     SetupTest(server, L"CookiesTest", &TestsModule::CookiesTest);
-                    SetupTest(server, L"AsyncTests", &TestsModule::AsyncTests);
+                    SetupTest(server, L"AsyncTests", &TestsModule::AsyncTests);                    
                     SetupTest(server, L"HeadersTest", &TestsModule::HeadersTest);
+
                     this->operator()(ctx);
                }
 
                void Register(rikitiki::Server& server) OVERRIDE{
+                    mxcomp::log::SetLogLevel(mxcomp::log::Debug);
+                    mxcomp::log::SetLogStream(std::cerr);
+
+
                     server.AddHandler(CreateRoute<>::With(this, L"/BasicTest", &TestsModule::BasicTest));
                     server.AddHandler(CreateRoute<int>::With(this, L"/QueryStringTest/{num}", &TestsModule::QueryStringTest));
                     server.AddHandler(CreateRoute<>::With(this, L"/HeadersTest", &TestsModule::HeadersTest));
+                    server.AddHandler(CreateRoute<>::With(this, L"/PayloadTest", &TestsModule::PayloadTest));
                     server.AddHandler(CreateRoute<>::With(this, L"/StatusTest", &TestsModule::StatusTest));
                     server.AddHandler(CreateRoute<>::With(this, L"/CookiesTest", &TestsModule::CookiesTest));
                     server.AddHandler(CreateRoute<>::With(this, L"/AsyncTests", &TestsModule::AsyncTests));                    

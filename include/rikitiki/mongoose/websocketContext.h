@@ -3,7 +3,7 @@
 
 #pragma once
 #include <rikitiki\mongoose\connContext.h>
-#include <rikitiki\websocket\websocketContext.h>
+#include <rikitiki\websocket\websocket>
 
 struct mg_connection;
 
@@ -11,7 +11,7 @@ namespace rikitiki {
      struct Server;
 
      namespace mongoose {
-          
+          /*
           class MongooseWebsocketContext : public MongooseRequestContext,
                public websocket::WebsocketContext {
           private:
@@ -26,6 +26,6 @@ namespace rikitiki {
                MongooseWebsocketContext( websocket::Server* s, const mg_connection* conn);
                MongooseWebsocketContext( websocket::Server* s, mg_connection* conn);
           };
-
+          */
      }
 }

@@ -7,109 +7,89 @@
 #include <rikitiki\http\content_types.h>
 #include <rikitiki\http\http_statuses.h>
 #include <mxcomp\useful_macros.h>
-
+#include <utility>
 #pragma warning (disable: 4265)
 #include <mutex>
 #pragma warning (default: 4265)
 
 #ifdef _MSC_VER
-#define decltype(a,b) decltype(b) // VC++ does not get sane error messages yet I guess -- this ICEs VC++2013
+//#define decltype(a,b) b
 #endif
-
 namespace rikitiki {
-
-     namespace Encoding {
-          enum t {
-               UNKNOWN,
-               chunked,
-               compress,
-               deflate,
-               gzip,
-               identity,
-               OTHER
-          };
-          
-          t FromString(const wchar_t*);
-          const wchar_t* ToString(t);
-     }
 
      std::ostream& operator <<(std::ostream& response, const wchar_t* obj);
      std::ostream& operator <<(std::ostream& response, const std::wstring& obj);
 
+     std::wostream& operator <<(std::wostream& response, const std::string& obj);
+
      /**
      Response class that handlers write to. Contains headers, response stream, status, etc.
      */
-     struct Response : public IMessage {
+     struct Response : public virtual Message {
      private:
+          CookieCollection cookies; 
            HeaderCollection headers;
            ByteStream body;
      public:
           Response();
           ~Response();
-          uint64_t ContentLength;
-          Encoding::t TransferEncoding; 
           
-          ContentType::t GetResponseType() const { return ContentType::FromString(ResponseType); }
-          void SetResponseType(ContentType::t v) { ResponseType = ContentType::ToString(v); }
-          std::wstring ResponseType;  
-
-          virtual HeaderCollection& Headers() OVERRIDE {
+          virtual HeaderCollection& Headers() OVERRIDE{
                return headers;
+          };
+          virtual CookieCollection& Cookies() OVERRIDE{
+               return cookies;
           };
 
           virtual ByteStream& Body() OVERRIDE {
                return body;
           }
-
           
           const HttpStatus* status;
           void reset();
 
           std::mutex payloadWrite;
 
-          template <class T> auto operator <<(const T& obj) -> decltype(instance_of<std::stringstream>::value << obj, instance_of<Response&>::value)
-          {
-               std::lock_guard<std::mutex> lock(payloadWrite);
-               Body() << obj;
-               assert(Body().good());
-               return *this;
-          }
-          /*const std::stringstream& GetResponse() const;
-          std::stringstream& GetResponse();*/
-          Response& operator <<(rikitiki::ContentType::t t);
-          Response& operator <<(const rikitiki::Cookie& t);
+          virtual void SetStartline(const std::wstring&) OVERRIDE;
+          virtual std::wstring Startline() const OVERRIDE;
+
           Response& operator <<(const rikitiki::HttpStatus& t);
-          virtual Response& operator <<(const rikitiki::Header& t) OVERRIDE;
+          using Message::operator<<;          
+     };
+     struct IResponse : public virtual IMessage, public virtual Response {
 
      };
+
+     struct OResponse : public OMessage {
+          const HttpStatus* status = &HttpStatus::OK;
+          virtual size_t WriteStartLine();
+          virtual OResponse& operator <<(const rikitiki::HttpStatus& t);
+          virtual OResponse& operator <<(rikitiki::ContentType::t t) OVERRIDE;
+          virtual OResponse& operator <<(const rikitiki::Cookie& t) OVERRIDE;
+          virtual OResponse& operator <<(const rikitiki::Header& t) OVERRIDE;
+     };
+     template <class T> auto operator <<(OResponse& out, const T& obj) -> decltype(std::declval<std::stringstream>() << obj, std::declval<OResponse&>())
+     {
+          std::stringstream ss;
+          auto buff = mxcomp::attachContinousBuffer(ss);
+          ss << obj;
+          out.WritePayloadData(buff->data(), buff->length());
+          return out;
+     }
+
+     
 
      /* Build a response object from a raw string of bytes. */
-     class ResponseBuilder {
-          enum StateT {
-               STATUS,
-               HEADERS,
-               PAYLOAD,
-               CHUNK_PAYLOAD,
-               FINISHED
-          };
-          StateT state;
-          enum BufferModeT {
-               LENGTH,
-               NEWLINE,
-               NONE
-          };
-          BufferModeT bufferMode;
-          std::size_t expectedSize;
-          std::string buffer; 
+     class ResponseBuilder  : public BufferedReader {          
+          MessageParserState state;
           
-          bool OnBufferedData(const char*, std::size_t length);
+          virtual bool OnBufferedData(const char*, std::size_t length);
      public:
           Response* response;
-          bool OnData(const char*, std::size_t length);
-          ResponseBuilder(Response*);          
+          ResponseBuilder(Response*);        
+          virtual ~ResponseBuilder(){}
      };
 }
-
 #ifdef _MSC_VER
 #undef decltype
 #endif

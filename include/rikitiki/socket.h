@@ -47,7 +47,16 @@ namespace rikitiki {
 	};
 
         class Response;
-        class IRequest; 
+        class Request; 
+        class SocketRequestClient : public SocketListener, public OMessage {
+             TCPIPSocket socket;
+             IResponse response;
+             const wchar_t* host;
+        public:
+             SocketRequestClient(const wchar_t* host, uint16_t port = 80);
+
+        };
+
         class SimpleRequestClient : public SocketListener{
              TCPIPSocket socket;              
              std::shared_ptr<Response> response;
@@ -61,7 +70,7 @@ namespace rikitiki {
              ~SimpleRequestClient();
 
              SimpleRequestClient(const wchar_t* host, uint16_t port = 80);
-             void MakeRequest(IRequest& request);
+             void MakeRequest(Request& request);
              virtual void OnClose();
              virtual bool OnData(const char*, size_t length);
              std::future<std::shared_ptr<Response>> future() {                

@@ -5,6 +5,7 @@
 
 namespace rikitiki {
      namespace mongoose {
+          /*
           void MongooseWebsocketContext::setConnection(mg_connection* conn) {
                this->conn = conn;
                this->request = mg_get_request_info(conn);
@@ -22,5 +23,7 @@ namespace rikitiki {
                     throw std::exception("Invalid socket write; tried to write to a socket before a connection was fully established.");
                return mg_write(conn, buffer, len);
           }
+          */
      }
+     
 }

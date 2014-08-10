@@ -77,7 +77,7 @@ static int modern_sscanf(const wchar_t* b, const wchar_t* format, T&... t){
 
 //------------------ Route_ -----------------------
 template <typename P, typename... T> 
-Route_<P,T...>::Route_(P* p, const std::wstring& _route, F _f, ConnContext::Method method) : parent(p), f(_f), Route(_route, method) { }
+Route_<P,T...>::Route_(P* p, const std::wstring& _route, F _f, Request::Method method) : parent(p), f(_f), Route(_route, method) { }
 
 template <typename P, typename... T>
 int Route_<P, T...>::Scan(ConnContextRef ctx, T&... t){
@@ -85,17 +85,17 @@ int Route_<P, T...>::Scan(ConnContextRef ctx, T&... t){
 }
 
 template <typename P, typename... T>
-int Route_<P, T...>::ScanTest(RequestContext& ctx, T&... t){
+int Route_<P, T...>::ScanTest(Request& ctx, T&... t){
      return modern_sscanf(ctx.URI(), route.c_str(), t...);
 }
 
 template <typename P, typename... T>
-bool Route_<P, T...>::CanHandle(RequestContext& ctx){
-     if (method != ConnContext::ANY && method != ctx.RequestMethod()) {
+bool Route_<P, T...>::CanHandle(Request& ctx){
+     if (method != RequestMethod::ANY && method != ctx.RequestMethod()) {
           return false;
      }
 
-     auto args = std::tuple_cat(std::tuple<RequestContext&>(ctx), std::tuple<T...>());
+     auto args = std::tuple_cat(std::tuple<Request&>(ctx), std::tuple<T...>());
 
      int matched = mxcomp::tuples::applyTuple(this, &Route_<P, T...>::ScanTest, args);
      if (matched == sizeof...(T) + 1){
@@ -107,7 +107,7 @@ bool Route_<P, T...>::CanHandle(RequestContext& ctx){
 template <typename P, typename... T> 
 bool Route_<P,T...>::Handle(ConnContextRef ctx){
      Handler::Handle(ctx); 
-  if( method != ConnContext::ANY && method != ctx->RequestMethod() ) {
+     if (method != rikitiki::RequestMethod::ANY && method != ctx->RequestMethod()) {
     return false;
   }
   
@@ -118,7 +118,7 @@ bool Route_<P,T...>::Handle(ConnContextRef ctx){
   // super interested to hear it. 
   int matched = mxcomp::tuples::applyTuple(this, &Route_<P, T...>::Scan, args);
   if(matched == sizeof...(T) + 1){
-    LOG(Web, Verbose) << "Using route " << route << ", " << method << std::endl;
+       LOG(Web, Verbose) << "Using route " << route << ", " << rikitiki::RequestMethod::ToString(method) << std::endl;
     mxcomp::tuples::applyTuple(parent, f, args);
     return true;
   }
@@ -130,14 +130,14 @@ template <typename P>
 Route_<P>::Route_(P* p, 	   
 		  const std::wstring& _route, 
 		  F _f,
-		  ConnContext::Method method) : parent(p), f(_f), Route(_route, method) {          
+		  Request::Method method) : parent(p), f(_f), Route(_route, method) {          
 }
 
 template <typename P>
-bool Route_<P>::CanHandle(RequestContext& ctx){
+bool Route_<P>::CanHandle(Request& ctx){
      bool shouldAttempt =
           wcscmp(route.c_str(), ctx.URI()) == 0 &&
-          (method == ConnContext::ANY ||
+          (method == RequestMethod::ANY ||
           method == ctx.RequestMethod());
      return shouldAttempt;
 }
@@ -147,11 +147,11 @@ bool Route_<P>::Handle(ConnContextRef ctx){
      Handler::Handle(ctx);
   bool shouldAttempt = 
     wcscmp(route.c_str(), ctx->URI()) == 0 &&
-    (method == ConnContext::ANY ||
+    (method == RequestMethod::ANY ||
      method == ctx->RequestMethod());
   
   if(shouldAttempt){       
-    LOG(Web, Verbose) << "Using route " << route << ", " << method << std::endl;
+    LOG(Web, Verbose) << "Using route " << route << ", " << rikitiki::RequestMethod::ToString(method) << std::endl;
     (parent->*f)(ctx);
     return true;
   }
@@ -165,7 +165,7 @@ template<typename P>
 Route* CreateRoute<T...>::With(P* p, 	   
 			       const std::wstring& _route, 
 			       typename Route_<P, T...>::F _f,
-			       ConnContext::Method method){
+			       Request::Method method){
   return new Route_<P, T...>(p, _route, _f, method);
 	
 }
@@ -174,6 +174,6 @@ template <typename... T>
 template<typename P>
 Route* CreateRoute<T...>::With(P* p, 	   
 			       const std::wstring& _route, 
-			       ConnContext::Method method){
+			       Request::Method method){
 	return CreateRoute<T...>::With(p, _route, &P::operator(), method);
 }

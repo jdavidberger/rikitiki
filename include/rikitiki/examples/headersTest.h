@@ -31,8 +31,8 @@ namespace rikitiki {
       }
 
       void cookies(ConnContextRef ctx){
-	if(ctx->QueryString()[L"name"].size())
-	  ctx << Cookie(ctx->QueryString()[L"name"], ctx->QueryString()[L"value"]);
+           if (ctx->QueryString()[L"name"].size())
+             ctx << Cookie(ctx->QueryString()[L"name"], ctx->QueryString()[L"value"]);
     
 	ctx << ContentType::text_plain
 	    << "Cookies: \n";

@@ -106,13 +106,16 @@ namespace rikitiki {
      SimpleRequestClient::SimpleRequestClient(const wchar_t* _host, uint16_t port) : host(_host), socket(_host, port), response(new Response()), builder(response.get()) {
           socket.listeners.push_back(this);
      }
-     void SimpleRequestClient::MakeRequest(IRequest& request) {
+     void SimpleRequestClient::MakeRequest(Request& request) {
           std::wstringstream req;
           std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
-
-          req << rikitiki::methodToStr(request.RequestMethod()) << L" /" << request.URI() << L" HTTP/1.1" << std::endl;
+          
+          req << request.Startline() << std::endl;
           req << L"Host: " << host << std::endl;
-          req << std::endl << std::endl;
+          for (auto it : request.Headers()) {
+               req << it.first << ": " << it.second << std::endl;
+          }
+          req << std::endl;
           req << conversion.from_bytes(request.Body().str());
 
           std::string utf8 = conversion.to_bytes(req.str());

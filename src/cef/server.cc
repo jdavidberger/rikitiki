@@ -69,7 +69,7 @@ namespace rikitiki {
                     for (auto it = ctx->response.Headers().begin(); it != ctx->response.Headers().end(); it++)
                          map.insert(*it);
                     response->SetHeaderMap(map);
-                    response->SetMimeType(ctx->response.ResponseType);
+                    response->SetMimeType(ctx->response.ContentType);
                }
 
                     virtual bool ReadResponse(void* data_out,
@@ -127,7 +127,7 @@ namespace rikitiki {
                     response->status = new HttpStatus(request->GetResponse()->GetStatus(), request->GetResponse()->GetStatusText());
                     request->GetResponse()->GetHeaderMap(headers);
                     for (auto it = headers.begin(); it != headers.end(); it++) {
-                         response->Headers().push_back(Header(std::wstring(it->first), std::wstring(it->second)));
+                         response->Headers().Add(std::wstring(it->first), std::wstring(it->second));
                     }
                     promise.set_value(response);
                }

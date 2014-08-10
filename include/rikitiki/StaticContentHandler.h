@@ -13,7 +13,7 @@ namespace rikitiki {
           std::map<std::wstring, std::wstring> mime_types;
           StaticContentHandler(const std::wstring& prefix, const std::wstring& path);
           virtual bool Handle(ConnContextRef ctx) OVERRIDE;
-          virtual bool CanHandle(RequestContext& ctx) OVERRIDE;
+          virtual bool CanHandle(Request& ctx) OVERRIDE;
           virtual bool visible() const;
           virtual std::wstring name() const;
           virtual ~StaticContentHandler();

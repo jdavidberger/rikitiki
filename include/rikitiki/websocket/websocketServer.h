@@ -3,6 +3,8 @@
 #include <map>
 #include <rikitiki\rikitiki>
 
+#ifdef USE_WEBSOCKET
+
 namespace rikitiki {
      namespace websocket {
           /*
@@ -44,3 +46,4 @@ namespace rikitiki {
 
      }
 }
+#endif

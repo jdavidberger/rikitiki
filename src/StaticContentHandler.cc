@@ -9,7 +9,6 @@ namespace rikitiki {
           mime_types[L"htm"] = L"text/html";
           mime_types[L"js"] = L"application/x-javascript";
           mime_types[L"css"] = L"text/css";
-
           mime_types[L"ico"] = L"image/x-icon";
           mime_types[L"gif"] = L"image/gif";
           mime_types[L"jpg"] = L"image/jpeg";
@@ -46,7 +45,7 @@ namespace rikitiki {
      }
      bool StaticContentHandler::Handle(ConnContextRef ctx) {
           Handler::Handle(ctx);
-          std::wstring relpath(ctx->URI() + prefix.length());
+          std::wstring relpath(ctx->request.URI() + prefix.length());
           std::wstring mime = L"text/html";
           auto idx = relpath.rfind(L".");
 
@@ -57,23 +56,23 @@ namespace rikitiki {
           }
 
           relpath = path + relpath;
-          LOG(Server, Info) << ctx->URI() << " -> " << relpath << std::endl;
+          LOG(Server, Info) << ctx->request.URI() << " -> " << relpath << std::endl;
 
-          ctx->response.ResponseType = mime;
+          ctx->response << ContentType::FromString(mime);          
 
           std::ifstream file(relpath, std::ios::binary);
-          ctx->OnHeadersFinished();
+          //ctx->OnHeadersFinished();
 
           if (file.good()) {
                ctx->handled = true;
-               ctx->response.Body() << file.rdbuf();
+               ctx->response << file.rdbuf();
                return true;
           }
 
           return false;
      }
 
-     bool StaticContentHandler::CanHandle(RequestContext& ctx) {
+     bool StaticContentHandler::CanHandle(Request& ctx) {
           std::wstring path(ctx.URI());
 
           if (path.find(L"..") != -1) {

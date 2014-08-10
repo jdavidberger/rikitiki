@@ -22,8 +22,8 @@
 
 namespace rikitiki {
      namespace mongoose {
-          
-          std::future<std::shared_ptr<Response>> MongooseServer::ProcessRequest(IRequest& request) {
+
+          std::future<std::shared_ptr<Response>> MongooseServer::ProcessRequest(Request& request) {
                auto client = new SimpleRequestClient(L"localhost", this->Port());
                client->MakeRequest(request);
                return client->future();
@@ -49,7 +49,7 @@ namespace rikitiki {
                return server->Handle(ctx) ? 1 : 0;
           }
 
-#ifdef RT_USE_WEBSOCKET
+#ifdef RT_USE_WEBSOCKET 
           using namespace websocket;
           WebsocketProcess* MongooseServer::HandleWs(ConnectionHandle conn) {
                auto ctx = new mongoose::MongooseWebsocketContext(this, (const struct mg_connection *)conn);
@@ -137,7 +137,7 @@ namespace rikitiki {
                mg_callbacks callbacks;
                memset(&callbacks, 0, sizeof(callbacks));
                callbacks.begin_request = &_handler;
-               
+
 #ifdef USE_WEBSOCKET
                callbacks.websocket_connect = &_wsHandler;
                callbacks.websocket_ready = &_wsReady;
