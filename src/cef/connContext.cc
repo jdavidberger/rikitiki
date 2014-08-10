@@ -1,17 +1,12 @@
 /* Copyright (C) 2012-2013 Justin Berger
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
-#include <rikitiki/cef/cef>
-#include <cstring>
-#include <mxcomp\log.h>
-
+#include "connContext.h"
 
 namespace rikitiki {
      namespace cef {
-          void RequestContext::FillQueryString() {
 
-          }
-          void RequestContext::FillHeaders() {
+          void Request::FillHeaders(HeaderCollection& _headers) const {
                CefRequest::HeaderMap map;
                request->GetHeaderMap(map);
                for (auto header : map) {
@@ -19,14 +14,12 @@ namespace rikitiki {
                }
           }
 
-          void RequestContext::FillPayload() {
-
-          }
-          void RequestContext::FillRequestMethod() {
+          void Request::FillRequestMethod(Request::Method& m) const {
                auto method = request->GetMethod();
-               this->_method = strToMethod(method.c_str());
+               m = RequestMethod::FromString(method.c_str());
           }
-          const wchar_t* RequestContext::URI(){
+
+          const wchar_t* Request::URI() const{
                if (url.size() == 0) {
                     url = request->GetURL();
                }

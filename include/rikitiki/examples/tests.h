@@ -151,23 +151,20 @@ namespace rikitiki {
                     numTests = 0;
                     auto& server = *ctx->server;
                     test_results.str("");
-
                     SetupTest(server, L"PayloadTest", &TestsModule::PayloadTest, "this is a test");
                     SetupTest(server, L"BasicTest", &TestsModule::BasicTest);
                     SetupTest(server, L"QueryStringTest/42", &TestsModule::QueryStringTest);
                     SetupTest(server, L"StatusTest", &TestsModule::StatusTest);
                     SetupTest(server, L"CookiesTest", &TestsModule::CookiesTest);
-                    SetupTest(server, L"AsyncTests", &TestsModule::AsyncTests);                    
                     SetupTest(server, L"HeadersTest", &TestsModule::HeadersTest);
-
+                    SetupTest(server, L"AsyncTests", &TestsModule::AsyncTests);
+                    
                     this->operator()(ctx);
                }
 
                void Register(rikitiki::Server& server) OVERRIDE{
                     mxcomp::log::SetLogLevel(mxcomp::log::Debug);
-                    mxcomp::log::SetLogStream(std::cerr);
-
-
+                    
                     server.AddHandler(CreateRoute<>::With(this, L"/BasicTest", &TestsModule::BasicTest));
                     server.AddHandler(CreateRoute<int>::With(this, L"/QueryStringTest/{num}", &TestsModule::QueryStringTest));
                     server.AddHandler(CreateRoute<>::With(this, L"/HeadersTest", &TestsModule::HeadersTest));

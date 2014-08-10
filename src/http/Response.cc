@@ -203,14 +203,36 @@ namespace rikitiki {
           return state.streamState == MessageState::FINISHED;
      }
 
-     size_t OResponse::WriteStartLine() {
+     size_t OResponseWriter::WriteStartLine() {
           return WriteData("HTTP/1.1 ") +
                WriteData(status->StartString() + "\r\n");
      }
 
-     OResponse& OResponse::operator << (const rikitiki::HttpStatus& t) {
-          this->status = &t;
+
+     OResponseMemory& OResponseMemory::operator << (const rikitiki::HttpStatus& t) {
+          Response::operator<<(t);
           return *this;
+     }
+     OResponseMemory& OResponseMemory::operator <<(const rikitiki::Header &t){
+          Response::operator<<(t);
+          return *this;
+     }
+     OResponseMemory& OResponseMemory::operator <<(const rikitiki::Cookie &t){
+          Response::operator<<(t);
+          return *this;
+     }
+     OResponseMemory& OResponseMemory::operator <<(rikitiki::ContentType::t t){
+          Response::operator<<(t);
+          return *this;
+     }
+
+     size_t OResponseMemory::WritePayloadData(const char* b, size_t size) {
+          OResponse::WritePayloadData(b, size);
+          Body().write(b, (std::streamsize)size);
+          return size;
+     }
+     void OResponseMemory::WriteHeader(const Header& h) {
+          Response::operator<<(h);
      }
 
      OResponse& OResponse::operator << (rikitiki::ContentType::t t) {
@@ -226,4 +248,6 @@ namespace rikitiki {
           OMessage::operator<<(t);
           return *this;
      }
+
+
 }

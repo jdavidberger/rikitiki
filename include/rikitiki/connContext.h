@@ -88,6 +88,23 @@ namespace rikitiki {
           Request& request ;
           OResponse& response ;
      };
+
+     template <class RequestT, class ResponseT, class Data >
+     struct Container_ {
+          ResponseT response;
+          RequestT  request;
+          Container_(const Data& data) : response(data), request(data) {}
+     };
+
+     template <class RequestT, class ResponseT, class Data = void>
+     class ConnContext_ : public Container_<RequestT, ResponseT, Data>, public ConnContext {
+     protected:
+          ConnContext_(Server* s, const Data& data) : Container_(data), ConnContext(s, request, response) {}
+     public:
+          using Container_<RequestT, ResponseT, Data>::request;
+          using Container_<RequestT, ResponseT, Data>::response;
+     };
+
      /*
      class ConnContextWithWrite : public ConnContext {
      private:

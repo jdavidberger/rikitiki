@@ -8,27 +8,17 @@
 #include <string>
 #include <include\cef_urlrequest.h>
 
+#include "RequestClient.h"
+#include "connContext.h"
+
 namespace rikitiki {
      namespace cef {
-          class ConnContext : public rikitiki::ConnContext, public cef::RequestContext {
+          class ConnContext : public rikitiki::ConnContext_ < cef::Request, cef::Response, CefRefPtr<CefRequest> > {
           public:
-               ConnContext(Server* s, CefRefPtr<CefRequest> r) : rikitiki::ConnContext(s), cef::RequestContext(r) {}
-               CefRefPtr<CefCallback> headersReady;
-               CefRefPtr<CefCallback> dataReady;
-               void Close() {}
 
-               virtual void OnHeadersFinished() {
-                    if (headersReady) {
-                         headersReady->Continue();
-                         headersReady = 0;
-                    }
-               }
-               virtual void OnData() {
-                    if (dataReady.get() != 0) {
-                         dataReady->Continue();
-                         //dataReady = 0; 
-                    }
-               }
+               ConnContext(Server* s, CefRefPtr<CefRequest> r) :
+                    rikitiki::ConnContext_<cef::Request, cef::Response, CefRefPtr<CefRequest>>(s, r) {}
+
           };
 
           class ResourceHandler : public CefResourceHandler {
@@ -47,11 +37,13 @@ namespace rikitiki {
 
                virtual bool ProcessRequest(CefRefPtr<CefRequest> request,
                     CefRefPtr<CefCallback> callback) OVERRIDE{
+
                     ctx = ConnContextRef_<cef::ConnContext>(new ConnContext(server, request));
-                    ctx->headersReady = callback;
+
+                    ctx->response.headersReady = callback;
                     handler.Handle(ctx);
-                    if (ctx.use_count() == 1) {
-                         callback->Continue(); 
+                    if (ctx.use_count() == 1 && ctx->response.headersReady) {
+                         callback->Continue();
                     }
                     return true;
                }
@@ -62,14 +54,15 @@ namespace rikitiki {
                     UNREFERENCED_PARAMETER(redirectUrl);
                     response->SetStatus(ctx->response.status->status);
                     response->SetStatusText(ctx->response.status->name);
-                    response_length = -1;
+                    response_length = (int64_t)ctx->response.ContentLength();
 
                     CefRequest::HeaderMap map;
                     response->GetHeaderMap(map);
+
                     for (auto it = ctx->response.Headers().begin(); it != ctx->response.Headers().end(); it++)
                          map.insert(*it);
                     response->SetHeaderMap(map);
-                    response->SetMimeType(ctx->response.ContentType);
+                    response->SetMimeType(ContentType::ToString(ctx->response.ContentType()));
                }
 
                     virtual bool ReadResponse(void* data_out,
@@ -81,7 +74,7 @@ namespace rikitiki {
                     ctx->response.Body().read((char*)data_out, bytes_to_read);
                     bytes_read = (int)ctx->response.Body().gcount();
                     ctx->response.Body().clear();
-                    ctx->dataReady = bytes_read == 0 ? callback : 0;
+                    ctx->response.dataReady = bytes_read == 0 ? callback : 0;
                     if (bytes_read)
                          return true;
                     if (ctx.use_count() == 1)
@@ -95,9 +88,11 @@ namespace rikitiki {
 
                IMPLEMENT_REFCOUNTING(ResourceHandler);
           };
+#ifdef RT_USE_WEBSOCKET
           websocket::WebsocketProcess* CefInternalServer::HandleWs(websocket::ConnectionHandle) {
                return 0;
           }
+#endif
           CefInternalServer::CefInternalServer(const std::wstring& _host) : hostname(_host) {
 
           }
@@ -107,7 +102,7 @@ namespace rikitiki {
                CefRefPtr<CefRequest> request) {
                if (wcsncmp(request->GetURL().c_str(), hostname.c_str(), hostname.size()) != 0)
                     return 0;
-               cef::RequestContext _request(request);
+               cef::Request _request(request);
                auto handler = this->GetHandler(_request);
                if (handler) {
                     CefRefPtr<CefResourceHandler> rtn(new ResourceHandler(this, *handler));
@@ -116,61 +111,31 @@ namespace rikitiki {
                return 0;
           };
 
-          class ReqClient : public CefURLRequestClient {
-          public:
-               ReqClient() : response(new Response) {}
-               std::promise<std::shared_ptr<Response>> promise;
-               std::shared_ptr<Response> response;
-               virtual void OnRequestComplete(CefRefPtr< CefURLRequest > request) OVERRIDE{
-                    UNREFERENCED_PARAMETER(request);
-                    CefResponse::HeaderMap headers;
-                    response->status = new HttpStatus(request->GetResponse()->GetStatus(), request->GetResponse()->GetStatusText());
-                    request->GetResponse()->GetHeaderMap(headers);
-                    for (auto it = headers.begin(); it != headers.end(); it++) {
-                         response->Headers().Add(std::wstring(it->first), std::wstring(it->second));
-                    }
-                    promise.set_value(response);
-               }
-                    virtual bool GetAuthCredentials(bool isProxy, const CefString& host, int port, const CefString& realm, const CefString& scheme, CefRefPtr< CefAuthCallback > callback) OVERRIDE{
-                    UNREFERENCED_PARAMETER(isProxy);
-                    UNREFERENCED_PARAMETER(host);
-                    UNREFERENCED_PARAMETER(port);
-                    UNREFERENCED_PARAMETER(realm);
-                    UNREFERENCED_PARAMETER(scheme);
-                    UNREFERENCED_PARAMETER(callback);
-                    return true;
-               }
-                    virtual void OnDownloadData(CefRefPtr< CefURLRequest > request, const void* data, size_t data_length) {
-                         std::string d((const char*)data, data_length);
-                         *response << d;
-                         UNREFERENCED_PARAMETER(request);
-               }
+          CefRefPtr<CefResourceHandler> CefInternalServer::Create(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, const CefString& scheme_name, CefRefPtr<CefRequest> request) {
+               UNREFERENCED_PARAMETER(scheme_name);
+               // Return a new resource handler instance to handle the request.
+               return GetResourceHandler(browser, frame, request);
+          }
 
-               virtual void	OnDownloadProgress(CefRefPtr< CefURLRequest > request, uint64 current, uint64 total) {
-                    UNREFERENCED_PARAMETER(request);
-                    UNREFERENCED_PARAMETER(current);
-                    UNREFERENCED_PARAMETER(total);
-               }
-
-               virtual void	OnUploadProgress(CefRefPtr< CefURLRequest > request, uint64 current, uint64 total) {
-                    UNREFERENCED_PARAMETER(request);
-                    UNREFERENCED_PARAMETER(current);
-                    UNREFERENCED_PARAMETER(total);
-               }
-               IMPLEMENT_REFCOUNTING(ReqClient);
-          };
-
-          std::future<std::shared_ptr<Response>> CefInternalServer::ProcessRequest(rikitiki::IRequest& _request) {
+          std::future<std::shared_ptr<rikitiki::Response>> CefInternalServer::ProcessRequest(rikitiki::Request& _request) {
                auto request = CefRequest::Create();
-               request->SetMethod(rikitiki::methodToStr(_request.RequestMethod()));
+               request->SetMethod(rikitiki::RequestMethod::ToString((_request.RequestMethod())));
                request->SetURL(hostname + _request.URI());
 
+               auto post = CefPostData::Create();
+               auto elem = CefPostDataElement::Create();
+               auto req = _request.Body().str();
+               
+               elem->SetToBytes(req.length(), &req[0]);
+               post->AddElement(elem);
+               request->SetPostData(post);
+               auto pClient = new RequestClient();
 
-               CefRefPtr<ReqClient> client = new ReqClient();
+               CefRefPtr<CefURLRequestClient> client = pClient;
 
                // Start the request. MyRequestClient callbacks will be executed asynchronously.
-               CefRefPtr<CefURLRequest> url_request = CefURLRequest::Create(request, client.get());
-               return client->promise.get_future();
+               CefRefPtr<CefURLRequest> url_request = CefURLRequest::Create(request, client);
+               return pClient->promise.get_future();
           }
      }
 }
