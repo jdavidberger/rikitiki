@@ -2,7 +2,6 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
 #include <rikitiki/cef/cef>
-#include <rikitiki\socket.h>
 #include <sstream>
 #include <codecvt>
 #include <string>
@@ -40,9 +39,9 @@ namespace rikitiki {
 
                     ctx = ConnContextRef_<cef::ConnContext>(new ConnContext(server, request));
 
-                    ctx->response.headersReady = callback;
+                    ctx->Response.headersReady = callback;
                     handler.Handle(ctx);
-                    if (ctx.use_count() == 1 && ctx->response.headersReady) {
+                    if (ctx.use_count() == 1 && ctx->Response.headersReady) {
                          callback->Continue();
                     }
                     return true;
@@ -52,29 +51,29 @@ namespace rikitiki {
                     int64& response_length,
                     CefString& redirectUrl) OVERRIDE{
                     UNREFERENCED_PARAMETER(redirectUrl);
-                    response->SetStatus(ctx->response.status->status);
-                    response->SetStatusText(ctx->response.status->name);
-                    response_length = (int64_t)ctx->response.ContentLength();
+                    response->SetStatus(ctx->Response.status->status);
+                    response->SetStatusText(ctx->Response.status->name);
+                    response_length = (int64_t)ctx->Response.ContentLength();
 
                     CefRequest::HeaderMap map;
                     response->GetHeaderMap(map);
 
-                    for (auto it = ctx->response.Headers().begin(); it != ctx->response.Headers().end(); it++)
+                    for (auto it = ctx->Response.Headers().begin(); it != ctx->Response.Headers().end(); it++)
                          map.insert(*it);
                     response->SetHeaderMap(map);
-                    response->SetMimeType(ContentType::ToString(ctx->response.ContentType()));
+                    response->SetMimeType(ContentType::ToString(ctx->Response.ContentType()));
                }
 
                     virtual bool ReadResponse(void* data_out,
                     int bytes_to_read,
                     int& bytes_read,
                     CefRefPtr<CefCallback> callback) OVERRIDE{
-                    std::lock_guard<std::mutex> lock(ctx->response.payloadWrite);
+                    std::lock_guard<std::mutex> lock(ctx->Response.payloadWrite);
 
-                    ctx->response.Body().read((char*)data_out, bytes_to_read);
-                    bytes_read = (int)ctx->response.Body().gcount();
-                    ctx->response.Body().clear();
-                    ctx->response.dataReady = bytes_read == 0 ? callback : 0;
+                    ctx->Response.Body().read((char*)data_out, bytes_to_read);
+                    bytes_read = (int)ctx->Response.Body().gcount();
+                    ctx->Response.Body().clear();
+                    ctx->Response.dataReady = bytes_read == 0 ? callback : 0;
                     if (bytes_read)
                          return true;
                     if (ctx.use_count() == 1)
@@ -125,7 +124,7 @@ namespace rikitiki {
                auto post = CefPostData::Create();
                auto elem = CefPostDataElement::Create();
                auto req = _request.Body().str();
-               
+
                elem->SetToBytes(req.length(), &req[0]);
                post->AddElement(elem);
                request->SetPostData(post);

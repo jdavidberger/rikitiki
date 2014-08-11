@@ -1,4 +1,4 @@
-#include <rikitiki\socket.h>
+#include <rikitiki\http\helpers\SimpleRequestClient.h>
 #ifdef _MSC_VER
 #pragma warning (disable: 4365 4574 4263 4264 )
 #define _WINSOCKAPI_
@@ -103,7 +103,8 @@ namespace rikitiki {
      SimpleRequestClient::~SimpleRequestClient() {
           
      }
-     SimpleRequestClient::SimpleRequestClient(const wchar_t* _host, uint16_t port) : host(_host), socket(_host, port), response(new Response()), builder(response.get()) {
+     SimpleRequestClient::SimpleRequestClient(const wchar_t* _host, uint16_t port) : host(_host), socket(_host, port), 
+          response(new IResponseMemory()) {
           socket.listeners.push_back(this);
      }
      void SimpleRequestClient::MakeRequest(Request& request) {
@@ -125,7 +126,7 @@ namespace rikitiki {
           promise.set_value(response);
      }
      bool SimpleRequestClient::OnData(const char* data, size_t length) {
-          return builder.OnData(data, length);
+          return response->OnData(data, length);          
      }
 
 }

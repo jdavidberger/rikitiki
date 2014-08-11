@@ -31,8 +31,8 @@ namespace rikitiki {
   
                struct MessageParserState {
                     BodyType::type bodyType = BodyType::UNKNOWN;
-                    MessageState::type streamState = MessageState::UNKNOWN;
-                    MessageParserState(MessageState::type streamState = MessageState::UNKNOWN,
+                    MessageState::type streamState = MessageState::START_LINE;
+                    explicit MessageParserState(MessageState::type streamState = MessageState::START_LINE,
                          BodyType::type streamType = BodyType::UNKNOWN);
                };
 

@@ -29,7 +29,7 @@ namespace rikitiki {
      class ConnContext;
      class IRequest;
      class Request;
-     class Socket;
+     
      class Response;
      void CleanConnContext(ConnContext* ctx);
 
@@ -47,14 +47,14 @@ namespace rikitiki {
      template <class T>
      std::shared_ptr<ConnContext>& operator<<(std::shared_ptr<ConnContext>& me, T& t)
      {
-          me->response << t;
+          me->Response << t;
           return me;
      }
 
      template <class T>
      std::shared_ptr<ConnContext>& operator<<(std::shared_ptr<ConnContext>& me, const T& t)
      {
-          me->response << t;
+          me->Response << t;
           return me;
      }
 

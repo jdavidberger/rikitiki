@@ -4,36 +4,7 @@
 #include <codecvt>
 
 namespace rikitiki {
-     Response::Response() : status(&HttpStatus::OK) {}
-
-     Response& Response::operator <<(const rikitiki::HttpStatus& t){
-          status = &t;
-          return *this;
-     }
-
-     Response::~Response() {
-          if (!status->managed) {
-               delete status;
-               status = 0;
-          }
-     }
-     void Response::SetStartline(const std::wstring& startline) {
-          auto pos = startline.find(L' ');
-          auto str = &startline[pos + 1];
-          wchar_t* pos2 = 0;
-          auto statusCode = wcstol(str, &pos2, 10);  
-          std::wstring statusString(pos2+1);
-          while ( ::iswspace( statusString[statusString.length()-1] ) )
-               statusString.pop_back();
-          
-          status = new HttpStatus(statusCode, statusString);
-     }
-     std::wstring Response::Startline() const {
-          std::wstringstream wss;
-          wss << L"HTTP/1.1 " << status->status << L" " << status->name;
-          return wss.str();
-     }
-     static inline const char* skipWhitespace(const char* data, const char* end) {
+   static inline const char* skipWhitespace(const char* data, const char* end) {
           while (data < end &&
                (*data == ' ' || *data == '\t')) {
                data++;
@@ -89,6 +60,7 @@ namespace rikitiki {
           return skipWhitespace(wordEnd, end);
      }
 
+     /*
      BufferedReader::BufferedReader() : bufferMode(NEWLINE), expectedSize((std::size_t) - 1) {}
      bool BufferedReader::OnData(const char* data, std::size_t length) {
           const char* end = &data[length];
@@ -126,7 +98,7 @@ namespace rikitiki {
           buffer += std::string(data, end);
           return false;
      }
-     /*
+
      ResponseBuilder::ResponseBuilder(Response* _response) : response(_response), state(MessageState::START_LINE) {}
 
      bool ResponseBuilder::OnBufferedData(const char* data, std::size_t length) {
@@ -209,6 +181,6 @@ namespace rikitiki {
           return state.streamState == MessageState::FINISHED;
      }
      */
-     
+
 
 }

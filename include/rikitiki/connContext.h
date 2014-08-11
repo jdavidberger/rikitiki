@@ -10,8 +10,10 @@
 #include "content_handler.h"
 #include <locale>
 #include <codecvt>
-#include <rikitiki/http/Request.h>
-#include <rikitiki/http/Response.h>
+#include <rikitiki/http/incoming/Request.h>
+#include <rikitiki/http/outgoing/Response.h>
+
+
 #include <rikitiki/requestContext.h>
 
 #include <mxcomp\useful_macros.h>
@@ -65,6 +67,7 @@ namespace rikitiki {
           
           template <class T> auto operator >>(T&) -> decltype(valid_conversions<T>::In::Instance(), instance_of<ConnContext>::value);
 
+          /*
           HeaderCollection& Headers() {
                return request.Headers();
           };
@@ -77,32 +80,33 @@ namespace rikitiki {
           QueryStringCollection& QueryString() {
                return request.QueryString();
           }
-          RequestMethod::t RequestMethod() const {
-               return request.RequestMethod();
+          */
+          DEPRECATED("Access request method via request") RequestMethod::t RequestMethod() const {
+               return Request.RequestMethod();
           };
-          const wchar_t* URI() const {
-               return request.URI();
+          DEPRECATED("Access uri via request") const wchar_t* URI() const {
+               return Request.URI();
           }
 
           void AddRequestListener(MessageListener*);
-          Request& request ;
-          OResponse& response ;
+          Request& Request ;
+          OResponse& Response ;
      };
 
      template <class RequestT, class ResponseT, class Data >
      struct Container_ {
-          ResponseT response;
-          RequestT  request;
-          Container_(const Data& data) : response(data), request(data) {}
+          ResponseT Response;
+          RequestT  Request;
+          Container_(const Data& data) : Response(data), Request(data) {}
      };
 
      template <class RequestT, class ResponseT, class Data = void>
      class ConnContext_ : public Container_<RequestT, ResponseT, Data>, public ConnContext {
      protected:
-          ConnContext_(Server* s, const Data& data) : Container_(data), ConnContext(s, request, response) {}
+          ConnContext_(Server* s, const Data& data) : Container_(data), ConnContext(s, Request, Response) {}
      public:
-          using Container_<RequestT, ResponseT, Data>::request;
-          using Container_<RequestT, ResponseT, Data>::response;
+          using Container_<RequestT, ResponseT, Data>::Request;
+          using Container_<RequestT, ResponseT, Data>::Response;
      };
 
      /*
@@ -120,10 +124,8 @@ namespace rikitiki {
           virtual void Close() OVERRIDE;
      };
      */
-     void mapContents(ByteStream& raw_content, PostCollection& post);
-     void mapQueryString(const wchar_t* _qs, QueryStringCollection& qs);
-     //Request::Method strToMethod(const wchar_t* method);
-     //const wchar_t* methodToStr(Request::Method method);
+     //void mapContents(ByteStream& raw_content, PostCollection& post);
+     //void mapQueryString(const wchar_t* _qs, QueryStringCollection& qs);
      ConnContext& operator>>(ConnContext&, std::wstring& t);
 }
 

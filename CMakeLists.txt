@@ -1,5 +1,6 @@
 cmake_minimum_required (VERSION 2.6) 
 project (rikitiki) 
+include(CTest)
 
 SET(rikitiki_VERSION_MAJOR 0.1)
 SET_PROPERTY(GLOBAL PROPERTY USE_FOLDERS On) 

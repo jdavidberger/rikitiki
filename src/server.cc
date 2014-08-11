@@ -11,8 +11,6 @@
 #include <rikitiki/registration.h>
 #include <fstream>
 
-#include <rikitiki\socket.h>
-
 namespace rikitiki {
 
      void CleanConnContext(ConnContext* ctx) {
@@ -62,7 +60,7 @@ namespace rikitiki {
      bool Server::Handle(ConnContextRef ctx) {
           for (size_t i = 0; i < handlers.size(); i++){
                try {
-                    if (handlers[i]->CanHandle(ctx->request))
+                    if (handlers[i]->CanHandle(ctx->Request))
                          handlers[i]->Handle(ctx);
                }
                catch (HandlerException& ex) {

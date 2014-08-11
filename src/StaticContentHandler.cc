@@ -45,7 +45,7 @@ namespace rikitiki {
      }
      bool StaticContentHandler::Handle(ConnContextRef ctx) {
           Handler::Handle(ctx);
-          std::wstring relpath(ctx->request.URI() + prefix.length());
+          std::wstring relpath(ctx->Request.URI() + prefix.length());
           std::wstring mime = L"text/html";
           auto idx = relpath.rfind(L".");
 
@@ -56,16 +56,16 @@ namespace rikitiki {
           }
 
           relpath = path + relpath;
-          LOG(Server, Info) << ctx->request.URI() << " -> " << relpath << std::endl;
+          LOG(Server, Info) << ctx->Request.URI() << " -> " << relpath << std::endl;
 
-          ctx->response << ContentType::FromString(mime);          
+          ctx->Response << ContentType::FromString(mime);          
 
           std::ifstream file(relpath, std::ios::binary);
           //ctx->OnHeadersFinished();
 
           if (file.good()) {
                ctx->handled = true;
-               ctx->response << file.rdbuf();
+               ctx->Response << file.rdbuf();
                return true;
           }
 

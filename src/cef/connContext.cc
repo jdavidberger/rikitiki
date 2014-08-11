@@ -18,14 +18,23 @@ namespace rikitiki {
                auto method = request->GetMethod();
                m = RequestMethod::FromString(method.c_str());
           }
-
+          void Request::FillQueryString(QueryStringCollection& qs) const {
+               auto _url = request->GetURL().ToWString();
+               auto qmark = _url.find_last_of(L'?');  
+               if (qmark != -1)
+                    qs.FromQueryString(&_url[qmark + 1]);
+          }
           const wchar_t* Request::URI() const{
                if (url.size() == 0) {
-                    url = request->GetURL();
+                    url = request->GetURL();                    
+                    auto protocol = url.find(L"://") + 3;
+                    auto startFrom = url.find(L"/", protocol);
+                    auto qmark = url.find_last_of(L'?');
+                    url = qmark == -1 ? std::wstring(&url[startFrom]) :
+                                        std::wstring(&url[startFrom], &url[qmark]);
                }
-               auto protocol = url.find(L"://") + 3;
-               auto startFrom = url.find(L"/", protocol);
-               return &url[startFrom];
+               
+               return url.data();
           }
 
      }

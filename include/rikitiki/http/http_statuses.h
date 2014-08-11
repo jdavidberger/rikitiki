@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <codecvt>
 
 namespace rikitiki {
   /**
@@ -9,8 +10,11 @@ namespace rikitiki {
    */
   class HttpStatus { 
   public:
-  HttpStatus(int s, const std::string& n = "", bool _managed = false) : status(s), name(n), managed(_managed) {}   
-  
+  HttpStatus(int s, const std::string& n, bool _managed = false) : status(s), name(n), managed(_managed) {}   
+  HttpStatus(int s, const std::wstring& n, bool _managed = false) : status(s), managed(_managed) {
+       std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
+       name = conversion.to_bytes(n);
+  }
     int status; 
     std::string name;
     bool managed; 

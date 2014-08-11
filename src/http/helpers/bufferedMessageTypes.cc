@@ -12,9 +12,6 @@ namespace rikitiki {
                void BufferedMessage::FillContentType(ContentType::t& t) const {
                     t = Message::ContentType();
                }
-               void BufferedRequest::FillQueryString(QueryStringCollection&) const {
-
-               }
                void BufferedMessage::FillCookies(CookieCollection& cookies) const {
                     auto _cookies = Message::Headers().GetList(L"Set-Cookie");
                     for (auto _cookie : _cookies) {

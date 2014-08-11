@@ -14,7 +14,8 @@
 #include <signal.h>
 #pragma warning(default:4062)
 
-#include <rikitiki/socket.h>
+#include <rikitiki/http/helpers/SimpleRequestClient.h>
+
 #pragma warning(disable:4265)
 #include <condition_variable>
 #include <thread>

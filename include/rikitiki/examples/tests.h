@@ -1,5 +1,4 @@
 #include <rikitiki/rikitiki>
-#include <rikitiki\socket.h>
 #include <assert.h>
 #include <memory>
 #pragma warning (disable: 4512 )
@@ -17,8 +16,6 @@ namespace rikitiki {
           std::vector<std::future<void>> active_tests; 
 
           struct TestsModule FINAL : public WebModule {
-          
-               std::auto_ptr<Socket> testSocket;
                virtual ~TestsModule() {}
 
                // Make sure we can roundtrip out a payload
@@ -32,12 +29,12 @@ namespace rikitiki {
                
                // Make sure whatever ingests route does a good job of it. 
                void QueryStringTest(ConnContextRef ctx, int num) {
-                    ctx << "Saw: " << num;
+                    ctx << "Saw: " << num << " and " << ctx->Request.QueryString()[L"qs"];
                }
                static void QueryStringTest(std::shared_ptr<Response> response) {
                     std::string payload(response->Body().str());
 
-                    QUNIT_IS_EQUAL(payload, "Saw: 42");
+                    QUNIT_IS_EQUAL(payload, "Saw: 42 and 43");
                }
 
                // Make sure we can set a handler. 
@@ -72,7 +69,7 @@ namespace rikitiki {
                     QUNIT_IS_EQUAL("tset a si siht", response->Body().str());
                }
                void PayloadTest(ConnContextRef ctx) {
-                    auto str = ctx->Body().str();
+                    auto str = ctx->Request.Body().str();
                     std::reverse(str.begin(), str.end());
                     ctx << str;
                }
@@ -109,7 +106,10 @@ namespace rikitiki {
                // Main page -- show all the tests. Might have to wait on them to finish. 
                void operator () (ConnContextRef ctx) {
                     ctx << "<html><body>";
-                    ctx << "<a href='StartTests'>Start tests</a>";
+                    ctx << "<a href='StartTests'>Start tests</a><br>";
+                    for (auto handler : ctx->server->handlers) {                         
+                         ctx << "<a href='StartTests?Test=" << handler->name() << "'>" << handler->name() << "</a><br>";
+                    }
                     std::async([](ConnContextRef ctx) {
 
                          ctx << "<div>";
@@ -151,20 +151,36 @@ namespace rikitiki {
                     numTests = 0;
                     auto& server = *ctx->server;
                     test_results.str("");
-                    SetupTest(server, L"PayloadTest", &TestsModule::PayloadTest, "this is a test");
-                    SetupTest(server, L"BasicTest", &TestsModule::BasicTest);
-                    SetupTest(server, L"QueryStringTest/42", &TestsModule::QueryStringTest);
-                    SetupTest(server, L"StatusTest", &TestsModule::StatusTest);
-                    SetupTest(server, L"CookiesTest", &TestsModule::CookiesTest);
-                    SetupTest(server, L"HeadersTest", &TestsModule::HeadersTest);
-                    SetupTest(server, L"AsyncTests", &TestsModule::AsyncTests);
+                    auto test = ctx->Request.QueryString()[L"Test"];
+                    
+                    if (test.empty() || test == L"PayloadTest")
+                         SetupTest(server, L"PayloadTest", &TestsModule::PayloadTest, "this is a test");
+
+                    if (test.empty() || test == L"BasicTest")
+                         SetupTest(server, L"BasicTest", &TestsModule::BasicTest);
+
+                    if (test.empty() || test == L"QueryStringTest")
+                         SetupTest(server, L"QueryStringTest/42?qs=43", &TestsModule::QueryStringTest);
+
+                    if (test.empty() || test == L"StatusTest")
+                         SetupTest(server, L"StatusTest", &TestsModule::StatusTest);
+
+                    if (test.empty() || test == L"CookiesTest")
+                         SetupTest(server, L"CookiesTest", &TestsModule::CookiesTest);
+
+                    if (test.empty() || test == L"HeadersTest")
+                         SetupTest(server, L"HeadersTest", &TestsModule::HeadersTest);
+
+                    if (test.empty() || test == L"AsyncTests") 
+                         SetupTest(server, L"AsyncTests", &TestsModule::AsyncTests);
                     
                     this->operator()(ctx);
                }
 
                void Register(rikitiki::Server& server) OVERRIDE{
                     mxcomp::log::SetLogLevel(mxcomp::log::Debug);
-                    
+                    mxcomp::log::SetLogStream(std::cerr);
+
                     server.AddHandler(CreateRoute<>::With(this, L"/BasicTest", &TestsModule::BasicTest));
                     server.AddHandler(CreateRoute<int>::With(this, L"/QueryStringTest/{num}", &TestsModule::QueryStringTest));
                     server.AddHandler(CreateRoute<>::With(this, L"/HeadersTest", &TestsModule::HeadersTest));

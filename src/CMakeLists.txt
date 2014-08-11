@@ -1,3 +1,5 @@
+include(CppcheckTargets)
+
 macro( add_module module)
     SET(module ${module})
 	   
@@ -129,6 +131,7 @@ CONFIGURE_FILE(config.h.in ${CMAKE_SOURCE_DIR}/include/rikitiki/config.h)
 
 add_library(rikitiki ${RT_SRC})
 target_link_libraries(rikitiki ${RT_LIBS})		     
+add_cppcheck(rikitiki STYLE POSSIBLE_ERROR FAIL_ON_WARNINGS) 
 
 IF(USE_MONGOOSE)
 	add_server_directory(mongoose)
@@ -167,3 +170,4 @@ if(${MAKE_TESTS})
 ENDIF()
 
 set(rikitiki_INCLUDE_DIRS ${rikitiki_INCLUDE_DIRS} PARENT_SCOPE)
+

@@ -13,7 +13,7 @@ public:
           UNREFERENCED_PARAMETER(request);
 
           CefResponse::HeaderMap headers;
-          response->status = new HttpStatus(request->GetResponse()->GetStatus(), request->GetResponse()->GetStatusText());
+          response->status = new HttpStatus(request->GetResponse()->GetStatus(), request->GetResponse()->GetStatusText().ToString());
           request->GetResponse()->GetHeaderMap(headers);
           for (auto it = headers.begin(); it != headers.end(); it++) {
                response->Headers().Add(std::wstring(it->first), std::wstring(it->second));

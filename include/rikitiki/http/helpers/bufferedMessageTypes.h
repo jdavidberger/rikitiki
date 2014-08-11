@@ -73,7 +73,7 @@ namespace rikitiki {
                class BufferedRequest : public BufferedMessage, public Request {
                     typedef BufferedRequest thisType;
                     BufferMemberPure(RequestMethod::t, RequestMethod);
-                    BufferMemberNoSetter(QueryStringCollection&, QueryString, NON_CONST);                    
+                    BufferMemberNoSetter(QueryStringCollection&, QueryString, NON_CONST) = 0;
                };
           }
      }

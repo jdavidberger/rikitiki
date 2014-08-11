@@ -52,7 +52,7 @@ namespace rikitiki {
           protected:
                virtual void FillHeaders(HeaderCollection&) const OVERRIDE;
                virtual void FillRequestMethod(Request::Method&) const OVERRIDE;
-
+               virtual void FillQueryString(QueryStringCollection&) const OVERRIDE;
                CefRefPtr<CefRequest> request;
                mutable std::wstring url; 
           public:

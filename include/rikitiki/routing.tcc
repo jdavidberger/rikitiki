@@ -81,7 +81,7 @@ Route_<P,T...>::Route_(P* p, const std::wstring& _route, F _f, Request::Method m
 
 template <typename P, typename... T>
 int Route_<P, T...>::Scan(ConnContextRef ctx, T&... t){
-     return modern_sscanf(ctx->URI(), route.c_str(), t...);
+     return modern_sscanf(ctx->Request.URI(), route.c_str(), t...);
 }
 
 template <typename P, typename... T>
@@ -107,7 +107,7 @@ bool Route_<P, T...>::CanHandle(Request& ctx){
 template <typename P, typename... T> 
 bool Route_<P,T...>::Handle(ConnContextRef ctx){
      Handler::Handle(ctx); 
-     if (method != rikitiki::RequestMethod::ANY && method != ctx->RequestMethod()) {
+     if (method != rikitiki::RequestMethod::ANY && method != ctx->Request.RequestMethod()) {
     return false;
   }
   
@@ -146,9 +146,9 @@ template <typename P>
 bool Route_<P>::Handle(ConnContextRef ctx){
      Handler::Handle(ctx);
   bool shouldAttempt = 
-    wcscmp(route.c_str(), ctx->URI()) == 0 &&
+       wcscmp(route.c_str(), ctx->Request.URI()) == 0 &&
     (method == RequestMethod::ANY ||
-     method == ctx->RequestMethod());
+     method == ctx->Request.RequestMethod());
   
   if(shouldAttempt){       
     LOG(Web, Verbose) << "Using route " << route << ", " << rikitiki::RequestMethod::ToString(method) << std::endl;

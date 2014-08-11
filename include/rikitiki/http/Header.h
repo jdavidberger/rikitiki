@@ -54,7 +54,11 @@ namespace rikitiki {
           }
      };
 
-     typedef std::map<std::wstring, std::wstring> QueryStringCollection;
+     struct QueryStringCollection : public std::map<std::wstring, std::wstring> {
+          void FromQueryString(const std::wstring&);
+          void FromQueryString(const std::string&);
+     };
+
      typedef multimap<std::wstring, std::wstring> PostCollection;
 
      class CookieCollection : public std::map<std::wstring, std::wstring> {};

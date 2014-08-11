@@ -27,6 +27,7 @@ namespace rikitiki {
                virtual const wchar_t* URI() const OVERRIDE;
                virtual void FillHeaders(HeaderCollection&) const OVERRIDE;
                virtual void FillRequestMethod(Request::Method&) const OVERRIDE;
+               virtual void FillQueryString(QueryStringCollection&) const OVERRIDE;
           };
 
           class MongooseResponse : public virtual OResponseWriter {

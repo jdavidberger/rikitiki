@@ -63,4 +63,39 @@ namespace rikitiki {
                return 0;
           return &(*el).second;
      }
+     void QueryStringCollection::FromQueryString(const std::string& qs) {
+          std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+          FromQueryString(converter.from_bytes(&qs[0]));
+     }
+     void QueryStringCollection::FromQueryString(const std::wstring& qs) {
+          const wchar_t* _qs = &qs[0];
+          std::wstring name;
+          std::wstring* val = 0;
+          bool nameMode = true;
+          while (*_qs != 0){
+               if (nameMode){
+                    if (*_qs == L'='){
+                         nameMode = false;
+                         val = &(*this)[name];
+                    }
+                    else if (*_qs == L'&'){
+                         (*this)[name] = L"";
+                         name.clear();
+                    }
+                    else {
+                         name += *_qs;
+                    }
+               }
+               else {
+                    if (*_qs == L'&'){
+                         nameMode = true;
+                         name.clear();
+                    }
+                    else {
+                         *val += *_qs;
+                    }
+               }
+               _qs++;
+          }
+     }
 }
