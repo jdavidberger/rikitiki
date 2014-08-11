@@ -30,7 +30,6 @@ namespace rikitiki {
      };
 
      struct InProvider {
-
           template<typename S, typename T>
           static auto Make() -> void(*)(ConnContext&, S&) {
                return [](ConnContext& ctx, S& s) {
@@ -40,7 +39,6 @@ namespace rikitiki {
                };
           }
      };
-
 
      template <typename S, typename FProvider, typename... T>
      struct TypeConversions  {

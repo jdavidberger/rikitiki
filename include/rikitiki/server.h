@@ -17,6 +17,8 @@
 
 #include <rikitiki/log/log>
 #include <rikitiki/http/http_statuses.h>
+#include <rikitiki/connContext.h>
+
 #include <memory>
 #pragma warning(disable:4265 4355 4062)
 #include <future>
@@ -29,21 +31,8 @@ namespace rikitiki {
      class ConnContext;
      class IRequest;
      class Request;
-     
      class Response;
-     void CleanConnContext(ConnContext* ctx);
-
-     template <class T>
-     class ConnContextRef_ : public std::shared_ptr<T> {
-     public:
-          ConnContextRef_() {}
-          ConnContextRef_(T*ptr) : std::shared_ptr<T>(ptr, CleanConnContext){
-               LOG(Server, Debug) << "Created Context Ref " << (void*)this << std::endl;
-          }
-     };
-
-     typedef std::shared_ptr<ConnContext> ConnContextRef;
-
+     
      template <class T>
      std::shared_ptr<ConnContext>& operator<<(std::shared_ptr<ConnContext>& me, T& t)
      {

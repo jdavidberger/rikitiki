@@ -7,6 +7,8 @@
 #include <mxcomp/vsostream.h>
 #include <mxcomp/threadedstringbuf.h>
 
+#include <rikitiki\http\outgoing\Request.h>
+
 namespace rikitiki {
      namespace examples {
           static std::stringstream test_results;
@@ -126,7 +128,7 @@ namespace rikitiki {
 
                // Set up a test to be run. 
                void SetupTest(rikitiki::Server& server, const std::wstring& url, void(*testf)(std::shared_ptr<Response>), const std::string& payload = "") {
-                    SimpleRequest request;
+                    ORequestMemory request;
                     request.uri = L"/" + url;
                     if (payload.size()) {
                          request.Body().write(payload.data(), (std::streamsize)payload.size());

@@ -1,40 +1,11 @@
 #include <mxcomp\log.h>
+#include <rikitiki/http/parsing/Utils.h>
 #include <rikitiki/http/Header.h>
 #include <rikitiki/http/incoming/Message.h>
 
 #include <codecvt>
 
 namespace rikitiki {
-     static inline const char* skipWhitespace(const char* data, const char* end) {
-          while (data < end &&
-               (*data == ' ' || *data == '\t')) {
-               data++;
-          }
-          return data;
-     }
-
-     static inline const char* readHeaderName(const char* data, const char* end, std::string& out) {
-          out.clear();
-          auto br = data;
-          while (br < end && !(isspace((int)*br) || *br == ':')) {
-               br++;
-          }
-          out.resize((std::size_t)(br - data)); std::memcpy(&out[0], data, out.size());
-
-          while (br < end && *br != ':') br++;
-          while (br < end && *br == ':') br++;
-
-          return skipWhitespace(br, end);
-     }
-     static inline const char* readHeaderValue(const char* data, const char* end, std::string& out) {
-          out.clear();
-          auto br = data;
-          while (br < end && !(*br == '\r' || *br == '\n')) {
-               br++;
-          }
-          out.resize((std::size_t)(br - data)); std::memcpy(&out[0], data, out.size());
-          return br;
-     }
      void IMessage::OnStartLine(const std::wstring& startline) {
           this->SetStartline(startline);
      }
@@ -130,5 +101,15 @@ namespace rikitiki {
 
           return currentState.streamState == MessageState::FINISHED;
      }
+     void IMessage::SetState(MessageState::type newState) { 
+          currentState.streamState = newState; 
+     }
+     bool IMessage::OnData(const char* data, size_t len) {
+          LOG(Message, Debug) << (void*)this << " incoming: " << std::string(data, len) << std::endl;
+          return BufferedReader::OnData(data, len);
+     }
 
+     void MessageListener::OnChunkedData(const char* d, size_t len) {
+          OnBodyData(d, len);
+     }
 }

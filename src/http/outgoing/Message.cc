@@ -27,6 +27,18 @@ namespace rikitiki {
           OnStateChange(st);
           streamState.streamState = st;
      }
+     void OMessage::WriteHeader(const rikitiki::Header&) {
+          switch (streamState.streamState) {
+          case MessageState::START_LINE:
+               SetState(MessageState::HEADERS);
+          case MessageState::HEADERS:
+               return;
+          case MessageState::BODY:
+          case MessageState::FINISHED:
+          default:
+               throw InvalidStateException("Could not write header");
+          }
+     }
      size_t OMessage::WritePayloadData(const char*, size_t size){
           switch (streamState.streamState) {
           case MessageState::START_LINE:
@@ -40,7 +52,7 @@ namespace rikitiki {
                return size;          
           case MessageState::FINISHED:
           default:
-               throw InvalidStateException("Could not write header");
+               throw InvalidStateException("Could not write payload");
           }
      }
 

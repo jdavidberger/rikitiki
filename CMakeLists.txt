@@ -23,7 +23,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
 
 # MSVC warnings are dumb
 if (MSVC)
-   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -wd4514 -wd4820 -wd4350 -wd4710 -wd4711 -wd4435 -wd4625 -wd4099 -wd4626 -wd4250 -wd4571 -wd4263 -wd4264 -wd4061 -wd4062 -WX")
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -wd4512 -wd4514 -wd4820 -wd4350 -wd4710 -wd4711 -wd4435 -wd4625 -wd4099 -wd4626 -wd4250 -wd4571 -wd4263 -wd4264 -wd4061 -wd4062 -WX")
    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")			    				
 else()

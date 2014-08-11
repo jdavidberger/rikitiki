@@ -1,25 +1,31 @@
 
-#include "rikitiki\iis7\server.h"
-#include "rikitiki\socket.h"
+#include <rikitiki\iis7\server.h>
+#include <rikitiki\http\helpers\SimpleRequestClient.h>
+#include <rikitiki\http\helpers\bufferedMessageTypes.h>
+
 namespace rikitiki {
      namespace iis7 {
-          class II7RequestContext : public virtual RequestContext {
+          class II7Request : public IMessage_ < rikitiki::http::helpers::BufferedRequest > {
                IHttpRequest* request;
           public:
-               II7RequestContext(IHttpRequest* req) : request(req) {
+               II7Request(IHttpContext& httpCtx) {
+                    request = httpCtx.GetRequest();
+               }
+               II7Request(IHttpRequest* req) : request(req) {
 
                }
 
-               virtual void FillQueryString() OVERRIDE{
-                    mapQueryString(request->GetRawHttpRequest()->CookedUrl.pQueryString, _qs);
-                    mappedQs = true;
+               virtual void FillQueryString(QueryStringCollection& qs) const OVERRIDE{
+                    qs.FromQueryString(request->GetRawHttpRequest()->CookedUrl.pQueryString);
                }
 
-                    virtual void FillHeaders() OVERRIDE{
-                    mappedHeaders = true;
+               virtual void FillHeaders(HeaderCollection&) const OVERRIDE{
+                    
+                    assert(false);
                }
-                    virtual void FillRequestMethod() OVERRIDE{
-#define VERBSWITCH(V) case HttpVerb ## V: this->_method = V; break;
+               
+               virtual void FillRequestMethod(Request::Method& m) const {
+#define VERBSWITCH(V) case HttpVerb ## V: m = RequestMethod::V; break;
                     switch (request->GetRawHttpRequest()->Verb) {
                          VERBSWITCH(POST);
                          VERBSWITCH(GET);
@@ -38,62 +44,39 @@ namespace rikitiki {
                     case HttpVerbLOCK:
                     case HttpVerbSEARCH:
                     case HttpVerbOPTIONS:
-                         this->_method = OTHER;
+                         m = RequestMethod::OTHER;
                          break;
                     case HttpVerbInvalid:
                     case HttpVerbUnknown:
                     case HttpVerbUnparsed:
 
                     case HttpVerbMaximum:
-                    default: this->_method = ANY;
+                    default: m = RequestMethod::ANY;
                     }
 #undef VERBSWITCH
 
                }
-                    virtual const wchar_t* URI() {
-                         return request->GetRawHttpRequest()->CookedUrl.pAbsPath;
+               virtual const wchar_t* URI() const {
+                    return request->GetRawHttpRequest()->CookedUrl.pAbsPath;
                }
           };
-          class II7ConnContext : public II7RequestContext, public ConnContextWithWrite {
-               IHttpContext* iis7ctx;
-               bool async; 
-
+          class II7Response : public OResponse {
+               IHttpContext& httpCtx; 
           public:
-               II7ConnContext(Server* server, IHttpContext* _ctx) : II7RequestContext(_ctx->GetRequest()), 
-                                                                      iis7ctx(_ctx), 
-                                                                      async(false),
-                                                                      ConnContextWithWrite(server) {
-
+               II7Response(IHttpContext& _httpCtx) : httpCtx(_httpCtx) {}
+               virtual II7Response& operator <<(const rikitiki::HttpStatus& t) OVERRIDE {
+                    httpCtx.GetResponse()->SetStatus((USHORT)t.status, t.name.data());
+                    return *this;
                }
-               virtual void OnHeadersFinished() OVERRIDE{
+               virtual void WriteHeader(const Header& header) {
                     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
-                    for (auto header : response.Headers()) {
-                         std::string name = converter.to_bytes(header.first.c_str());
-                         std::string value = converter.to_bytes(header.second.c_str());
-                         iis7ctx->GetResponse()->SetHeader(name.c_str(), value.c_str(), (USHORT)value.length(), true);
-                    }
+                    std::string name = converter.to_bytes(header.first.data());
+                    std::string value = converter.to_bytes(header.second.data());
+                    httpCtx.GetResponse()->SetHeader(name.data(), value.data(), (USHORT)value.length(), true);
+               }
 
-                    iis7ctx->GetResponse()->SetStatus((USHORT)response.status->status, response.status->name.c_str());
-               }
-               void SetAsync() {
-                    async = true; 
-               }
-               virtual void Close() OVERRIDE {
-                    ConnContext::Close();
-                    rawWrite("", 0);
-                    iis7ctx->SetRequestHandled();
-                    if (async)
-                         iis7ctx->IndicateCompletion(RQ_NOTIFICATION_FINISH_REQUEST);
-               }
-               virtual void OnData() OVERRIDE{
-                    std::stringstream ss;
-                    response.Body().swap(ss);
-                    std::string buffer = ss.str();
-                    
-                    rawWrite(buffer.c_str(), buffer.length());                    
-               }
-               virtual size_t rawWrite(const void* buffer, size_t length)  {
+               virtual size_t WritePayloadData(const char* buffer, size_t length) {
                     HTTP_DATA_CHUNK c;
 
                     c.DataChunkType = HttpDataChunkFromMemory;
@@ -101,16 +84,35 @@ namespace rikitiki {
                     c.FromMemory.BufferLength = (ULONG)length;
                     DWORD sent; BOOL completed;
                     // Note -- we should make this asyc at some point; figure out memory management detail with data chunk.
-                    BOOL moreData = length > 0; 
-                    assert(S_OK == iis7ctx->GetResponse()->WriteEntityChunks(&c, 1, false, moreData, &sent, &completed));
-                    
+                    BOOL moreData = length > 0;
+                    assert(S_OK == httpCtx.GetResponse()->WriteEntityChunks(&c, 1, false, moreData, &sent, &completed));
+
                     return sent;
                }
+          };
 
-               virtual void FillPayload() OVERRIDE{
+          class II7ConnContext : public ConnContext_ < II7Request, II7Response, IHttpContext > {
+
+               IHttpContext* iis7ctx;
+               bool async;
+
+          public:
+               II7ConnContext(Server* server, IHttpContext* _ctx) : ConnContext_ < II7Request, II7Response, IHttpContext >(server, *_ctx),
+                    iis7ctx(_ctx),
+                    async(false) {
 
                }
 
+               void SetAsync() {
+                    async = true;
+               }
+               virtual void Close() OVERRIDE{
+                    ConnContext::Close();
+                    iis7ctx->SetRequestHandled();
+                    if (async)
+                         iis7ctx->IndicateCompletion(RQ_NOTIFICATION_FINISH_REQUEST);
+               }
+               
           };
 
           class IIS7Server : public Server, public IHttpModuleFactory, public CHttpModule {
@@ -134,8 +136,10 @@ namespace rikitiki {
                     UNREFERENCED_PARAMETER(pHttpContext);
 
                     REQUEST_NOTIFICATION_STATUS rtn = RQ_NOTIFICATION_CONTINUE;
+
                     ConnContextRef_<II7ConnContext> ctx(new II7ConnContext(this, pHttpContext));
-                    auto handler = this->GetHandler(*ctx.get());
+
+                    auto handler = this->GetHandler(ctx->Request);
                     if (handler != 0 && (handler->Handle(ctx) == true)) {
                          if (ctx.use_count() == 1) {
                               rtn = RQ_NOTIFICATION_FINISH_REQUEST;
@@ -148,7 +152,7 @@ namespace rikitiki {
                     return rtn;
                }
 
-               virtual
+                    virtual
                     REQUEST_NOTIFICATION_STATUS
                     OnPostBeginRequest(
                     _In_ IHttpContext *         pHttpContext,
@@ -167,8 +171,8 @@ namespace rikitiki {
                     *ppModule = this;
                     return S_OK;
                }
-               
-               virtual void Dispose() OVERRIDE{
+
+                    virtual void Dispose() OVERRIDE{
 
                }
 
@@ -179,12 +183,13 @@ namespace rikitiki {
 
                std::wstring domain;
 
-               virtual std::future<std::shared_ptr<Response>> ProcessRequest(IRequest& request) OVERRIDE{
-                    auto client = new SimpleRequestClient(L"localhost", 80);                    
+               virtual std::future<std::shared_ptr<Response>> ProcessRequest(Request& request) OVERRIDE{
+                    auto client = new SimpleRequestClient(L"localhost", 80);
                     client->MakeRequest(request);
                     return client->future();
                }
           };
+
           Server* CreateServer(DWORD dwServerVersion, IHttpModuleRegistrationInfo * pModuleInfo, IHttpServer * pHttpServer) {
                auto rtn = new IIS7Server(dwServerVersion, pModuleInfo, pHttpServer);
                pModuleInfo->SetRequestNotifications(rtn, RQ_BEGIN_REQUEST, RQ_BEGIN_REQUEST);

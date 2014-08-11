@@ -2,8 +2,7 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
 #pragma once
-#include "server.h"
-#include "connContext.h"
+#include <rikitiki/server.h>
 #include <cstring>
 #include <memory>
 namespace rikitiki {

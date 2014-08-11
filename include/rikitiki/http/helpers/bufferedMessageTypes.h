@@ -23,7 +23,8 @@ namespace rikitiki {
                     typedef const T& type;
                };
 
-
+// We define this just so that its clear that a property is non const. 
+#define NON_CONST 
 #define BufferMemberNoSetter(T, name, access) \
                    private: mutable Buffered_<std::remove_reference<T>::type> _ ## name; \
                    public: \
@@ -56,7 +57,7 @@ namespace rikitiki {
                          return data;
                     }
                };
-#define NON_CONST 
+
                class BufferedMessage : public virtual Message {
                     typedef BufferedMessage thisType;
                     rikitiki::ByteStream body;

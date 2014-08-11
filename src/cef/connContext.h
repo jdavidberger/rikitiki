@@ -9,7 +9,9 @@
 #include <include/cef_app.h>
 #pragma warning(default: 4100 4668)
 
+
 #include <rikitiki\connContext.h>
+#include <rikitiki\http\incoming\Request.h>
 #include <rikitiki\http\helpers\bufferedMessageTypes.h>
 namespace rikitiki {
      struct Server;

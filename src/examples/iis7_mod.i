@@ -6,8 +6,6 @@ using namespace rikitiki::examples;
 using namespace rikitiki::iis7;
 
 //Note -- __declexport here doesn't propertly remove the name mangling. 
-//#pragma comment(linker, "/EXPORT:RegisterModule=?RegisterModule" "@@" "YAJKPEAVIHttpModuleRegistrationInfo" "@@" "PEAVIHttpServer" "@@@" "Z")
-//#pragma comment(linker, "/EXPORT:RegisterModule=_RegisterModule@12")
 #pragma comment(linker, "/EXPORT:RegisterModule")
 extern "C" HRESULT __stdcall RegisterModule(
      DWORD                           dwServerVersion,

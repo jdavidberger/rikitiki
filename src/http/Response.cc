@@ -21,7 +21,7 @@ namespace rikitiki {
           auto pos = startline.find(L' ');
           auto str = &startline[pos + 1];
           wchar_t* pos2 = 0;
-          auto statusCode = wcstol(str, &pos2, 10);  
+          auto statusCode = (uint16_t)wcstol(str, &pos2, 10);
           std::wstring statusString(pos2+1);
           while ( ::iswspace( statusString[statusString.length()-1] ) )
                statusString.pop_back();
@@ -126,89 +126,5 @@ namespace rikitiki {
           buffer += std::string(data, end);
           return false;
      }
-     /*
-     ResponseBuilder::ResponseBuilder(Response* _response) : response(_response), state(MessageState::START_LINE) {}
-
-     bool ResponseBuilder::OnBufferedData(const char* data, std::size_t length) {
-          std::string buffer;
-          const char* end = &data[length];
-          switch (state.streamState) {
-          case MessageState::START_LINE: {
-               data = readWord(data, end, buffer);
-               assert(buffer == "HTTP/1.1");
-
-               data = readWord(data, end, buffer); // Status num 
-               auto status = atoi(&buffer[0]);
-
-               data = readWord(data, end, buffer); // Status text 
-
-               response->status = new HttpStatus(status, buffer);
-               expectLinefeed(data, end);
-          }
-               state = MessageState::HEADERS;
-               return false;
-          case  MessageState::HEADERS:
-
-               if (data[0] == '\r' || data[0] == '\n') {
-                    data += 2;
-                    state.bodyType = BodyType::From(response->ContentLength(), response->TransferEncoding());
-                    state.streamState = response->ContentLength() == 0 ? MessageState::FINISHED : MessageState::BODY;
-                    bufferMode = response->TransferEncoding() == Encoding::chunked ? NEWLINE : NONE;
-               }
-               else {
-                    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
-                    std::string buffer2;
-                    data = readHeaderName(data, end, buffer);
-                    data = readHeaderValue(data, end, buffer2);
-                    auto header = rikitiki::Header(conversion.from_bytes(&buffer[0]), conversion.from_bytes(&buffer2[0]));
-                    *response << header;
-                    data += 2; // Burn \r\n                    
-               }
-               return state.streamState == MessageState::FINISHED;
-          case  MessageState::BODY: {
-               switch (state.bodyType) {
-               case  BodyType::CHUNKED:
-               {
-                    response->Body().write(data, (std::streamsize)(expectedSize - 2));
-                    if (expectedSize - 2 == 0)
-                         state = MessageState::FINISHED;
-                    else
-                         state = MessageState::BODY;
-                    bufferMode = NEWLINE;
-                    break;
-               }
-               case BodyType::KNOWN_SIZE:{
-                    if (data != end) {
-                         if (response->TransferEncoding() == Encoding::chunked) {
-                              expectedSize = (size_t)strtol(data, (char**)&data, 16) + 2;
-                              data += 2; // burn \r\n
-                              bufferMode = LENGTH;
-                              state.bodyType = BodyType::CHUNKED;
-                              return false;
-                         }
-                         else {
-                              bufferMode = NONE;
-                              response->Body().write(data, end - data);
-                         }
-                    }
-
-                    if (response->ContentLength() != (uint64_t)-1 && response->Body().str().size() >= response->ContentLength())
-                         state = MessageState::FINISHED;
-
-                    break;
-               } // case BodyType::BODY
-               } // switch BodyType
-               break;
-          } // case  MessageState::BODY
-
-
-          case  MessageState::FINISHED:
-               throw new std::exception("Unexpected input");
-          }
-
-          return state.streamState == MessageState::FINISHED;
-     }
-     */
      
-
 }

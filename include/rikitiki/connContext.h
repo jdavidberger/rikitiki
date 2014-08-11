@@ -2,25 +2,22 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
 #pragma once
-#include <map>
+
+#include <type_traits>
+
+#include <mxcomp/useful_macros.h>
+
 #include <string>
 #include <sstream>
-#include <rikitiki/http/http_statuses.h>
-#include <mxcomp/reflection.h>
-#include "content_handler.h"
-#include <locale>
-#include <codecvt>
-#include <rikitiki/http/incoming/Request.h>
+
+#include <rikitiki/content_handler.h>
+#include <rikitiki/http/Request.h>
 #include <rikitiki/http/outgoing/Response.h>
 
 
-#include <rikitiki/requestContext.h>
-
-#include <mxcomp\useful_macros.h>
-
 namespace rikitiki {
      class Server;
-     class ConnContext;
+     class MessageListener;
 
      /** Thrown from within handlers to immediately stop handler execution.
      Note that throwing an exception will treat the request as handled, by design.
@@ -66,28 +63,7 @@ namespace rikitiki {
                ConnContext&>::type operator <<(T&);
           
           template <class T> auto operator >>(T&) -> decltype(valid_conversions<T>::In::Instance(), instance_of<ConnContext>::value);
-
-          /*
-          HeaderCollection& Headers() {
-               return request.Headers();
-          };
-          ByteStream& Body() {
-               return request.Body();
-          };
-          CookieCollection& Cookies() {
-               return request.Cookies();
-          }
-          QueryStringCollection& QueryString() {
-               return request.QueryString();
-          }
-          */
-          DEPRECATED("Access request method via request") RequestMethod::t RequestMethod() const {
-               return Request.RequestMethod();
-          };
-          DEPRECATED("Access uri via request") const wchar_t* URI() const {
-               return Request.URI();
-          }
-
+          
           void AddRequestListener(MessageListener*);
           Request& Request ;
           OResponse& Response ;
@@ -97,36 +73,36 @@ namespace rikitiki {
      struct Container_ {
           ResponseT Response;
           RequestT  Request;
-          Container_(const Data& data) : Response(data), Request(data) {}
+          Container_(Data& data) : Response(data), Request(data) {}
      };
 
      template <class RequestT, class ResponseT, class Data = void>
      class ConnContext_ : public Container_<RequestT, ResponseT, Data>, public ConnContext {
      protected:
-          ConnContext_(Server* s, const Data& data) : Container_(data), ConnContext(s, Request, Response) {}
+          ConnContext_(Server* s, Data& data) : Container_(data), ConnContext(s, Request, Response) {}
      public:
           using Container_<RequestT, ResponseT, Data>::Request;
           using Container_<RequestT, ResponseT, Data>::Response;
      };
 
-     /*
-     class ConnContextWithWrite : public ConnContext {
-     private:
+     void CleanConnContext(ConnContext* ctx);
 
-     protected:
-          virtual size_t rawWrite(const void* buffer, size_t length) = 0;
-          virtual void WriteHeaders();           
-          virtual void OnHeadersFinished() OVERRIDE;
-          virtual void OnData() OVERRIDE;
+     template <class T>
+     class ConnContextRef_ : public std::shared_ptr<T> {
      public:
-          ConnContextWithWrite(Server* s, Request& r);
-          virtual ~ConnContextWithWrite();
-          virtual void Close() OVERRIDE;
+          ConnContextRef_() {}
+          ConnContextRef_(T*ptr) : std::shared_ptr<T>(ptr, CleanConnContext){
+               LOG(Server, Debug) << "Created Context Ref " << (void*)this << std::endl;
+          }
      };
-     */
-     //void mapContents(ByteStream& raw_content, PostCollection& post);
-     //void mapQueryString(const wchar_t* _qs, QueryStringCollection& qs);
+
+     typedef std::shared_ptr<ConnContext> ConnContextRef;
+
+
      ConnContext& operator>>(ConnContext&, std::wstring& t);
+
+     void type_conversion_error(ConnContext& ctx, void** handlers);
+
 }
 
 #include "connContext.tcc"
