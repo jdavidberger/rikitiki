@@ -5,12 +5,12 @@
 #include "content_types.h"
 #include <vector>
 #include <sstream>
-#include <mxcomp\useful_macros.h>
-#include <mxcomp\cont_stringbuf.h>
+#include <mxcomp/useful_macros.h>
+#include <mxcomp/cont_stringbuf.h>
 #include <assert.h>
-#include <rikitiki\http\Enums.h>
-#include <rikitiki\http\parsing\BufferedReader.h>
-#include <rikitiki\http\parsing\MessageParserState.h>
+#include <rikitiki/http/Enums.h>
+#include <rikitiki/http/parsing/BufferedReader.h>
+#include <rikitiki/http/parsing/MessageParserState.h>
 
 #pragma warning (disable: 4265)
 #include <condition_variable>

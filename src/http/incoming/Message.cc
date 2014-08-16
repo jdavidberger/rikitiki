@@ -1,9 +1,10 @@
-#include <mxcomp\log.h>
+#include <rikitiki/exception.h>
 #include <rikitiki/http/parsing/Utils.h>
 #include <rikitiki/http/Header.h>
 #include <rikitiki/http/incoming/Message.h>
 
-#include <codecvt>
+#include <mxcomp/log.h>
+#include <mxcomp/utf.h>
 
 namespace rikitiki {
      void IMessage::OnStartLine(const std::wstring& startline) {
@@ -31,11 +32,13 @@ namespace rikitiki {
 
      bool IMessage::OnBufferedData(const char* data, std::size_t length) {
           std::string buffer;
+
+	  LOG(IMessage, Debug) << "Buffered IMessage: " << currentState.streamState << ", " << currentState.bodyType << ": " << data << std::endl;
+
           const char* end = &data[length];
           switch (currentState.streamState) {
           case MessageState::START_LINE: {
-               std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
-               OnStartLine(conversion.from_bytes(data));
+               OnStartLine(mxcomp::utf::convert(data));
                SetState(MessageState::HEADERS);
                return false;
           }
@@ -48,11 +51,10 @@ namespace rikitiki {
                     expectedSize = ContentLength();
                }
                else {                    
-                    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
                     std::string buffer2;
                     data = readHeaderName(data, end, buffer);
                     data = readHeaderValue(data, end, buffer2);                    
-                    OnHeader(conversion.from_bytes(&buffer[0]), conversion.from_bytes(&buffer2[0]));
+                    OnHeader(mxcomp::utf::convert(&buffer[0]), mxcomp::utf::convert(&buffer2[0]));
                     data += 2; // Burn \r\n                    
                }
                return currentState.streamState == MessageState::FINISHED;
@@ -86,7 +88,7 @@ namespace rikitiki {
                     }
 
                     if (expectedSize == 0)
-                         currentState.streamState = MessageState::FINISHED;
+		      SetState(MessageState::FINISHED);
                     break;
                case BodyType::BUFFERING:
                case BodyType::UNKNOWN:
@@ -96,13 +98,18 @@ namespace rikitiki {
                break;
           }
           case MessageState::FINISHED:
-               throw new std::exception("Unexpected input");
+               throw new rikitiki::exception("Unexpected input");
           }
+
+	  if(currentState.streamState == MessageState::FINISHED) {
+	    LOG(IMessage, Debug) << "Message finished" << std::endl;
+	  }
 
           return currentState.streamState == MessageState::FINISHED;
      }
      void IMessage::SetState(MessageState::type newState) { 
-          currentState.streamState = newState; 
+       OnStateChange(newState);
+       currentState.streamState = newState; 
      }
      bool IMessage::OnData(const char* data, size_t len) {
           LOG(Message, Debug) << (void*)this << " incoming: " << std::string(data, len) << std::endl;

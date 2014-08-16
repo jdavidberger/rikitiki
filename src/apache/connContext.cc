@@ -2,18 +2,19 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
 #include <rikitiki/apache/apache>
-#include <curl/curl.h>
+
 #include <apr_strings.h>
-#include <httpd/httpd.h>
-#include <httpd/http_config.h>
-#include <httpd/http_protocol.h>
-#include <httpd/ap_config.h>
+#include <apache2/httpd.h>
+#include <apache2/http_config.h>
+#include <apache2/http_protocol.h>
+#include <apache2/ap_config.h>
 #include <apr_tables.h>
 #include <assert.h>
 
 namespace rikitiki {
   namespace apache {
 
+    /*
     void ApacheConnContext::FillRequestMethod() {
       _method = strToMethod(request->method);
     }    
@@ -50,7 +51,8 @@ namespace rikitiki {
       } while(nth == (int)_payload.size());
       _payload.resize(nth);
       mappedPayload = true;			  
-    }		  
+    }
+    */		  
     /*
     void ApacheConnContext::FillPost() {
       apr_array_header_t* p_data;
@@ -74,6 +76,7 @@ namespace rikitiki {
       mappedPost = true;
     }
     */
+    /*
     void ApacheConnContext::writeResponse(){
       std::string resp = response.response.str();
       std::string responseType = ToString(response.ResponseType);
@@ -108,5 +111,7 @@ namespace rikitiki {
     const char* ApacheConnContext::URI(){
       return request->uri;
     }
+    */
   }
+
 }

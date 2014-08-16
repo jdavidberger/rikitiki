@@ -1,6 +1,6 @@
 #pragma once
 
-#include <rikitiki\http\Enums.h>
+#include <rikitiki/http/Enums.h>
 
 namespace rikitiki {
      namespace http {

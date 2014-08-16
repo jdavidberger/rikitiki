@@ -1,10 +1,10 @@
 #pragma once 
 
-#include <rikitiki\http\Message.h>
-#include <mxcomp\useful_macros.h>
+#include <rikitiki/http/Message.h>
+#include <mxcomp/useful_macros.h>
 
-#include <rikitiki\http\parsing\BufferedReader.h>
-#include <rikitiki\http\parsing\MessageParserState.h>
+#include <rikitiki/http/parsing/BufferedReader.h>
+#include <rikitiki/http/parsing/MessageParserState.h>
 
 #pragma warning (disable: 4265)
 #include <condition_variable>

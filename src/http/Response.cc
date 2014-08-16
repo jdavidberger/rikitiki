@@ -1,7 +1,7 @@
 #include <rikitiki/http/Response.h>
 #include <assert.h>
 #include <locale>
-#include <codecvt>
+#include <cstring>
 
 namespace rikitiki {
      Response::Response() : status(&HttpStatus::OK) {}
@@ -63,7 +63,8 @@ namespace rikitiki {
           while (br < end && !(isspace((int)*br) || *br == ':')) {
                br++;
           }
-          out.resize((std::size_t)(br - data)); std::memcpy(&out[0], data, out.size());
+          out.resize((std::size_t)(br - data)); 
+	  std::memcpy(&out[0], data, out.size());
 
           while (br < end && *br != ':') br++;
           while (br < end && *br == ':') br++;

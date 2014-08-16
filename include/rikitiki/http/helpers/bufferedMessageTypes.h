@@ -1,8 +1,8 @@
 #pragma once
 
-#include <rikitiki\http\Message.h>
-#include <rikitiki\http\Request.h>
-#include <rikitiki\http\Response.h>
+#include <rikitiki/http/Message.h>
+#include <rikitiki/http/Request.h>
+#include <rikitiki/http/Response.h>
 
 namespace rikitiki {
      namespace http {

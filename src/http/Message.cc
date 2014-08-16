@@ -1,9 +1,11 @@
 #include <mxcomp/log.h>
+#include <mxcomp/utf.h>
+
 #include <rikitiki/http/Header.h>
 #include <rikitiki/http/Message.h>
+
 #include <locale>
 #include <algorithm>
-#include <codecvt>
 #include <assert.h>
 
 namespace rikitiki {
@@ -45,11 +47,10 @@ namespace rikitiki {
      }
 
      std::ostream& operator<< (std::ostream& stream, const Message& m){
-          std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-          stream << converter.to_bytes(m.Startline()) << std::endl;
+          stream << mxcomp::utf::convert(m.Startline()) << std::endl;
           for (auto header : m.Headers()){
-               stream << converter.to_bytes(header.first) << ": " << 
-                    converter.to_bytes(header.second) << std::endl;
+               stream << mxcomp::utf::convert(header.first) << ": " << 
+		 mxcomp::utf::convert(header.second) << std::endl;
           }
           stream << std::endl << std::endl;
           stream << m.Body().str();
@@ -57,13 +58,12 @@ namespace rikitiki {
           return stream;
      }
      std::wostream& operator<< (std::wostream& stream, const Message& m){
-          std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
           stream << m.Startline() << std::endl;
           for (auto header : m.Headers()){
                stream << header.first << ": " << header.second << std::endl;
           }
           stream << std::endl << std::endl;
-          stream << converter.from_bytes( m.Body().str() );
+          stream << mxcomp::utf::convert( m.Body().str() );
 
           return stream;
      }
@@ -82,37 +82,5 @@ namespace rikitiki {
           CookieCollection& rtn = const_cast<Message*>(this)->Cookies();
           return rtn;
      }
-
-     static inline const char* skipWhitespace(const char* data, const char* end) {
-          while (data < end &&
-               (*data == ' ' || *data == '\t')) {
-               data++;
-          }
-          return data;
-     }
-
-     static inline const char* readHeaderName(const char* data, const char* end, std::string& out) {
-          out.clear();
-          auto br = data;
-          while (br < end && !(isspace((int)*br) || *br == ':')) {
-               br++;
-          }
-          out.resize((std::size_t)(br - data)); std::memcpy(&out[0], data, out.size());
-
-          while (br < end && *br != ':') br++;
-          while (br < end && *br == ':') br++;
-
-          return skipWhitespace(br, end);
-     }
-     static inline const char* readHeaderValue(const char* data, const char* end, std::string& out) {
-          out.clear();
-          auto br = data;
-          while (br < end && !(*br == '\r' || *br == '\n')) {
-               br++;
-          }
-          out.resize((std::size_t)(br - data)); std::memcpy(&out[0], data, out.size());
-          return br;
-     }
-
 
 }

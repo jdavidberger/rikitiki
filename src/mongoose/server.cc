@@ -5,9 +5,8 @@
 #include <mongoose.h>
 
 #include <rikitiki/configuration/configuration>
-#include <rikitiki\websocket\websocketProcess.h>
-#include <rikitiki\server.h>
-
+#include <rikitiki/websocket/websocketProcess.h>
+#include <rikitiki/server.h>
 
 #include <sstream>
 #pragma warning(disable:4062)
@@ -15,6 +14,7 @@
 #pragma warning(default:4062)
 
 #include <rikitiki/http/helpers/SimpleRequestClient.h>
+#include <string.h>
 
 #pragma warning(disable:4265)
 #include <condition_variable>
@@ -46,6 +46,7 @@ namespace rikitiki {
 
           static int _handler(struct mg_connection *conn) {
                MongooseServer* server = getServer(conn);
+	       LOG(Mongoose, Debug) << "Incoming request on " << server << std::endl;
                ConnContextRef_<ConnContext> ctx(new mongoose::MongooseConnContext(server, conn));
                return server->Handle(ctx) ? 1 : 0;
           }
@@ -153,6 +154,8 @@ namespace rikitiki {
                if (DocumentRoot.size())
                     options.push_back("document_root"), options.push_back(&DocumentRoot[0]);
                options.push_back(NULL);
+
+               LOG(Mongoose, Debug) << "Starting Mongoose web server " << (void*)this << std::endl;
 
                ctx = mg_start(&callbacks, this, &options[0]);
           }

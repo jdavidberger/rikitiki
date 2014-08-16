@@ -1,7 +1,7 @@
 #pragma once
-#include <mxcomp\useful_macros.h>
-#include <rikitiki\http\outgoing\Message.h>
-#include <rikitiki\http\Response.h>
+#include <mxcomp/useful_macros.h>
+#include <rikitiki/http/outgoing/Message.h>
+#include <rikitiki/http/Response.h>
 
 namespace rikitiki {
 
@@ -21,6 +21,7 @@ namespace rikitiki {
           virtual size_t WritePayloadData(const char*, size_t) OVERRIDE;
           virtual void WriteHeader(const Header&) OVERRIDE;
      };
+
      struct OResponseWriter : public OResponse, public OMessageWriter {
           const HttpStatus* status = &HttpStatus::OK;
 

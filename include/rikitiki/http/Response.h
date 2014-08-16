@@ -3,10 +3,10 @@
 #include <string>
 #include <sstream>
 #include <vector>
-#include <rikitiki\http\Request.h>
-#include <rikitiki\http\content_types.h>
-#include <rikitiki\http\http_statuses.h>
-#include <mxcomp\useful_macros.h>
+#include <rikitiki/http/Request.h>
+#include <rikitiki/http/content_types.h>
+#include <rikitiki/http/http_statuses.h>
+#include <mxcomp/useful_macros.h>
 #include <utility>
 #pragma warning (disable: 4265)
 #include <mutex>

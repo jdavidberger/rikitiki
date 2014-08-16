@@ -1,4 +1,4 @@
-include(CppcheckTargets)
+#include(CppcheckTargets)
 
 macro( add_module module)
     SET(module ${module})
@@ -72,7 +72,7 @@ endmacro(add_source_directory)
 macro(add_server_directory srcdir) 
 	file (GLOB _INCLUDES ../include/rikitiki/${srcdir}/*.tcc ../include/rikitiki/${srcdir}/*.h )
 	file (GLOB _SOURCES "${srcdir}/*.c*")
-        
+
 	SOURCE_GROUP("Source" FILES ${_SOURCES})
 	SOURCE_GROUP("Include" FILES ${_INCLUDES})
 	add_library(rt_${srcdir} ${_INCLUDES} ${_SOURCES})
@@ -81,10 +81,10 @@ macro(add_server_directory srcdir)
 endmacro(add_server_directory)
 
 
-include_directories(${THIRD_PARTY_DIR}/curl-7.28.1/include)
+#include_directories(${THIRD_PARTY_DIR}/curl-7.28.1/include)
 
 link_directories(
-		${THIRD_PARTY_DIR}/curl-7.28.1/bin/lib
+#		${THIRD_PARTY_DIR}/curl-7.28.1/bin/lib
 		${THIRD_PARTY_DIR}/ctemplate-2.2 
 		${THIRD_PARTY_DIR}/cef/cef3/Release
 )
@@ -97,11 +97,12 @@ SOURCE_GROUP("Include\\Base" FILES ${RT_INC})
 
 add_source_directory(utils)	
 add_source_directory(http)	
+add_source_directory(os/linux)
 
 IF(${WIN32})
 	set (RT_LIBS mxcomp)
 ELSE()
-	set (RT_LIBS curl pthread mxcomp)
+	set (RT_LIBS pthread mxcomp event event_pthreads)
 ENDIF()
 
 IF(USE_WEBSOCKET)
@@ -131,7 +132,7 @@ CONFIGURE_FILE(config.h.in ${CMAKE_SOURCE_DIR}/include/rikitiki/config.h)
 
 add_library(rikitiki ${RT_SRC})
 target_link_libraries(rikitiki ${RT_LIBS})		     
-add_cppcheck(rikitiki STYLE POSSIBLE_ERROR FAIL_ON_WARNINGS) 
+#add_cppcheck(rikitiki STYLE POSSIBLE_ERROR FAIL_ON_WARNINGS) 
 
 IF(USE_MONGOOSE)
 	add_server_directory(mongoose)
@@ -143,7 +144,7 @@ IF(USE_MONGOOSE)
 ENDIF()
 
 IF(USE_APACHE)
-	include_directories(/usr/include/apr-1/)	
+	include_directories(/usr/include/apr-1.0/)	
 	add_server_directory(apache)
 ENDIF()
 
@@ -161,7 +162,7 @@ ENDIF()
 
 install(TARGETS rikitiki DESTINATION lib)
 
-if(${MAKE_EXAMPLES})
+if(MAKE_EXAMPLES)
 	add_subdirectory(examples)
 ENDIF()
 

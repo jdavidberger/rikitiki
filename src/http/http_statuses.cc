@@ -1,6 +1,12 @@
+#include <mxcomp/utf.h>
 #include <rikitiki/http/http_statuses.h>
 
 namespace rikitiki {    
+  HttpStatus::HttpStatus(uint16_t s, const std::string& n, bool _managed) : status(s), name(n), managed(_managed) {}
+  HttpStatus::HttpStatus(uint16_t s, const std::wstring& n, bool _managed) : status(s), managed(_managed) {
+    name = mxcomp::utf::convert(n);
+    }
+
   const HttpStatus HttpStatus::Continue(100, "Continue",true);
   const HttpStatus HttpStatus::Switching_Protocols(101, "Switching Protocols",true);
   const HttpStatus HttpStatus::Processing(102, "Processing",true);

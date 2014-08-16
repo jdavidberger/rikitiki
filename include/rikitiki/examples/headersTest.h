@@ -26,21 +26,22 @@ namespace rikitiki {
       void headers(ConnContextRef ctx){
 	ctx << ContentType::text_plain
 	    << "Headers: \n";
-	for(auto header : ctx->Headers())
+	for(auto header : ctx->Request.Headers())
 	  ctx << header.first << ": " << header.second << "\n";
       }
 
       void cookies(ConnContextRef ctx){
-           if (ctx->QueryString()[L"name"].size())
-             ctx << Cookie(ctx->QueryString()[L"name"], ctx->QueryString()[L"value"]);
+           if (ctx->Request.QueryString()[L"name"].size())
+             ctx << Cookie(ctx->Request.QueryString()[L"name"], 
+			   ctx->Request.QueryString()[L"value"]);
     
 	ctx << ContentType::text_plain
 	    << "Cookies: \n";
 
-	for(auto cook : ctx->Cookies())
+	for(auto cook : ctx->Request.Cookies())
 	  ctx << cook.first << ": " << cook.second << "\n";
 	ctx << "Headers: \n";
-	for(auto header : ctx->Headers())
+	for(auto header : ctx->Request.Headers())
 	  ctx << header.first << ": " << header.second << "\n";
       }
 

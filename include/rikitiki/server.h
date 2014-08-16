@@ -3,21 +3,21 @@
 
 #pragma once 
 
-#include <rikitiki\http\Request.h>
-
-#include <rikitiki/config.h>
-#include <vector>
-#include <sstream>
+#include <rikitiki/http/Request.h>
 #include <rikitiki/http/content_types.h>
+#include <rikitiki/exception.h>
+#include <rikitiki/config.h>
+#include <rikitiki/log/log>
+#include <rikitiki/http/http_statuses.h>
+#include <rikitiki/connContext.h>
 
 #include <mxcomp/macros.h>
 #include <mxcomp/tuple_ext.h>
 #include <mxcomp/useful_macros.h>
-#include <tuple>
 
-#include <rikitiki/log/log>
-#include <rikitiki/http/http_statuses.h>
-#include <rikitiki/connContext.h>
+#include <vector>
+#include <sstream>
+#include <tuple>
 
 #include <memory>
 #pragma warning(disable:4265 4355 4062)
@@ -95,7 +95,6 @@ namespace rikitiki {
 
           This is mostly useful for testing -- it allows one test suite to hit every server implementation.
           */
-          //virtual std::auto_ptr<Socket> GetDirectSocket();
           virtual std::future<std::shared_ptr<Response>> ProcessRequest(Request&) = 0;
 
           virtual void Register(WebModule& t);

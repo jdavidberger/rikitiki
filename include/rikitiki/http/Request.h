@@ -3,10 +3,10 @@
 #include <string>
 #include <map>
 #include <sstream>
-#include <mxcomp\useful_macros.h>
+#include <mxcomp/useful_macros.h>
 #include "Message.h"
 #include "Enums.h"
-#include <rikitiki\http\Header.h>
+#include <rikitiki/http/Header.h>
 
 namespace rikitiki {     
 

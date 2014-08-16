@@ -1,9 +1,9 @@
 #pragma once
 #include <string>
-#include <exception>
+#include <rikitiki/exception.h>
 
 namespace rikitiki {
-     struct InvalidStateException : public std::exception {
+     struct InvalidStateException : public rikitiki::exception {
           InvalidStateException(const std::string& msg);
      };
 }

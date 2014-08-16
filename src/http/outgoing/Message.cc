@@ -1,11 +1,14 @@
 #include <mxcomp/log.h>
+#include <mxcomp/utf.h>
+
+#include <rikitiki/exception.h>
 #include <rikitiki/http/Header.h>
 #include <rikitiki/http/outgoing/Message.h>
 #include <rikitiki/http/parsing/MessageParserState.h>
 #include <rikitiki/http/parsing/InvalidStateException.h>
+
 #include <locale>
 #include <algorithm>
-#include <codecvt>
 #include <assert.h>
 
 namespace rikitiki {
@@ -58,8 +61,9 @@ namespace rikitiki {
 
      size_t OMessageWriter::WritePayloadData(const char* buffer, size_t size){
           auto oldStreamState = streamState.streamState;
-          if (streamState.streamState == MessageState::START_LINE)
+          if (streamState.streamState == MessageState::START_LINE) {
                WriteStartLine();
+	  }
 
           OMessage::WritePayloadData(buffer, size);
 
@@ -106,7 +110,7 @@ namespace rikitiki {
                }
                WriteData("\r\n");
                if (contentSize != 0) {
-                    throw std::exception("Connection was abandoned prematurely");
+		 throw rikitiki::exception("Connection was abandoned prematurely");
                }
           case MessageState::BODY:
                switch (streamState.bodyType) {
@@ -148,15 +152,14 @@ namespace rikitiki {
      }
 
      size_t OMessageWriter::WriteData(const wchar_t* buffer, size_t size) {
-          std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-          auto strBuffer = converter.to_bytes(buffer, buffer + size);
-          return WriteData(strBuffer.data(), strBuffer.length());
+       auto strBuffer = mxcomp::utf::convert( buffer );
+       return WriteData(strBuffer.data(), strBuffer.length());
      }
      size_t OMessageWriter::WriteData(const std::wstring& str) {
-          return WriteData(str.data(), str.length());
+       return WriteData(str.data(), str.length());
      }
      size_t OMessageWriter::WriteData(const std::string& str) {
-          return WriteData(str.data(), str.length());
+       return WriteData(str.data(), str.length());
      }
 
 }

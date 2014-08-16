@@ -1,12 +1,13 @@
+#include <rikitiki/http/Header.h>
+
+#include <mxcomp/utf.h>
+#include <mxcomp/useful_macros.h>
+
 #include <string>
 #include <map>
 #include <vector>
-#include <rikitiki\http\Header.h>
 #include <assert.h>
-#include <mxcomp\useful_macros.h>
 #include <sstream>
-#include <locale>
-#include <codecvt>
 
 namespace rikitiki {
 
@@ -40,12 +41,10 @@ namespace rikitiki {
      }
 
      void HeaderCollection::Add(const std::string& name, const std::string& value) {
-          std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-          Add(converter.from_bytes(name.data()), converter.from_bytes(value.data()));
+          Add(mxcomp::utf::convert(name.data()), mxcomp::utf::convert(value.data()));
      }
      void HeaderCollection::Set(const std::string& name, const std::string& value) {
-          std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-          Set(converter.from_bytes(name.data()), converter.from_bytes(value.data()));
+          Set(mxcomp::utf::convert(name.data()), mxcomp::utf::convert(value.data()));
      }
 
      void HeaderCollection::Set(const std::wstring& name, const std::wstring& value) {
@@ -64,8 +63,7 @@ namespace rikitiki {
           return &(*el).second;
      }
      void QueryStringCollection::FromQueryString(const std::string& qs) {
-          std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-          FromQueryString(converter.from_bytes(&qs[0]));
+          FromQueryString(mxcomp::utf::convert(&qs[0]));
      }
      void QueryStringCollection::FromQueryString(const std::wstring& qs) {
           const wchar_t* _qs = &qs[0];

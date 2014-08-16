@@ -2,7 +2,10 @@
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 #pragma once
 #include <rikitiki/rikitiki>
-#include <httpd/httpd.h>
+#include <mxcomp/useful_macros.h>
+
+struct server_rec;
+struct request_rec;
 
 namespace rikitiki {
   namespace apache {
@@ -10,9 +13,11 @@ namespace rikitiki {
        Apache server wrapper. Does not currently do much. 
      */
     class ApacheServer : public Server {
-    public:
       server_rec* server;
+    public:
       ApacheServer(server_rec* server);
+      bool Handle(request_rec*); 
+      virtual std::future<std::shared_ptr<rikitiki::Response> > ProcessRequest(rikitiki::Request&) OVERRIDE;
     };
   }
 }

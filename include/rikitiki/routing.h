@@ -43,7 +43,7 @@ namespace rikitiki {
      };
 
      template <typename C, typename rtn, typename... Args> struct Function_{
-          typedef rtn(C::*Type)(typename sane_ref_type<Args>::type...);
+          typedef rtn(C::*type)(typename sane_ref_type<Args>::type...);
      };
 
 #ifdef _MSC_VER

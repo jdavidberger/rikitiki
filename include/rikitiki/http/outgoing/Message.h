@@ -2,16 +2,16 @@
 
 #include <string>
 #include <map>
-#include <rikitiki\http\content_types.h>
+#include <rikitiki/http/content_types.h>
 #include <vector>
 #include <sstream>
-#include <mxcomp\useful_macros.h>
-#include <mxcomp\cont_stringbuf.h>
+#include <mxcomp/useful_macros.h>
+#include <mxcomp/cont_stringbuf.h>
 #include <assert.h>
-#include <rikitiki\http\Enums.h>
-#include <rikitiki\http\parsing\BufferedReader.h>
-#include <rikitiki\http\parsing\MessageParserState.h>
-#include <rikitiki\http\Header.h>
+#include <rikitiki/http/Enums.h>
+#include <rikitiki/http/parsing/BufferedReader.h>
+#include <rikitiki/http/parsing/MessageParserState.h>
+#include <rikitiki/http/Header.h>
 
 #pragma warning (disable: 4265)
 #include <condition_variable>
@@ -59,7 +59,7 @@ namespace rikitiki {
           virtual size_t WritePayloadData(const char*, size_t) OVERRIDE;
           size_t WritePayloadData(const std::string& buff);
      };
-
+     /*
      template <class T> auto operator <<(OMessage& out, const T& obj) -> decltype(std::declval<std::stringstream>() << obj, std::declval<OMessage&>())
      {
           std::stringstream ss;           
@@ -68,4 +68,5 @@ namespace rikitiki {
           out.WriteData(buff->data(), buff->length());          
           return out;
      }
+     */
 }

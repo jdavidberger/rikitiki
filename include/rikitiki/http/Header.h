@@ -3,6 +3,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <sstream>
 
 namespace rikitiki {
      typedef std::pair<std::wstring, std::wstring> wstringpair;

@@ -7,7 +7,7 @@
 // ----------- Parse format string -----------------
 inline bool skip_to_format(std::wstringstream& b, const wchar_t*& format){
   while( *format != '{' ){
-    if(b.peek() != *format) return false;    
+    if((wchar_t)b.peek() != *format) return false;    
     if(b.peek() == '\0') return false;
     b.get();
     format++;
@@ -53,11 +53,11 @@ inline bool extract(std::wstringstream& b, std::wstring& t){
 
 static inline int modern_sscanf(std::wstringstream& b, const wchar_t*& format){
   while( *format != '\0' && !b.eof() ){
-    if(b.peek() != *format) return false;    
+    if((wchar_t)b.peek() != *format) return false;    
     b.get(); if(!b.good()) return 0;
     format++;
   }       
-  return *format == '\0' && (wchar_t)EOF == b.peek() ? 1 : 0;
+  return *format == '\0' && (wchar_t)EOF == (wchar_t)b.peek() ? 1 : 0;
 } 
 
 template <typename H, typename... T>

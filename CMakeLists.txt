@@ -19,7 +19,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 LINK_DIRECTORIES( ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} )
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wno-unknown-pragmas")
 
 # MSVC warnings are dumb
 if (MSVC)
@@ -27,7 +27,7 @@ if (MSVC)
    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")			    				
 else()
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Werror")
+   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wno-reorder -Wno-switch -Wno-sign-compare")
 endif (MSVC)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_FLAGS}")
@@ -63,6 +63,8 @@ MACRO( check_feature feature_ defaultvalue description)
        endif()
 
 ENDMACRO(check_feature)
+
+set(MAKE_EXAMPLES ON CACHE BOOL "Build rikitiki examples")
 
 CHECK_FEATURE(apache OFF "Compile support for apache web servers")
 CHECK_FEATURE(mongoose ON "Compile support for mongoose web servers")

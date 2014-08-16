@@ -3,23 +3,24 @@
 
 #include <rikitiki/mongoose/connContext.h>
 #include <cstring>
-#include <mxcomp\log.h>
+#include <mxcomp/log.h>
+#include <mxcomp/utf.h>
 #include <locale>
-#include <codecvt>
+
 #include <mongoose.h>
 #include <future>
 
 namespace rikitiki {
      namespace mongoose {
-          static inline std::wstring toWString(const char* str) {
-               std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
-               return conversion.from_bytes(str);
-          }
+       static inline std::wstring toWString(const char* str) {
+	 return mxcomp::utf::convert(str);
+       }
+       
           static void read_loop(MongooseRequest* request) {
                char buffer[1024];
                while (request->conn) {                    
                     auto bytes = mg_read(request->conn, buffer, sizeof(buffer));
-
+		    LOG(Mongoose, Debug) << "Mongoose read loop: " << buffer << std::endl;
                     if (request->OnData(buffer, (size_t)bytes))
                          return;
                }
@@ -61,7 +62,7 @@ namespace rikitiki {
                     qs.FromQueryString(request->query_string);
           }
           size_t MongooseResponse::WriteData(const char* buff, size_t size){
-               LOG(Mongoose, Debug) << (void*)this << " WriteData: " << std::string(buff, size) << std::endl;
+	    LOG(Mongoose, Debug) << "Writing: " << buff << std::endl;
                return (size_t)mg_write(conn, buff, size);
           }
           MongooseResponse::MongooseResponse(mg_connection* c) : conn(c) {}
@@ -73,7 +74,7 @@ namespace rikitiki {
           MongooseConnContext::MongooseConnContext(Server* s, mg_connection* c) : 
                MongooseConnContextMembers(c),
                ConnContext(s, _request, _response), conn(c) {        
-
+	    LOG(Mongoose, Debug) << "ConnContext " << this << " created. " << std::endl;
           }
      }
 }

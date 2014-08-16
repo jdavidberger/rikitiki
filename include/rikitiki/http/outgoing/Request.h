@@ -1,7 +1,7 @@
 #pragma once
 
-#include <rikitiki\http\Request.h>
-#include <rikitiki\http\outgoing\Message.h>
+#include <rikitiki/http/Request.h>
+#include <rikitiki/http/outgoing/Message.h>
 
 namespace rikitiki {     
 

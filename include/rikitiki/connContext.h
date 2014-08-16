@@ -6,6 +6,7 @@
 #include <type_traits>
 
 #include <mxcomp/useful_macros.h>
+#include <mxcomp/log.h>
 
 #include <string>
 #include <sstream>
@@ -13,7 +14,7 @@
 #include <rikitiki/content_handler.h>
 #include <rikitiki/http/Request.h>
 #include <rikitiki/http/outgoing/Response.h>
-
+#include <rikitiki/exception.h>
 
 namespace rikitiki {
      class Server;
@@ -22,7 +23,7 @@ namespace rikitiki {
      /** Thrown from within handlers to immediately stop handler execution.
      Note that throwing an exception will treat the request as handled, by design.
      */
-     struct HandlerException {
+     struct HandlerException : public rikitiki::exception {
           HandlerException() : status(0){}
           HandlerException(const HttpStatus& s) : status(&s){}
           /** Optionally specify the status to return.
@@ -65,7 +66,7 @@ namespace rikitiki {
           template <class T> auto operator >>(T&) -> decltype(valid_conversions<T>::In::Instance(), instance_of<ConnContext>::value);
           
           void AddRequestListener(MessageListener*);
-          Request& Request ;
+	  rikitiki::Request& Request ;
           OResponse& Response ;
      };
 
@@ -79,7 +80,7 @@ namespace rikitiki {
      template <class RequestT, class ResponseT, class Data = void>
      class ConnContext_ : public Container_<RequestT, ResponseT, Data>, public ConnContext {
      protected:
-          ConnContext_(Server* s, Data& data) : Container_(data), ConnContext(s, Request, Response) {}
+     ConnContext_(Server* s, Data& data) : Container_<RequestT, ResponseT, Data>(data), ConnContext(s, Request, Response) {}
      public:
           using Container_<RequestT, ResponseT, Data>::Request;
           using Container_<RequestT, ResponseT, Data>::Response;

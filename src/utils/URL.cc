@@ -1,4 +1,4 @@
-#include <rikitiki\utils\URL.h>
+#include <rikitiki/utils/URL.h>
 
 namespace rikitiki {
 
@@ -15,12 +15,14 @@ namespace rikitiki {
           return w;
      }
 
-     template <typename class T>
+#define _T(x, y) ChooseCW<x>(y, TOWSTRINGLITERAL(y) )
+
+     template <class T>
      URL_<T>::URL_(const std::basic_string<T>& _uri) : uri(_uri) {
           start = &uri[0];
           end = &uri[uri.length()];
           hostStart = protocolStart = resourceStart = end;
-          auto protocolEnd = uri.find(_T(T, "://"));
+          auto protocolEnd = uri.find( _T(T, "://") );
           if (protocolEnd != std::string::npos) {
                protocolStart = start;
                hostStart = &uri[protocolEnd + 3];

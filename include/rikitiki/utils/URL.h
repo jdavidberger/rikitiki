@@ -1,7 +1,7 @@
 #include <string>
 
 namespace rikitiki {
-     template <typename class T>
+     template <class T>
      struct URL_ {
           std::basic_string<T> uri;
           const T *start, *end,

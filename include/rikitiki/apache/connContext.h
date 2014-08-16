@@ -3,31 +3,11 @@
 
 #pragma once
 #include <rikitiki/rikitiki>
-#include <httpd/httpd.h>
-#include <httpd/http_protocol.h>
-#include <httpd/http_config.h>
-#include <httpd/ap_config.h>
-#include <httpd/http_core.h>
+
+struct request_rec;
 
 namespace rikitiki {
   namespace apache {
-    /**
-       Connection context which deals with apache request_recs
-     */
-    class ApacheConnContext : public ConnContext {  
-    private:      
-    protected:
-      virtual void FillPayload();
-      virtual void FillQueryString();
-      virtual void FillRequestMethod();
-      virtual void FillHeaders();
-
-    public:      
-      request_rec *request;
-      virtual const char* URI();
-      ApacheConnContext(Server* server, request_rec* r);
-      virtual void writeResponse();
-    };
 
   }
 }

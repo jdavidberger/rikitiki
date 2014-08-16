@@ -4,14 +4,14 @@
 #pragma once 
 #include <string>
 #include <map>
-#include <rikitiki\rikitiki>
+#include <rikitiki/server.h>
 
 namespace rikitiki {
      struct StaticContentHandler : public Handler {
-          std::wstring prefix;
-          std::wstring path;
-          std::map<std::wstring, std::wstring> mime_types;
-          StaticContentHandler(const std::wstring& prefix, const std::wstring& path);
+          std::string prefix;
+          std::string path;
+          std::map<std::string, std::string> mime_types;
+          StaticContentHandler(const std::string& prefix, const std::string& path);
           virtual bool Handle(ConnContextRef ctx) OVERRIDE;
           virtual bool CanHandle(Request& ctx) OVERRIDE;
           virtual bool visible() const;

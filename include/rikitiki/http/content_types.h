@@ -89,6 +89,8 @@ namespace rikitiki {
     };
 
     t FromString(const std::wstring& type);
+    t FromString(const std::string& type);
+
     std::wstring ToString(t type);
     std::wistream& operator >>(std::wistream& s, t& _t);
 

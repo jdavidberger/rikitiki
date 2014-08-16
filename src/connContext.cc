@@ -1,12 +1,10 @@
 /* Copyright (C) 2012-2013 Justin Berger
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
 
-#include <mxcomp\log.h>
+#include <mxcomp/log.h>
 #include <rikitiki/connContext.h>
 #include <algorithm>
-#ifndef _MSC_VER
-#include <curl/curl.h>
-#endif
+#include <mxcomp/utf.h>
 #include <assert.h>
 #include <cstring>
 
@@ -25,9 +23,7 @@ namespace rikitiki {
 
      std::ostream& operator <<(std::ostream& response, const wchar_t* obj)
      {
-          std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-          response << conv.to_bytes(obj);
-          return response;
+       return response << mxcomp::utf::convert(obj);
      }
      std::ostream& operator <<(std::ostream& response, const std::wstring& obj) {
           return response << obj.c_str();
@@ -128,9 +124,7 @@ namespace rikitiki {
           }
      }
      void mapContents(ByteStream& raw_content_stream, PostCollection& post){
-          std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
-
-          std::wstring raw_content = conversion.from_bytes(raw_content_stream.str());
+       std::wstring raw_content = mxcomp::utf::convert( raw_content_stream.str() );
 
           if (raw_content.size() == 0)
                return;
@@ -148,15 +142,10 @@ namespace rikitiki {
                     break;
                case L'&':
 
-#ifdef _MSC_VER
                     std::wstring value;
                     unescapeString(&*l_it, &*it, value);
                     post.insert(PostContent(name, value));
-#else 
-                    char* value = curl_unescape(&*l_it, it - l_it);
-                    post.insert(PostContent(name, value));
-                    curl_free(value);
-#endif
+
                     l_it = it + 1;
                     break;
                }

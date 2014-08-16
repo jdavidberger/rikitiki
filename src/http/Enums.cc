@@ -1,19 +1,19 @@
 /* Copyright (C) 2012-2013 Justin Berger
 The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
-
-#pragma once 
-#include <string>
 #include <rikitiki/http/Enums.h>
-#include <assert.h>
+#include <rikitiki/http/http_statuses.h>
+
 #include <mxcomp/useful_macros.h>
 #include <mxcomp/cont_stringbuf.h>
 #include <mxcomp/log.h>
-#include <rikitiki/http/http_statuses.h>
+
+#include <string>
+#include <assert.h>
 
 namespace rikitiki {
      namespace RequestMethod {
 
-#define MATCH_METHOD_ENUM(eval)	{if(wcscmp(method, L#eval) == 0) return eval;}
+#define MATCH_METHOD_ENUM(eval)	{if(wcscmp(method, L###eval) == 0) return eval;}
 
           t FromString(const wchar_t* method){
                MATCH_METHOD_ENUM(GET);
@@ -29,7 +29,7 @@ namespace rikitiki {
                return ANY;
           }
 
-#define MATCH_METHOD_STR(eval) case eval: return L#eval;
+#define MATCH_METHOD_STR(eval) case eval: return L###eval;
           const wchar_t* ToString(t method){
                switch (method) {
                     MATCH_METHOD_STR(GET);
@@ -56,7 +56,7 @@ namespace rikitiki {
                assert(false);
                return L"";
           }
-          t Encoding::FromString(const wchar_t * str) {
+          t FromString(const wchar_t * str) {
                if (wcscmp(str, L"chunked") == 0)
                     return Encoding::chunked;
                if (wcscmp(str, L"compress") == 0)

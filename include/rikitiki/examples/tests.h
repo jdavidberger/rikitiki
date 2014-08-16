@@ -2,12 +2,11 @@
 #include <assert.h>
 #include <memory>
 #pragma warning (disable: 4512 )
-#include <qunit.hpp>
+#include <QUnit.hpp>
 #pragma warning (default: 4512 )
 #include <mxcomp/vsostream.h>
-#include <mxcomp/threadedstringbuf.h>
-
-#include <rikitiki\http\outgoing\Request.h>
+#include <algorithm>
+#include <rikitiki/http/outgoing/Request.h>
 
 namespace rikitiki {
      namespace examples {
@@ -83,7 +82,7 @@ namespace rikitiki {
                     QUNIT_IS_EQUAL(payload, "Testing");
                }
                void AsyncTests(ConnContextRef ctx) {
-                    std::async([](ConnContextRef ctx) {
+		 std::async(std::launch::async, [](ConnContextRef ctx) {
                          std::this_thread::sleep_for(std::chrono::milliseconds(1000));
                          ctx << "Testing"; 
                     }, ctx);
@@ -110,20 +109,21 @@ namespace rikitiki {
                     ctx << "<html><body>";
                     ctx << "<a href='StartTests'>Start tests</a><br>";
                     for (auto handler : ctx->server->handlers) {                         
-                         ctx << "<a href='StartTests?Test=" << handler->name() << "'>" << handler->name() << "</a><br>";
+		      ctx << "<a href='StartTests?Test=" << handler->name() << "'>" << handler->name() << "</a><br>";
                     }
-                    std::async([](ConnContextRef ctx) {
-
-                         ctx << "<div>";
-                         while (numTests != 0) {
-                             std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                             ctx << ".";
-                         }
-                         ctx << "</div>";
-                         qunit.printStatus();
-                         ctx << "<pre>" << test_results.str() << "</pre>";
-                         ctx << "</body></html>";
-                    }, ctx);
+                
+		    std::async(std::launch::async, []( ConnContextRef ctx) {			
+			LOG(Tests, Debug) << "Waiting for tests to finish..." << std::endl;
+			ctx << "<div>";
+			while (numTests != 0) {
+			  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+			  ctx << ".";
+			}
+			ctx << "</div>";
+			qunit.printStatus();
+			ctx << "<pre>" << test_results.str() << "</pre>";
+			ctx << "</body></html>";
+		      }, ctx);
                }
 
                // Set up a test to be run. 
@@ -141,7 +141,7 @@ namespace rikitiki {
                     numTests++;
                     LOG(Tests, Info) << url << " Started." << std::endl;
                     std::shared_future<std::shared_ptr<Response>> future = server.ProcessRequest(request);
-                    active_tests.push_back(std::async([=] {
+                    active_tests.push_back(std::async(std::launch::async, [=] {
                          testf(future.get());
                          LOG(Tests, Info) << url << " done." << std::endl;
                          numTests--;
@@ -180,9 +180,6 @@ namespace rikitiki {
                }
 
                void Register(rikitiki::Server& server) OVERRIDE{
-                    mxcomp::log::SetLogLevel(mxcomp::log::Debug);
-                    mxcomp::log::SetLogStream(std::cerr);
-
                     server.AddHandler(CreateRoute<>::With(this, L"/BasicTest", &TestsModule::BasicTest));
                     server.AddHandler(CreateRoute<int>::With(this, L"/QueryStringTest/{num}", &TestsModule::QueryStringTest));
                     server.AddHandler(CreateRoute<>::With(this, L"/HeadersTest", &TestsModule::HeadersTest));
@@ -193,7 +190,7 @@ namespace rikitiki {
                     server.AddHandler(CreateRoute<>::With(this, L"/StartTests", &TestsModule::StartTests));
                     server.AddHandler(CreateRoute<>::With(this, L"/"));
 
-                    server.AddHandler(new StaticContentHandler(L"/static/", L"c:\\"));
+                    server.AddHandler(new StaticContentHandler("/static/", "c:\\"));
                }
 
           };

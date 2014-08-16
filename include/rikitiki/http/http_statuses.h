@@ -1,21 +1,19 @@
 #pragma once
 #include <string>
-#include <codecvt>
 #include <stdint.h>
+
+#include <locale>
 
 namespace rikitiki {
   /**
      Basic HttpStatus information -- status code and name of status.
 
      More usefully, holds static members for every standard status type. 
-   */
+  */
   class HttpStatus { 
   public:
-       HttpStatus(uint16_t s, const std::string& n, bool _managed = false) : status(s), name(n), managed(_managed) {}
-       HttpStatus(uint16_t s, const std::wstring& n, bool _managed = false) : status(s), managed(_managed) {
-       std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
-       name = conversion.to_bytes(n);
-  }
+  HttpStatus(uint16_t s, const std::string& n, bool _managed = false);
+  HttpStatus(uint16_t s, const std::wstring& n, bool _managed = false);
     uint16_t status; 
     std::string name;
     bool managed; 

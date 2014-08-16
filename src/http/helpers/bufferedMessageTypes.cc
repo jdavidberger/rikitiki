@@ -1,4 +1,4 @@
-#include <rikitiki\http\helpers\bufferedMessageTypes.h>
+#include <rikitiki/http/helpers/bufferedMessageTypes.h>
 
 namespace rikitiki {
      namespace http {

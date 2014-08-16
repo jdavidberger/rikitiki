@@ -1,115 +1,26 @@
-#include <rikitiki\http\helpers\SimpleRequestClient.h>
-#ifdef _MSC_VER
-#pragma warning (disable: 4365 4574 4263 4264 )
-#define _WINSOCKAPI_
-// http://social.msdn.microsoft.com/Forums/vstudio/en-US/96202d94-f108-483b-b007-6d3de6e303f4/ntddiwin7sp1-is-missing-from-80-sdkddkverh
-#define NOMINMAX
-#define NTDDI_WIN7SP1                       0x06010100
-#include <windows.h>
-#include <WinSock2.h>
-#include <Ws2tcpip.h>
-#pragma warning (default: 4365 4574 4263 4264 )
-#endif
+#include <rikitiki/http/helpers/SimpleRequestClient.h>
 #include <rikitiki/http/Response.h>
-#include <rikitiki\rikitiki>
+#include <rikitiki/rikitiki>
 #include <sstream>
+#include <mxcomp/utf.h>
 
 namespace rikitiki {
 
-      
-     Socket::Socket() {}
+     
+  Socket::Socket(SocketListener& _listener) : listener(_listener) {}
      size_t Socket::Send(const std::string& buffer) {
           return this->Send(&buffer[0], buffer.size());
      }
 
-#ifdef _MSC_VER
-
-     TCPIPSocket::~TCPIPSocket() {
-          running = false;
-          closesocket(_socket);
-          pollingThread.join();
-     }
-
-     TCPIPSocket::TCPIPSocket(const wchar_t * host, uint16_t port) : running(false) {
-
-          WSADATA wsaData;
-          int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-          if (iResult != NO_ERROR) {
-               throw std::exception("WSAStartup function failed with error: %d\n", iResult);
-          }
-          addrinfoW *result = NULL;
-          GetAddrInfoW(host, nullptr, nullptr, (addrinfoW**)&result);
-          while (result && result->ai_family != 2) {
-               result = result->ai_next;
-          }
-          if (result == 0) {
-               WSACleanup();
-               throw std::exception("could not resolve address");
-          }
-
-
-          _socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-          if (_socket == INVALID_SOCKET) {
-               WSACleanup();
-               throw std::exception("socket function failed with error: %ld\n", WSAGetLastError());
-          }
-
-          sockaddr_in clientService;
-          clientService.sin_family = AF_INET;
-          clientService.sin_addr = ((sockaddr_in*)result->ai_addr)->sin_addr;
-          clientService.sin_port = htons(port);
-
-          int cresult = connect(_socket, (SOCKADDR*)&clientService, sizeof(clientService));
-          if (cresult == SOCKET_ERROR) {
-               closesocket(_socket);
-               WSACleanup();
-               throw std::exception("connect failed with error: %d\n", WSAGetLastError());
-          }
-          running = true;
-          pollingThread = std::thread([=]() {
-               char buffer[512];               
-               while (running) {                    
-                    int readBytes = recv(_socket, buffer, sizeof(buffer), 0);
-                    if (readBytes <= 0) {
-                         running = false;
-                         for (auto l : listeners)
-                              l->OnClose();
-                         running = false;
-                    }
-                    else {
-                         for (std::size_t i = 0; i < listeners.size(); i++){
-                              auto l = listeners[i];
-                              if (l->OnData(buffer, (size_t)readBytes)) { // OnData returns true when message is finished
-                                   l->OnClose();
-                                   listeners[i] = listeners.back();
-                                   listeners.pop_back();
-                                   i--;
-                                   running = false;
-                              }
-
-                         }
-                    }
-               }
-               closesocket(_socket);
-          });
-     }
-
-     size_t TCPIPSocket::Send(const char* buffer, size_t length) {
-          return (size_t)send(_socket, buffer, (int)length, 0);
-     }
-
-#endif
-
      SimpleRequestClient::~SimpleRequestClient() {
           
      }
-     SimpleRequestClient::SimpleRequestClient(const wchar_t* _host, uint16_t port) : host(_host), socket(_host, port), 
-          response(new IResponseMemory()) {
-          socket.listeners.push_back(this);
+  SimpleRequestClient::SimpleRequestClient(const wchar_t* _host, uint16_t port) : host(_host),
+										  response(new IResponseMemory()), 
+										  socket( CreateTCPIPSocket(*this, _host, port)) {
      }
      void SimpleRequestClient::MakeRequest(Request& request) {
           std::wstringstream req;
-          std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> conversion;
           
           req << request.Startline() << std::endl;
           req << L"Host: " << host << std::endl;
@@ -117,10 +28,10 @@ namespace rikitiki {
                req << it.first << ": " << it.second << std::endl;
           }
           req << std::endl;
-          req << conversion.from_bytes(request.Body().str());
+          req << mxcomp::utf::convert( request.Body().str() );
 
-          std::string utf8 = conversion.to_bytes(req.str());
-          socket.Send(utf8.data(), utf8.size());
+          std::string utf8 = mxcomp::utf::convert (req.str());
+          socket->Send(utf8.data(), utf8.size());
      }
      void SimpleRequestClient::OnClose() {
           promise.set_value(response);
@@ -128,5 +39,5 @@ namespace rikitiki {
      bool SimpleRequestClient::OnData(const char* data, size_t length) {
           return response->OnData(data, length);          
      }
-
+  
 }

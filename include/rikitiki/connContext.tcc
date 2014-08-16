@@ -4,10 +4,11 @@
 
 namespace rikitiki {
 
+  /*
      template <class T>
      typename std::enable_if<  std::is_class<typename valid_conversions<T>::In>::value,
           ConnContext&>::type ConnContext::operator <<(T& obj) {
-          auto rType = response.ResponseType;
+       auto rType = Response.ContentType;
           auto& handlers = valid_conversions<T>::Out::Instance().handlers;
 
           // We should always respect whatever the user set as the response type
@@ -78,4 +79,5 @@ namespace rikitiki {
           it = this->insert(std::pair<T1, T2>(key, T2()));
           return it->second;
      }
+  */
 }
