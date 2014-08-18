@@ -19,14 +19,17 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 LINK_DIRECTORIES( ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} )
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wno-unknown-pragmas")
-
-# MSVC warnings are dumb
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+ 
 if (MSVC)
+   # MSVC warnings are dumb
+   message("MSVC toolchain")
    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -wd4512 -wd4514 -wd4820 -wd4350 -wd4710 -wd4711 -wd4435 -wd4625 -wd4099 -wd4626 -wd4250 -wd4571 -wd4263 -wd4264 -wd4061 -wd4062 -WX")
    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT")
    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd")			    				
 else()
+     message("GCC toolchain")
+   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror -Wno-unknown-pragmas")
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wno-reorder -Wno-switch -Wno-sign-compare")
 endif (MSVC)
 
