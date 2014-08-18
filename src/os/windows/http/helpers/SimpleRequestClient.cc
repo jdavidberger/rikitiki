@@ -20,13 +20,13 @@ namespace rikitiki {
     bool running; 
 
   public:
-    WindowsTCPIPSocket(const wchar_t* host, uint16_t port = 80);
+    WindowsTCPIPSocket(SocketListener&,const wchar_t* host, uint16_t port);
     virtual ~WindowsTCPIPSocket();
     virtual size_t Send(const char*, size_t length) OVERRIDE;
   };
 
-  TCPIPSocket* CreateTCPIPSocket(const wchar_t* host, uint16_t port) {
-    return new WindowsTCPIPSocket(host, port);
+  TCPIPSocket* CreateTCPIPSocket(SocketListener& l, const wchar_t* host, uint16_t port) {
+    return new WindowsTCPIPSocket(l, host, port);
   }
 
   WindowsTCPIPSocket::~WindowsTCPIPSocket() {
@@ -35,7 +35,7 @@ namespace rikitiki {
     pollingThread.join();
   }
 
-  WindowsTCPIPSocket::WindowsTCPIPSocket(const wchar_t * host, uint16_t port) : running(false) {
+  WindowsTCPIPSocket::WindowsTCPIPSocket(SocketListener& l, const wchar_t * host, uint16_t port) : TCPIPSocket(l), running(false) {
 
     WSADATA wsaData;
     int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -72,31 +72,23 @@ namespace rikitiki {
     }
     running = true;
     pollingThread = std::thread([=]() {
-	char buffer[512];               
-	while (running) {                    
-	  int readBytes = recv(_socket, buffer, sizeof(buffer), 0);
-	  if (readBytes <= 0) {
-	    running = false;
-	    for (auto l : listeners)
-	      l->OnClose();
-	    running = false;
-	  }
-	  else {
-	    for (std::size_t i = 0; i < listeners.size(); i++){
-	      auto l = listeners[i];
-	      if (l->OnData(buffer, (size_t)readBytes)) { // OnData returns true when message is finished
-		l->OnClose();
-		listeners[i] = listeners.back();
-		listeners.pop_back();
-		i--;
-		running = false;
-	      }
-
-	    }
-	  }
-	}
-	closesocket(_socket);
-      });
+         char buffer[512];
+         while (running) {
+              int readBytes = recv(_socket, buffer, sizeof(buffer), 0);
+              if (readBytes <= 0) {
+                   running = false;
+                   listener.OnClose();
+                   running = false;
+              }
+              else {
+                   if (listener.OnData(buffer, (size_t)readBytes)) { // OnData returns true when message is finished
+                        listener.OnClose();
+                        running = false;
+                   }
+              }
+         }
+         closesocket(_socket);
+    });
   }
 
   size_t WindowsTCPIPSocket::Send(const char* buffer, size_t length) {

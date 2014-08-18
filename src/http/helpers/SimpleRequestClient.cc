@@ -15,10 +15,12 @@ namespace rikitiki {
      SimpleRequestClient::~SimpleRequestClient() {
           
      }
+#pragma warning (disable: 4355)
   SimpleRequestClient::SimpleRequestClient(const wchar_t* _host, uint16_t port) : host(_host),
 										  response(new IResponseMemory()), 
-										  socket( CreateTCPIPSocket(*this, _host, port)) {
+                                                                                  socket(CreateTCPIPSocket(*this, _host, port)) {
      }
+#pragma warning (default: 4355)
      void SimpleRequestClient::MakeRequest(Request& request) {
           std::wstringstream req;
           

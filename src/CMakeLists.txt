@@ -97,11 +97,12 @@ SOURCE_GROUP("Include\\Base" FILES ${RT_INC})
 
 add_source_directory(utils)	
 add_source_directory(http)	
-add_source_directory(os/linux)
 
 IF(${WIN32})
+        add_source_directory(os/windows)
 	set (RT_LIBS mxcomp)
 ELSE()
+        add_source_directory(os/linux)
 	set (RT_LIBS pthread mxcomp event event_pthreads)
 ENDIF()
 

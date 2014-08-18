@@ -2,6 +2,7 @@
 #include <rikitiki\iis7\server.h>
 #include <rikitiki\http\helpers\SimpleRequestClient.h>
 #include <rikitiki\http\helpers\bufferedMessageTypes.h>
+#include <codecvt>
 
 namespace rikitiki {
      namespace iis7 {

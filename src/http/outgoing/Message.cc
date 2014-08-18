@@ -152,7 +152,7 @@ namespace rikitiki {
      }
 
      size_t OMessageWriter::WriteData(const wchar_t* buffer, size_t size) {
-       auto strBuffer = mxcomp::utf::convert( buffer );
+       auto strBuffer = mxcomp::utf::convert( buffer, &buffer[size] );
        return WriteData(strBuffer.data(), strBuffer.length());
      }
      size_t OMessageWriter::WriteData(const std::wstring& str) {
