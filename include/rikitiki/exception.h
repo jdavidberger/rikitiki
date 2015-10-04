@@ -9,7 +9,7 @@ namespace rikitiki {
     std::string _what;
   public:
   exception(const std::string& w = "Rikitiki Error") : _what(w) {}
-    virtual const char* what() const OVERRIDE {
+    virtual const char* what() const throw() OVERRIDE {
       return _what.data();
     }
   };

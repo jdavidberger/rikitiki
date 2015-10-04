@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 #include <stdint.h>
-#include <rikitiki\connContext.h>
-#include <rikitiki\websocket\websocketServer.h>
+#include <rikitiki/connContext.h>
+#include <rikitiki/websocket/websocketServer.h>
 
 namespace rikitiki {
 	namespace websocket {

@@ -1,9 +1,7 @@
 #pragma once
 #include <vector>
 #include <map>
-#include <rikitiki\rikitiki>
-
-#ifdef USE_WEBSOCKET
+#include <rikitiki/rikitiki>
 
 namespace rikitiki {
      namespace websocket {
@@ -46,4 +44,3 @@ namespace rikitiki {
 
      }
 }
-#endif

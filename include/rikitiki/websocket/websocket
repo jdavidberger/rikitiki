@@ -1,6 +1,7 @@
 #pragma once
+#include <rikitiki/config.h>
 
-#ifdef USE_WEBSOCKET
+#ifdef RT_USE_WEBSOCKET
 #include "websocketServer.h"
 #include "websocketProcess.h"
 #include "websocketContext.h"

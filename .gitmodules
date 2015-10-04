@@ -1,0 +1,6 @@
+[submodule "third/mxcomp"]
+	path = third/mxcomp
+	url = https://github.com/jdavidberger/mxcomp.git
+[submodule "third/mongoose"]
+	path = third/mongoose
+	url = https://github.com/cesanta/mongoose.git

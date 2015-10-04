@@ -71,7 +71,7 @@ set(MAKE_EXAMPLES ON CACHE BOOL "Build rikitiki examples")
 
 CHECK_FEATURE(apache OFF "Compile support for apache web servers")
 CHECK_FEATURE(mongoose ON "Compile support for mongoose web servers")
-CHECK_FEATURE(cef ON "Compile support for Chromium Embedded Framework")
+CHECK_FEATURE(cef OFF "Compile support for Chromium Embedded Framework")
 CHECK_FEATURE(iis7 ON "Compile support for iis7 web servers")
 
 CHECK_FEATURE(ctemplate OFF "")
