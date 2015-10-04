@@ -59,4 +59,4 @@ int main(){
 }
 ```
 
-[See all examples](doxygen/examples.html)
+[See all examples](http://www.metaxcompile.com/rikitiki/doxygen/examples.html)
