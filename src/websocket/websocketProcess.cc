@@ -1,5 +1,5 @@
 #include <rikitiki/websocket/websocket>
-#include <mxcomp\log.h>
+#include <mxcomp/log.h>
 
 namespace rikitiki {
   namespace websocket {

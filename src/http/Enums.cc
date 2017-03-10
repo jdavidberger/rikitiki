@@ -8,13 +8,29 @@ The full license is available in the LICENSE file at the root of this project an
 #include <mxcomp/log.h>
 
 #include <string>
+#include <string.h>
 #include <assert.h>
 
 namespace rikitiki {
      namespace RequestMethod {
 
-#define MATCH_METHOD_ENUM(eval)	{if(wcscmp(method, L###eval) == 0) return eval;}
+#define MATCH_METHOD_ENUM(eval)	{if(strcmp((const char*)method, #eval) == 0) return eval;}
+         t FromString(const char* method){
+             MATCH_METHOD_ENUM(GET);
+             MATCH_METHOD_ENUM(POST);
+             MATCH_METHOD_ENUM(HEAD);
+             MATCH_METHOD_ENUM(PUT);
+             MATCH_METHOD_ENUM(DELETE);
+             MATCH_METHOD_ENUM(TRACE);
+             MATCH_METHOD_ENUM(OPTIONS);
+             MATCH_METHOD_ENUM(CONNECT);
+             MATCH_METHOD_ENUM(PATCH);
+             LOG(Server, Error) << "strToMethod failed on method '" << method << "'" << std::endl;
+             return ANY;
+         }
 
+        #undef MATCH_METHOD_ENUM
+#define MATCH_METHOD_ENUM(eval)	{if(wcscmp(method, L###eval) == 0) return eval;}
           t FromString(const wchar_t* method){
                MATCH_METHOD_ENUM(GET);
                MATCH_METHOD_ENUM(POST);

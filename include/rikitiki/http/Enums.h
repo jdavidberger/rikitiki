@@ -14,7 +14,8 @@ namespace rikitiki {
                ANY = 0, GET = 1, POST = 2, HEAD = 3, PUT = 4, DELETE = 5, TRACE = 6, OPTIONS = 7, CONNECT = 8, PATCH = 9, OTHER
           };
 
-          t FromString(const wchar_t*);
+         t FromString(const char*);
+         t FromString(const wchar_t*);
           const wchar_t* ToString(t);
           std::wistream& operator >>(std::wistream& s, t& _t);
      }

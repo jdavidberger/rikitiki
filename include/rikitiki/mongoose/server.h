@@ -20,9 +20,9 @@ namespace rikitiki {
                ,public rikitiki::websocket::Server 
 #endif
           {
-               mg_context *ctx;
-               std::vector<const char*> options;
-               uint16_t port;
+              mg_context *ctx;
+              uint16_t port;
+              std::thread runThread;
 
 #ifdef USE_WEBSOCKET
           private:

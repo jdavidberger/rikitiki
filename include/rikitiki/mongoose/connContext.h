@@ -17,17 +17,32 @@ namespace rikitiki {
 
      namespace mongoose {
 
-          class MongooseRequest : public IMessage_<http::helpers::BufferedRequest> {               
+          class MongooseRequest : public Request {
                std::wstring uri; 
-               std::thread read_thread;                
+               std::thread read_thread;
+              QueryStringCollection qs;
+              HeaderCollection headers;
+              CookieCollection cookies;
+              ByteStream body;
           public:
                mg_connection* conn;
-               MongooseRequest(mg_connection*);
+              http_message* message;
+               MongooseRequest(mg_connection*, http_message*);
                ~MongooseRequest();
-               virtual const wchar_t* URI() const OVERRIDE;
-               virtual void FillHeaders(HeaderCollection&) const OVERRIDE;
-               virtual void FillRequestMethod(Request::Method&) const OVERRIDE;
-               virtual void FillQueryString(QueryStringCollection&) const OVERRIDE;
+
+              RequestMethod::t RequestMethod() const override;
+
+              void SetRequestMethod(RequestMethod::t t) override;
+
+              QueryStringCollection &QueryString() override;
+
+              virtual const wchar_t* URI() const OVERRIDE;
+
+              HeaderCollection &Headers() override;
+
+              ByteStream &Body() override;
+
+              CookieCollection &Cookies() override;
           };
 
           class MongooseResponse : public virtual OResponseWriter {
@@ -39,15 +54,16 @@ namespace rikitiki {
           };
 
           struct MongooseConnContextMembers {
-               MongooseConnContextMembers(mg_connection* c);
+               MongooseConnContextMembers(mg_connection* c, http_message* msg);
                MongooseRequest _request;
                MongooseResponse _response;
           };
 
           class MongooseConnContext : virtual MongooseConnContextMembers, public virtual ConnContext {
-                 mg_connection* conn;               
+                 mg_connection* conn;
+                 http_message* message;
                  public:
-                      MongooseConnContext(Server* s, mg_connection* c);
+                      MongooseConnContext(Server* s, mg_connection* c, http_message* msg);
           };
      }
 }

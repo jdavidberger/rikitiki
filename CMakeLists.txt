@@ -56,9 +56,9 @@ ENDMACRO(enable_feature)
 
 MACRO( check_feature feature_ defaultvalue description)
        STRING(TOUPPER ${feature_} feature)  
-       
-       set(USE_${feature} ${defaultvalue} CACHE BOOL "${description}")
-       
+
+           option(USE_${feature} "${description}" ${defaultvalue} )
+
        IF(USE_${feature})
        	  ENABLE_FEATURE(${feature})
        ELSE()
@@ -72,7 +72,6 @@ set(MAKE_EXAMPLES ON CACHE BOOL "Build rikitiki examples")
 CHECK_FEATURE(apache OFF "Compile support for apache web servers")
 CHECK_FEATURE(mongoose ON "Compile support for mongoose web servers")
 CHECK_FEATURE(cef OFF "Compile support for Chromium Embedded Framework")
-CHECK_FEATURE(iis7 ON "Compile support for iis7 web servers")
 
 CHECK_FEATURE(ctemplate OFF "")
 CHECK_FEATURE(jsoncpp OFF "")
@@ -80,7 +79,12 @@ CHECK_FEATURE(rest OFF "")
 CHECK_FEATURE(configuration OFF "")
 CHECK_FEATURE(log ON "Use MXCOMP logging")
 CHECK_FEATURE(stencet OFF "") 
-CHECK_FEATURE(websocket ON "Compile support for websockets (EXPERIMENTAL)")
+CHECK_FEATURE(websocket OFF "Compile support for websockets (EXPERIMENTAL)")
+
+IF(msvc)
+    CHECK_FEATURE(iis7 ON "Compile support for iis7 web servers")
+endif()
+
 
 IF("${MAKE_EXAMPLES}" STREQUAL "")
        set(MAKE_EXAMPLES 0)

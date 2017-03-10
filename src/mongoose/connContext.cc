@@ -15,65 +15,74 @@ namespace rikitiki {
        static inline std::wstring toWString(const char* str) {
 	 return mxcomp::utf::convert(str);
        }
-       
-          static void read_loop(MongooseRequest* request) {
-               char buffer[1024];
-               while (request->conn) {                    
-                    auto bytes = mg_read(request->conn, buffer, sizeof(buffer));
-		    LOG(Mongoose, Debug) << "Mongoose read loop: " << buffer << std::endl;
-                    if (request->OnData(buffer, (size_t)bytes))
-                         return;
-               }
-          }
+
 
           MongooseRequest::~MongooseRequest() {
                conn = 0;               
                if (read_thread.joinable())
                     read_thread.join();
           }
-          MongooseRequest::MongooseRequest(mg_connection* c) : conn(c) {
-               auto request = mg_get_request_info(c);
-               const char* _uri = request->uri;
-               for (; *_uri != 0; _uri++)
-                    uri.push_back((wchar_t)*_uri);
-               
-               currentState.streamState = MessageState::BODY;               
-               UpdateBufferState();
+          MongooseRequest::MongooseRequest(mg_connection* c, http_message* msg) : conn(c), message(msg) {
+              for(size_t i = 0;i < msg->uri.len;i++)
+                    uri.push_back(msg->uri.p[i]);
 
-               if (currentState.streamState != MessageState::FINISHED)
-                    read_thread = std::thread(read_loop, this);
+              if(message->query_string.len > 0)
+                  qs.FromQueryString( std::string(message->query_string.p, message->query_string.len));
+
+
+              for (int i = 0; i < 40; i++) {
+                  if(message->header_names[i].len == 0)
+                      break;
+
+                  headers.Add(std::string(message->header_names[i].p, message->header_names[i].len),
+                              std::string(message->header_values[i].p, message->header_values[i].len));
+              }
+
+              if(message->body.len > 0)
+                  body.str(std::string(message->body.p, message->body.len));
           }
           const wchar_t* MongooseRequest::URI() const {
                return uri.data();
           }
-          void MongooseRequest::FillHeaders(HeaderCollection& headers) const {
-               auto request = mg_get_request_info(conn);
-               for (int i = 0; i < request->num_headers; i++) {
-                    headers.Add(request->http_headers[i].name, request->http_headers[i].value);
-               }
-          };
-          
-          void MongooseRequest::FillRequestMethod(Request::Method& ) const {
-               assert(false);
-          }
-          void MongooseRequest::FillQueryString(QueryStringCollection& qs) const {
-               auto request = mg_get_request_info(conn);
-               if (request->query_string)
-                    qs.FromQueryString(request->query_string);
-          }
-          size_t MongooseResponse::WriteData(const char* buff, size_t size){
-	    LOG(Mongoose, Debug) << "Writing: " << buff << std::endl;
-               return (size_t)mg_write(conn, buff, size);
+
+         RequestMethod::t MongooseRequest::RequestMethod() const {
+             return RequestMethod::FromString(message->method.p);
+         }
+
+         void MongooseRequest::SetRequestMethod(RequestMethod::t t) {
+             assert(false);
+         }
+
+         QueryStringCollection &MongooseRequest::QueryString() {
+             return qs;
+         }
+
+         HeaderCollection &MongooseRequest::Headers() {
+             return headers;
+         }
+
+         ByteStream &MongooseRequest::Body() {
+             return body;
+         }
+
+         CookieCollection &MongooseRequest::Cookies() {
+             return cookies;
+         }
+
+         size_t MongooseResponse::WriteData(const char* buff, size_t size){
+             LOG(Mongoose, Debug) << "Writing: " << buff << std::endl;
+               mg_send(conn, buff, size);
+             return size;
           }
           MongooseResponse::MongooseResponse(mg_connection* c) : conn(c) {}
 
-          MongooseConnContextMembers::MongooseConnContextMembers(mg_connection* c) :
-               _request(c), _response(c) {
+          MongooseConnContextMembers::MongooseConnContextMembers(mg_connection* c, http_message* msg) :
+               _request(c, msg), _response(c) {
 
           }
-          MongooseConnContext::MongooseConnContext(Server* s, mg_connection* c) : 
-               MongooseConnContextMembers(c),
-               ConnContext(s, _request, _response), conn(c) {        
+          MongooseConnContext::MongooseConnContext(Server* s, mg_connection* c, http_message* msg) :
+               MongooseConnContextMembers(c, msg),
+               ConnContext(s, _request, _response), conn(c), message(msg) {
 	    LOG(Mongoose, Debug) << "ConnContext " << this << " created. " << std::endl;
           }
      }
