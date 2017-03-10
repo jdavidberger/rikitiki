@@ -79,7 +79,7 @@ CHECK_FEATURE(rest OFF "")
 CHECK_FEATURE(configuration OFF "")
 CHECK_FEATURE(log ON "Use MXCOMP logging")
 CHECK_FEATURE(stencet OFF "") 
-CHECK_FEATURE(websocket OFF "Compile support for websockets (EXPERIMENTAL)")
+CHECK_FEATURE(websocket ON "Compile support for websockets (EXPERIMENTAL)")
 
 IF(msvc)
     CHECK_FEATURE(iis7 ON "Compile support for iis7 web servers")
@@ -96,6 +96,15 @@ include_directories(include)
 include_directories(third/mxcomp/include)
 include_directories(third/stencet/include)
 include_directories(third/qunit)
+
+macro(add_rikitiki_library name)
+    add_library(${ARGV})
+    install(TARGETS ${name} DESTINATION lib)
+    GET_PROPERTY(exports GLOBAL PROPERTY exports)
+    SET_PROPERTY(GLOBAL PROPERTY exports "${exports} ${name}")
+endmacro()
+
+SET_PROPERTY(GLOBAL PROPERTY exports "")
 
 set(rikitiki_INCLUDE_DIRS "${rikitiki_INCLUDE_DIRS};${CMAKE_CURRENT_SOURCE_DIR}/include;${CMAKE_CURRENT_SOURCE_DIR}/third/mxcomp/include;${CMAKE_CURRENT_SOURCE_DIR}/third/stencet/include")
 add_subdirectory(third)
@@ -123,7 +132,31 @@ set_property(TARGET memcheck PROPERTY FOLDER "testing")
 set_property(TARGET release PROPERTY FOLDER "testing")
 set_property(TARGET tests PROPERTY FOLDER "testing")
 
+GET_PROPERTY(rikitikiExports GLOBAL PROPERTY exports)
+
 export(PACKAGE rikitiki)
 install(DIRECTORY include/rikitiki DESTINATION include)
 
-set(rikitiki_INCLUDE_DIRS "${rikitiki_INCLUDE_DIRS}" PARENT_SCOPE)
+set(rikitiki_INCLUDE_DIRS "${rikitiki_INCLUDE_DIRS}")
+
+# Create the FooBarConfig.cmake and FooBarConfigVersion files
+set(REL_INCLUDE_DIR include)
+
+set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
+configure_file(rikitikiConfig.cmake.in
+        "${PROJECT_BINARY_DIR}/rikitikiConfig.cmake" @ONLY)
+
+# ... for the install tree
+set(CONF_INCLUDE_DIRS "\${RIKITIKI_CMAKE_DIR}/${REL_INCLUDE_DIR}")
+configure_file(rikitikiConfig.cmake.in
+        "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/rikitikiConfig.cmake" @ONLY)
+# ... for both
+configure_file(rikitikiConfigVersion.cmake.in
+        "${PROJECT_BINARY_DIR}/rikitikiConfigVersion.cmake" @ONLY)
+
+# Install the rikitikiConfig.cmake and rikitikiConfigVersion.cmake
+install(FILES
+        "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/rikitikiConfig.cmake"
+        "${PROJECT_BINARY_DIR}/rikitikiConfigVersion.cmake"
+        DESTINATION "lib/cmake" COMPONENT dev)
+

@@ -17,92 +17,115 @@
 #include <rikitiki/exception.h>
 
 namespace rikitiki {
-     class Server;
-     class MessageListener;
+    class Server;
 
-     /** Thrown from within handlers to immediately stop handler execution.
-     Note that throwing an exception will treat the request as handled, by design.
-     */
-     struct HandlerException : public rikitiki::exception {
-          HandlerException() : status(0){}
-          HandlerException(const HttpStatus& s) : status(&s){}
-          /** Optionally specify the status to return.
-          If no status is set, Internal_Server_Error is returned.
-          */
-          const HttpStatus* status;
-     };
+    class MessageListener;
 
-     /**
-        Connection Context object. This is the main object in which handlers use both to read request data and
-        write response data.
+    /** Thrown from within handlers to immediately stop handler execution.
+    Note that throwing an exception will treat the request as handled, by design.
+    */
+    struct HandlerException : public rikitiki::exception {
+        HandlerException() : status(0) {}
 
-        In general, you can just stream ('<<') whatever you want into it, and there should be an override that
-        does the right thing.
-        */    
-     class ConnContext {
-     protected:
-          friend class Server;
+        HandlerException(const HttpStatus &s) : status(&s) {}
 
-          ConnContext(Server*, Request&, OResponse&);
-          
-     public:
-          ConnContext& operator=(const ConnContext&) = delete;
-          virtual ~ConnContext();
-          Server* server;
-          
-          virtual void Close();
-          bool handled;
+        /** Optionally specify the status to return.
+        If no status is set, Internal_Server_Error is returned.
+        */
+        const HttpStatus *status;
+    };
 
-          ConnContext& operator <<(const HttpStatus& obj);
-          ConnContext& operator <<(const Cookie& obj);
-          ConnContext& operator <<(const Header& obj);
-          ConnContext& operator <<(std::function<void(std::wostream&)>);
-          template <class T> ConnContext& operator <<(const T& obj);
+    /**
+       Connection Context object. This is the main object in which handlers use both to read request data and
+       write response data.
 
-          template <class T>
-          typename std::enable_if<  std::is_class<typename valid_conversions<T>::In>::value,
-               ConnContext&>::type operator <<(T&);
-          
-          template <class T> auto operator >>(T&) -> decltype(valid_conversions<T>::In::Instance(), instance_of<ConnContext>::value);
-          
-          void AddRequestListener(MessageListener*);
-	  rikitiki::Request& Request ;
-          OResponse& Response ;
-     };
+       In general, you can just stream ('<<') whatever you want into it, and there should be an override that
+       does the right thing.
+       */
+    class ConnContext {
+    protected:
+        friend class Server;
 
-     template <class RequestT, class ResponseT, class Data >
-     struct Container_ {
-          ResponseT Response;
-          RequestT  Request;
-          Container_(Data& data) : Response(data), Request(data) {}
-     };
+        ConnContext(Server *, Request &, OResponse &);
 
-     template <class RequestT, class ResponseT, class Data = void>
-     class ConnContext_ : public Container_<RequestT, ResponseT, Data>, public ConnContext {
-     protected:
-     ConnContext_(Server* s, Data& data) : Container_<RequestT, ResponseT, Data>(data), ConnContext(s, Request, Response) {}
-     public:
-          using Container_<RequestT, ResponseT, Data>::Request;
-          using Container_<RequestT, ResponseT, Data>::Response;
-     };
+    public:
+        ConnContext &operator=(const ConnContext &) = delete;
 
-     void CleanConnContext(ConnContext* ctx);
+        virtual ~ConnContext();
 
-     template <class T>
-     class ConnContextRef_ : public std::shared_ptr<T> {
-     public:
-          ConnContextRef_() {}
-          ConnContextRef_(T*ptr) : std::shared_ptr<T>(ptr, CleanConnContext){
-               LOG(Server, Debug) << "Created Context Ref " << (void*)this << std::endl;
-          }
-     };
+        Server *server;
 
-     typedef std::shared_ptr<ConnContext> ConnContextRef;
+        virtual void Close();
+
+        bool handled;
+
+        ConnContext &operator <<(rikitiki::ContentType::t t);
+
+        ConnContext &operator<<(const HttpStatus &obj);
+
+        ConnContext &operator<<(const Cookie &obj);
+
+        ConnContext &operator<<(const Header &obj);
+
+        ConnContext &operator<<(const std::string &);
+
+        ConnContext &operator<<(const char *s);
+
+        ConnContext &operator<<(std::function<void(std::wostream &)>);
+
+        template<class T>
+        ConnContext &operator<<(const T &obj);
+
+        template<class T>
+        typename std::enable_if<std::is_class<typename valid_conversions<T>::In>::value,
+                ConnContext &>::type operator<<(T &);
+
+        template<class T>
+        auto operator>>(T &) -> decltype(valid_conversions<T>::In::Instance(), instance_of<ConnContext>::value);
+
+        void AddRequestListener(MessageListener *);
+
+        rikitiki::Request &Request;
+        OResponse &Response;
+    };
+
+    template<class RequestT, class ResponseT, class Data>
+    struct Container_ {
+        ResponseT Response;
+        RequestT Request;
+
+        Container_(Data &data) : Response(data), Request(data) {}
+    };
+
+    template<class RequestT, class ResponseT, class Data = void>
+    class ConnContext_ : public Container_<RequestT, ResponseT, Data>, public ConnContext {
+    protected:
+        ConnContext_(Server *s, Data &data) : Container_<RequestT, ResponseT, Data>(data),
+                                              ConnContext(s, Request, Response) {}
+
+    public:
+        using Container_<RequestT, ResponseT, Data>::Request;
+        using Container_<RequestT, ResponseT, Data>::Response;
+    };
+
+    void CleanConnContext(ConnContext *ctx);
+
+    template<class T>
+    class ConnContextRef_ : public std::shared_ptr<T> {
+    public:
+        ConnContextRef_() {}
+
+        ConnContextRef_(T *ptr) : std::shared_ptr<T>(ptr, CleanConnContext) {
+            LOG(Server, Debug) << "Created Context Ref " << (void *) this << std::endl;
+        }
+    };
+
+    typedef std::shared_ptr<ConnContext> ConnContextRef;
 
 
-     ConnContext& operator>>(ConnContext&, std::wstring& t);
+    ConnContext &operator>>(ConnContext &, rikitiki::string &t);
 
-     void type_conversion_error(ConnContext& ctx, void** handlers);
+    void type_conversion_error(ConnContext &ctx, void **handlers);
 
 }
 

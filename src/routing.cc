@@ -4,15 +4,15 @@
 #include <rikitiki/routing.h>
 
 namespace rikitiki {
-  Route::Route(const std::wstring& _route, Request::Method _method) : route(_route), method(_method) {
+  Route::Route(const rikitiki::string& _route, Request::Method _method) : route(_route), method(_method) {
   
   }
 
-  Route::Route(const std::wstring& _route) : route(_route), method(RequestMethod::ANY) {
+  Route::Route(const rikitiki::string& _route) : route(_route), method(RequestMethod::ANY) {
   
   }
 
-  std::wstring Route::name() const {
+  rikitiki::string Route::name() const {
     return route;
   }
 }

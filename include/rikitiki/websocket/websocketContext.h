@@ -4,7 +4,8 @@
 #include <vector>
 #include <stdint.h>
 #include <rikitiki/connContext.h>
-#include <rikitiki/websocket/websocketServer.h>
+#include "rikitiki/websocket/websocketServer.h"
+#include "rikitiki/http/Message.h"
 
 namespace rikitiki {
 	namespace websocket {
@@ -48,11 +49,10 @@ namespace rikitiki {
 		};
 
 		const static size_t MAX_FRAME = (size_t)4294967295;
-		class WebsocketContext : public virtual RequestContext {
+		class WebsocketContext  {
 		private:
 			virtual int raw_write(const unsigned char*, size_t) = 0;
 		public:
-                    
 		    rikitiki::websocket::Server* server;
 		    std::vector<std::string> availableProtocols;
 
@@ -60,16 +60,18 @@ namespace rikitiki {
 		    std::string SelectedProtocol;
 		    unsigned Version;
 
-                    /*
-                    We don't assume every implementation is going to have a socket context which is always persisted and never is copied/created/etc. 
-                    However; we do need to have a way of uniquely identifying an open communication so we can tie it to a process. So the Id is unique
-                    per connection. Default is the address of the context object. 
-                    */
-                    virtual ConnectionHandle Handle() const;
+            /*
+            We don't assume every implementation is going to have a socket context which is always persisted and never is copied/created/etc.
+            However; we do need to have a way of uniquely identifying an open communication so we can tie it to a process. So the Id is unique
+            per connection. Default is the address of the context object.
+            */
+            virtual ConnectionHandle Handle() const;
 		    virtual void Ping();
 		    virtual void Write(const char*, size_t, OpCode::T opcode = OpCode::Binary);
 		    virtual void Write(const unsigned char*, size_t, OpCode::T opcode = OpCode::Binary);
 		    virtual void Write(const std::string& buffer);
+
+			virtual const char *URI() const = 0;
 
 		    WebsocketContext(websocket::Server*);
 		};

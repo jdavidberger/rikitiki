@@ -28,10 +28,10 @@ namespace rikitiki {
           };
 
           struct WebsocketRoute : public WebsocketHandler {
-               std::wstring route;
+               rikitiki::string route;
                virtual ~WebsocketRoute(){}
                virtual WebsocketProcess* CreateProcessor(WebsocketContext* ctx) = 0;
-               WebsocketRoute(const std::wstring& r);
+               WebsocketRoute(const rikitiki::string& r);
                virtual WebsocketProcess* Handle(WebsocketContext* ctx);
           };
 
@@ -41,9 +41,9 @@ namespace rikitiki {
 
           template <typename T, typename... A>
           struct WebsocketRoute_ : public WebsocketRoute {
-               std::wstring route;
+               rikitiki::string route;
                std::tuple<A...> args; 
-               WebsocketRoute_(const std::wstring& r, A... _arg) : WebsocketRoute(r), args(_arg...) {
+               WebsocketRoute_(const rikitiki::string& r, A... _arg) : WebsocketRoute(r), args(_arg...) {
 
                }
                T* create(WebsocketContext* ctx, const A&... args) {
@@ -58,7 +58,7 @@ namespace rikitiki {
           template <typename P>
           struct CreateWsRoute {
                template<typename... A>
-               static WebsocketRoute* With(const std::wstring& _route, A... p){
+               static WebsocketRoute* With(const rikitiki::string& _route, A... p){
                     return new WebsocketRoute_<P, A...>(_route, p...);
                }
           };

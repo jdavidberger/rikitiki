@@ -46,11 +46,11 @@ namespace rikitiki {
      }
      bool StaticContentHandler::Handle(ConnContextRef ctx) {
           Handler::Handle(ctx);
-          std::string relpath( mxcomp::utf::convert(ctx->Request.URI() + prefix.length()));
+          std::string relpath( rikitiki::to_rt_string(ctx->Request.URI() + prefix.length()));
           std::string mime = "text/html";
           auto idx = relpath.rfind(".");
 
-          if (idx != std::wstring::npos){
+          if (idx != rikitiki::string::npos){
                std::string ext = relpath.substr(idx + 1);
                mime = mime_types[ext];
                LOG(Server, Info) << mime << ", " << ext << std::endl;
@@ -74,7 +74,7 @@ namespace rikitiki {
      }
 
      bool StaticContentHandler::CanHandle(Request& ctx) {
-       std::string path( mxcomp::utf::convert( ctx.URI() ) );
+       std::string path( rikitiki::to_rt_string( ctx.URI() ) );
 
           if (path.find("..") != (size_t)-1) {
                LOG(Server, Debug) << "Error encountered: user gave .. path." << std::endl;
@@ -87,8 +87,8 @@ namespace rikitiki {
      bool StaticContentHandler::visible() const {
           return false;
      }
-     std::wstring StaticContentHandler::name() const {
-       return mxcomp::utf::convert(prefix);
+     rikitiki::string StaticContentHandler::name() const {
+       return rikitiki::to_rt_string(prefix);
      }
      StaticContentHandler::~StaticContentHandler(){}
 

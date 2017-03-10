@@ -54,7 +54,7 @@ namespace rikitiki {
           virtual bool Handle(ConnContextRef ctx);
           virtual bool CanHandle(Request&) = 0;
           virtual bool visible() const = 0;
-          virtual std::wstring name() const = 0;
+          virtual rikitiki::string name() const = 0;
           virtual std::string desc() const;
           virtual ~Handler();
      };

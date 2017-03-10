@@ -38,7 +38,7 @@ namespace rikitiki {
           Response::operator<<(h);
      }
 
-     OResponse& OResponse::operator << (rikitiki::ContentType::t t) {
+    OResponse& OResponse::operator << (rikitiki::ContentType::t t) {
           OMessage::operator<<(t);
           return *this;
      }

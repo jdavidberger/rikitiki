@@ -17,23 +17,28 @@ namespace rikitiki {
                status = 0;
           }
      }
-     void Response::SetStartline(const std::wstring& startline) {
+     void Response::SetStartline(const rikitiki::string& startline) {
           auto pos = startline.find(L' ');
           auto str = &startline[pos + 1];
-          wchar_t* pos2 = 0;
-          auto statusCode = (uint16_t)wcstol(str, &pos2, 10);
-          std::wstring statusString(pos2+1);
+          rikitiki::string::value_type * pos2 = 0;
+          auto statusCode = (uint16_t)strtol(str, &pos2, 10);
+          rikitiki::string statusString(pos2+1);
           while ( ::iswspace( statusString[statusString.length()-1] ) )
                statusString.pop_back();
           
           status = new HttpStatus(statusCode, statusString);
      }
-     std::wstring Response::Startline() const {
-          std::wstringstream wss;
+     rikitiki::string Response::Startline() const {
+          rikitiki::stringstream wss;
           wss << L"HTTP/1.1 " << status->status << L" " << status->name;
           return wss.str();
      }
-     static inline const char* skipWhitespace(const char* data, const char* end) {
+
+    QueryStringCollection &Response::Post() {
+        return post;
+    }
+
+    static inline const char* skipWhitespace(const char* data, const char* end) {
           while (data < end &&
                (*data == ' ' || *data == '\t')) {
                data++;

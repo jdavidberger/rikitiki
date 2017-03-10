@@ -17,12 +17,12 @@ namespace rikitiki {
           virtual RequestMethod::t RequestMethod() const = 0;
           virtual void SetRequestMethod(RequestMethod::t) = 0;
 
-          virtual const wchar_t* URI() const = 0;
+          virtual const rikitiki::string::value_type * URI() const = 0;
 
           virtual QueryStringCollection& QueryString() = 0;          
 
-          virtual void SetStartline(const std::wstring&) OVERRIDE;
-          virtual std::wstring Startline() const OVERRIDE;
+          virtual void SetStartline(const rikitiki::string&) OVERRIDE;
+          virtual rikitiki::string Startline() const OVERRIDE;
      };
        
 }

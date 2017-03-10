@@ -13,7 +13,7 @@
 namespace rikitiki {
      namespace mongoose {
        static inline std::wstring toWString(const char* str) {
-	 return mxcomp::utf::convert(str);
+           return  mxcomp::utf::convert(str);
        }
 
 
@@ -38,15 +38,17 @@ namespace rikitiki {
                               std::string(message->header_values[i].p, message->header_values[i].len));
               }
 
-              if(message->body.len > 0)
+              if(message->body.len > 0) {
                   body.str(std::string(message->body.p, message->body.len));
+                  post.FromQueryString(body.str());
+              }
           }
-          const wchar_t* MongooseRequest::URI() const {
+          const rikitiki::string::value_type* MongooseRequest::URI() const {
                return uri.data();
           }
 
          RequestMethod::t MongooseRequest::RequestMethod() const {
-             return RequestMethod::FromString(message->method.p);
+             return RequestMethod::FromString(std::string(message->method.p, message->method.len).c_str());
          }
 
          void MongooseRequest::SetRequestMethod(RequestMethod::t t) {
@@ -69,6 +71,10 @@ namespace rikitiki {
              return cookies;
          }
 
+         QueryStringCollection &MongooseRequest::Post() {
+             return post;
+         }
+
          size_t MongooseResponse::WriteData(const char* buff, size_t size){
              LOG(Mongoose, Debug) << "Writing: " << buff << std::endl;
                mg_send(conn, buff, size);
@@ -76,7 +82,12 @@ namespace rikitiki {
           }
           MongooseResponse::MongooseResponse(mg_connection* c) : conn(c) {}
 
-          MongooseConnContextMembers::MongooseConnContextMembers(mg_connection* c, http_message* msg) :
+         void MongooseResponse::Done() {
+             OMessageWriter::Done();
+
+         }
+
+         MongooseConnContextMembers::MongooseConnContextMembers(mg_connection* c, http_message* msg) :
                _request(c, msg), _response(c) {
 
           }

@@ -30,8 +30,8 @@ namespace rikitiki {
                     auto protocol = url.find(L"://") + 3;
                     auto startFrom = url.find(L"/", protocol);
                     auto qmark = url.find_last_of(L'?');
-                    url = qmark == -1 ? std::wstring(&url[startFrom]) :
-                                        std::wstring(&url[startFrom], &url[qmark]);
+                    url = qmark == -1 ? rikitiki::string(&url[startFrom]) :
+                                        rikitiki::string(&url[startFrom], &url[qmark]);
                }
                
                return url.data();

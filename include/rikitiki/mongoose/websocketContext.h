@@ -11,21 +11,22 @@ namespace rikitiki {
      struct Server;
 
      namespace mongoose {
-          /*
-          class MongooseWebsocketContext : public MongooseRequestContext,
+         #ifdef RT_USE_WEBSOCKET
+          class MongooseWebsocketContext :
                public websocket::WebsocketContext {
           private:
                virtual int raw_write(const unsigned char* buffer, size_t len);
           protected:
                void setConnection(mg_connection* conn);
-               friend static void _wsReady(struct mg_connection *conn);
+               friend void _wsReady(struct mg_connection *conn);
           public:
                mg_connection* conn;
                const mg_connection* requestConn;
 
                MongooseWebsocketContext( websocket::Server* s, const mg_connection* conn);
-               MongooseWebsocketContext( websocket::Server* s, mg_connection* conn);
+
+              const char *URI() const override;
           };
-          */
+         #endif
      }
 }

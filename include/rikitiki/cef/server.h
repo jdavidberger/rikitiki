@@ -35,11 +35,11 @@ namespace rikitiki {
                public CefSchemeHandlerFactory {
 
                // We have to pretend to be a host
-               std::wstring hostname; 
+               rikitiki::string hostname;
 
           public:
                using rikitiki::Server::Register;
-               CefInternalServer(const std::wstring& _host = L"http://app");
+               CefInternalServer(const rikitiki::string& _host = RT_STRING_LITERAL"http://app");
                
                virtual CefRefPtr<CefResourceHandler> GetResourceHandler(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame, CefRefPtr<CefRequest> request) OVERRIDE;
 

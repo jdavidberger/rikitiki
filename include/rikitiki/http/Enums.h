@@ -3,7 +3,7 @@
 
 #pragma once 
 #include <string>
-
+#include <rikitiki/types.h>
 #ifdef DELETE
 #undef DELETE
 #endif
@@ -16,7 +16,7 @@ namespace rikitiki {
 
          t FromString(const char*);
          t FromString(const wchar_t*);
-          const wchar_t* ToString(t);
+          const rikitiki::string::value_type * ToString(t);
           std::wistream& operator >>(std::wistream& s, t& _t);
      }
 
@@ -31,10 +31,11 @@ namespace rikitiki {
                OTHER
           };
 
-          t FromString(const wchar_t*);
-          const wchar_t* ToString(t);
-          std::wistream& operator >>(std::wistream& s, t& _t);
+          t FromString(const rikitiki::string::value_type *);
+          const rikitiki::string::value_type* ToString(t);
 
+         std::wistream& operator >>(std::wistream& s, t& _t);
+         std::istream& operator >>(std::istream& s, t& _t);
      }
 
 }

@@ -7,10 +7,10 @@
 #include <mxcomp/utf.h>
 
 namespace rikitiki {
-     void IMessage::OnStartLine(const std::wstring& startline) {
+     void IMessage::OnStartLine(const rikitiki::string& startline) {
           this->SetStartline(startline);
      }
-     void IMessage::OnHeader(const std::wstring& n, const  std::wstring& v) {
+     void IMessage::OnHeader(const rikitiki::string& n, const  rikitiki::string& v) {
           *this << Header(n, v);
      }
      void IMessage::OnBodyData(const char* data, size_t size) {
@@ -38,7 +38,7 @@ namespace rikitiki {
           const char* end = &data[length];
           switch (currentState.streamState) {
           case MessageState::START_LINE: {
-               OnStartLine(mxcomp::utf::convert(data));
+               OnStartLine(data);
                SetState(MessageState::HEADERS);
                return false;
           }
@@ -54,7 +54,8 @@ namespace rikitiki {
                     std::string buffer2;
                     data = readHeaderName(data, end, buffer);
                     data = readHeaderValue(data, end, buffer2);                    
-                    OnHeader(mxcomp::utf::convert(&buffer[0]), mxcomp::utf::convert(&buffer2[0]));
+                    OnHeader(rikitiki::to_rt_string(&buffer[0]),
+                             rikitiki::to_rt_string(&buffer2[0]));
                     data += 2; // Burn \r\n                    
                }
                return currentState.streamState == MessageState::FINISHED;

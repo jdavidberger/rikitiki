@@ -59,8 +59,8 @@ namespace rikitiki {
      */
     struct WebsocketModule : public rikitiki::websocket::WebModule {
       void Register(websocket::Server& server){
-           server.AddWsHandler(CreateWsRoute<Chat>::With(L"/chat"));
-           server.AddWsHandler(CreateWsRoute<Image>::With(L"/image"));
+           server.AddWsHandler(CreateWsRoute<Chat>::With(RT_STRING_LITERAL"/chat"));
+           server.AddWsHandler(CreateWsRoute<Image>::With(RT_STRING_LITERAL"/image"));
       }
     };
   }

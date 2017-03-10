@@ -22,7 +22,7 @@ namespace rikitiki {
      }
 #pragma warning (default: 4355)
      void SimpleRequestClient::MakeRequest(Request& request) {
-          std::wstringstream req;
+          rikitiki::stringstream req;
           
           req << request.Startline() << std::endl;
           req << L"Host: " << host << std::endl;
@@ -30,9 +30,9 @@ namespace rikitiki {
                req << it.first << ": " << it.second << std::endl;
           }
           req << std::endl;
-          req << mxcomp::utf::convert( request.Body().str() );
+          req << rikitiki::to_rt_string( request.Body().str() );
 
-          std::string utf8 = mxcomp::utf::convert (req.str());
+          std::string utf8 = (req.str());
           socket->Send(utf8.data(), utf8.size());
      }
      void SimpleRequestClient::OnClose() {

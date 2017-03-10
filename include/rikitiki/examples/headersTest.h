@@ -18,9 +18,9 @@ namespace rikitiki {
     struct HeadersTestModule : public WebModule {
       void Register(Server& server){
 	typedef HeadersTestModule T;
-	server.AddHandler( CreateRoute<>::With(this, L"/headers", &T::headers) );
-        server.AddHandler(CreateRoute<std::wstring, std::wstring>::With(this, L"/cookies/{name}/{value}", &T::set_cookie));
-        server.AddHandler(CreateRoute<>::With(this, L"/cookies", &T::cookies));
+	server.AddHandler( CreateRoute<>::With(this, RT_STRING_LITERAL"/headers", &T::headers) );
+        server.AddHandler(CreateRoute<rikitiki::string, rikitiki::string>::With(this, RT_STRING_LITERAL"/cookies/{name}/{value}", &T::set_cookie));
+        server.AddHandler(CreateRoute<>::With(this, RT_STRING_LITERAL"/cookies", &T::cookies));
       }
 
       void headers(ConnContextRef ctx){
@@ -31,9 +31,9 @@ namespace rikitiki {
       }
 
       void cookies(ConnContextRef ctx){
-           if (ctx->Request.QueryString()[L"name"].size())
-             ctx << Cookie(ctx->Request.QueryString()[L"name"], 
-			   ctx->Request.QueryString()[L"value"]);
+           if (ctx->Request.QueryString()[RT_STRING_LITERAL"name"].size())
+             ctx << Cookie(ctx->Request.QueryString()[RT_STRING_LITERAL"name"],
+			   ctx->Request.QueryString()[RT_STRING_LITERAL"value"]);
     
 	ctx << ContentType::text_plain
 	    << "Cookies: \n";
@@ -45,7 +45,7 @@ namespace rikitiki {
 	  ctx << header.first << ": " << header.second << "\n";
       }
 
-      void set_cookie(ConnContextRef ctx, const std::wstring& name, const std::wstring& value){
+      void set_cookie(ConnContextRef ctx, const rikitiki::string& name, const rikitiki::string& value){
 		  ctx << Cookie(name, value);
 			  cookies(ctx);
       }

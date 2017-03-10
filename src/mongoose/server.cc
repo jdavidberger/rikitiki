@@ -39,7 +39,7 @@ namespace rikitiki {
 
         uint16_t MongooseServer::Port() { return port; }
 
-        MongooseServer::MongooseServer(uint16_t _port) : port(_port) {
+        MongooseServer::MongooseServer(uint16_t _port) : port(_port), s_http_server_opts(new mg_serve_http_opts()) {
             ctx = 0;
 #ifdef RT_USE_CONFIGURATION
             if(Configuration::Global().exists("mongoose")){
@@ -61,10 +61,19 @@ namespace rikitiki {
                     struct http_message *hm = (struct http_message *) ev_data;
                     ConnContextRef_<ConnContext> ctx(new mongoose::MongooseConnContext(server, conn, hm));
                     if (!server->Handle(ctx)) {
-
+                        mg_serve_http(conn, hm, *server->s_http_server_opts); /* Serve static content */
                     }
                 }
                     break;
+                case MG_EV_WEBSOCKET_HANDSHAKE_REQUEST: {
+                    struct http_message *hm = (struct http_message *) ev_data;
+                    ConnContextRef_<ConnContext> ctx(new mongoose::MongooseConnContext(server, conn, hm));
+                    if (!server->Handle(ctx)) {
+
+                    }
+
+                    break;
+                }
                 default:
                     break;
             }
@@ -174,11 +183,8 @@ namespace rikitiki {
 
                 LOG(Mongoose, Debug) << "Starting Mongoose web server " << (void *) this << std::endl;
 
-                /*
-                struct mg_serve_http_opts s_http_server_opts;
                 if (DocumentRoot.size())
-                    s_http_server_opts.document_root = DocumentRoot.c_str();
-*/
+                    s_http_server_opts->document_root = DocumentRoot.c_str();
 
                 auto nc = mg_bind(&mgr, __port.c_str(), _handler);
                 mg_set_protocol_http_websocket(nc);
@@ -199,6 +205,10 @@ namespace rikitiki {
             if (runThread.joinable())
                 runThread.join();
             ctx = 0;
+        }
+
+        MongooseServer::~MongooseServer() {
+
         }
     }
 }

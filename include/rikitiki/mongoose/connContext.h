@@ -5,12 +5,14 @@
 #include <rikitiki/connContext.h>
 #include <rikitiki/http/helpers/bufferedMessageTypes.h>
 #include <rikitiki/http/incoming/Message.h>
-#include <mongoose.h>
 #include <string>
 #pragma warning(disable:4265 4355 4062)
 #include <thread>
 #include <future>
 #pragma warning(default:4265 4355 4062)
+
+struct mg_connection;
+struct http_message;
 
 namespace rikitiki {
      struct Server;
@@ -18,12 +20,13 @@ namespace rikitiki {
      namespace mongoose {
 
           class MongooseRequest : public Request {
-               std::wstring uri; 
+               rikitiki::string uri; 
                std::thread read_thread;
               QueryStringCollection qs;
               HeaderCollection headers;
               CookieCollection cookies;
               ByteStream body;
+              QueryStringCollection post;
           public:
                mg_connection* conn;
               http_message* message;
@@ -36,11 +39,13 @@ namespace rikitiki {
 
               QueryStringCollection &QueryString() override;
 
-              virtual const wchar_t* URI() const OVERRIDE;
+              virtual const rikitiki::string::value_type * URI() const OVERRIDE;
 
               HeaderCollection &Headers() override;
 
               ByteStream &Body() override;
+
+              QueryStringCollection &Post() override;
 
               CookieCollection &Cookies() override;
           };
@@ -48,7 +53,11 @@ namespace rikitiki {
           class MongooseResponse : public virtual OResponseWriter {
                mg_connection* conn;
                using OMessageWriter::WriteData;
-               virtual size_t WriteData(const char*, size_t) OVERRIDE;
+              virtual size_t WriteData(const char*, size_t) OVERRIDE;
+
+          public:
+              void Done() override;
+
           public:
                MongooseResponse(mg_connection* c);
           };

@@ -70,7 +70,7 @@ namespace rikitiki {
                     return *this;
                }
                virtual void WriteHeader(const Header& header) {
-                    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+                    rikitiki::string_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
                     std::string name = converter.to_bytes(header.first.data());
                     std::string value = converter.to_bytes(header.second.data());
@@ -182,7 +182,7 @@ namespace rikitiki {
                }
 
 
-               std::wstring domain;
+               rikitiki::string domain;
 
                virtual std::future<std::shared_ptr<Response>> ProcessRequest(Request& request) OVERRIDE{
                     auto client = new SimpleRequestClient(L"localhost", 80);

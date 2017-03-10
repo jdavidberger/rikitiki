@@ -1,29 +1,35 @@
 /* Copyright (C) 2012-2013 Justin Berger
    The full license is available in the LICENSE file at the root of this project and is also available at http://opensource.org/licenses/MIT. */
-
+#include <rikitiki/types.h>
 #include <rikitiki/http/content_types.h>
 #include <map>
 #include <mxcomp/utf.h>
 
 #define STRINGIFY(X) #X
 
-#define CASE_RET(X,Y) case X ## _ ## Y: return L###X L"/" L###Y;
-#define CASE_RET_PLUS(X,Y,Z) case X ## _ ## Y ## _ ## Z: return L###X L"/" L###Y L"+" L###Z;
-#define CASE_RET_DASH(X,Y,Z) case X ## _ ## Y ## _ ## Z: return L###X L"/" L###Y L"-" L###Z;
-#define CASE_RET_DASH_DASH(X,Y,Z,A) case X ## _ ## Y ## _ ## Z ## _ ## A: return L###X L"/" L###Y L"-" L###Z L"-" L###A;
+/*
+#define CASE_RET(X,Y) case X ## _ ## Y: return L###X RT_STRING_LITERAL"/" L###Y;
+#define CASE_RET_PLUS(X,Y,Z) case X ## _ ## Y ## _ ## Z: return L###X RT_STRING_LITERAL"/" L###Y RT_STRING_LITERAL"+" L###Z;
+#define CASE_RET_DASH(X,Y,Z) case X ## _ ## Y ## _ ## Z: return L###X RT_STRING_LITERAL"/" L###Y RT_STRING_LITERAL"-" L###Z;
+#define CASE_RET_DASH_DASH(X,Y,Z,A) case X ## _ ## Y ## _ ## Z ## _ ## A: return L###X RT_STRING_LITERAL"/" L###Y RT_STRING_LITERAL"-" L###Z RT_STRING_LITERAL"-" L###A;
+*/
 
+#define CASE_RET(X,Y) case X ## _ ## Y: return #X "/" #Y;
+#define CASE_RET_PLUS(X,Y,Z) case X ## _ ## Y ## _ ## Z: return #X "/" #Y "+" #Z;
+#define CASE_RET_DASH(X,Y,Z) case X ## _ ## Y ## _ ## Z: return #X "/" #Y "-" #Z;
+#define CASE_RET_DASH_DASH(X,Y,Z,A) case X ## _ ## Y ## _ ## Z ## _ ## A: return #X "/" #Y "-" #Z "-" #A;
 
 namespace rikitiki {
   namespace ContentType {
-    static std::map<std::wstring, t> types;
-    t FromString(const std::wstring& type){			
+    static std::map<rikitiki::string, t> types;
+    t FromString(const std::wstring& type){
       if (type == L"")
 	return DEFAULT;
       if (types.empty()){
 	for (auto _type = (int)ALL; _type < (int)MAX; _type++)
 	  types[ToString((t)_type)] = (t)_type;
       }
-      return types[type];
+      return types[ rikitiki::to_rt_string(type) ];
     }
 	  
     t FromString(const std::string& type){			
@@ -33,10 +39,10 @@ namespace rikitiki {
 	for (auto _type = (int)ALL; _type < (int)MAX; _type++)
 	  types[ToString((t)_type)] = (t)_type;
       }
-      return types[ mxcomp::utf::convert(type) ];
+      return types[ rikitiki::to_rt_string(type) ];
     }
 	  
-    std::wstring ToString(t type){
+    rikitiki::string ToString(t type){
       switch (type){
 	CASE_RET_PLUS(application, atom, xml);
 	CASE_RET(application, ecmascript);
@@ -114,12 +120,12 @@ namespace rikitiki {
 	CASE_RET_DASH(audio, vnd, wave);
 	CASE_RET_DASH_DASH(audio, vnd, rn, realaudio);
       case ALL:
-	return L"*/*";
+	return RT_STRING_LITERAL"*/*";
       case DEFAULT:
 	CASE_RET(text, html);
       case MAX:
       default:
-	return L"unknown";
+	return RT_STRING_LITERAL"unknown";
       }
     }
                 
@@ -129,5 +135,12 @@ namespace rikitiki {
       _t = FromString(str);
       return s;
     }
+
+	  std::istream& operator >>(std::istream& s, t& _t) {
+		  std::string str;
+		  s >> str;
+		  _t = FromString(str);
+		  return s;
+	  }
   }
 }

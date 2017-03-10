@@ -20,37 +20,37 @@ namespace rikitiki {
      }
 
      Message& Message::operator <<(const rikitiki::Cookie& cookie){
-          auto header = Header(L"Set-Cookie", cookie.first + L"=" + cookie.second);
+          auto header = Header(RT_STRING_LITERAL"Set-Cookie", cookie.first + RT_STRING_LITERAL"=" + cookie.second);
           return *this << header;
      }
 
      size_t Message::ContentLength() const {          
-          return Headers().Get<size_t>(L"Content-Length", (size_t)-1);
+          return Headers().Get<size_t>(RT_STRING_LITERAL"Content-Length", (size_t)-1);
      }
 
      Encoding::t Message::TransferEncoding() const {
-          return Headers().Get<Encoding::t>(L"Transfer-Encoding", Encoding::UNKNOWN);
+          return Headers().Get<Encoding::t>(RT_STRING_LITERAL"Transfer-Encoding", Encoding::UNKNOWN);
      }
 
      ContentType::t Message::ContentType() const {
-          return Headers().Get<ContentType::t>(L"contenttype", ContentType::text_html);
+          return Headers().Get<ContentType::t>(RT_STRING_LITERAL"contenttype", ContentType::text_html);
      }
 
      void Message::SetContentLength(size_t l) {
-          Headers().Set(L"Content-Length", l);          
+          Headers().Set(RT_STRING_LITERAL"Content-Length", l);
      }
      void Message::SetTransferEncoding(Encoding::t enc){
-          Headers().Set(L"Transfer-Encoding", Encoding::ToString(enc));          
+          Headers().Set(RT_STRING_LITERAL"Transfer-Encoding", Encoding::ToString(enc));
      }
      void Message::SetContentType(ContentType::t t){
-          Headers().Set(L"Content-Type", ContentType::ToString(t));
+          Headers().Set(RT_STRING_LITERAL"Content-Type", ContentType::ToString(t));
      }
 
      std::ostream& operator<< (std::ostream& stream, const Message& m){
-          stream << mxcomp::utf::convert(m.Startline()) << std::endl;
+          stream << rikitiki::to_string(m.Startline()) << std::endl;
           for (auto header : m.Headers()){
-               stream << mxcomp::utf::convert(header.first) << ": " << 
-		 mxcomp::utf::convert(header.second) << std::endl;
+               stream << rikitiki::to_string(header.first) << ": " <<
+                      rikitiki::to_string(header.second) << std::endl;
           }
           stream << std::endl << std::endl;
           stream << m.Body().str();
@@ -58,9 +58,10 @@ namespace rikitiki {
           return stream;
      }
      std::wostream& operator<< (std::wostream& stream, const Message& m){
-          stream << m.Startline() << std::endl;
+          stream << rikitiki::to_wstring(m.Startline()) << std::endl;
           for (auto header : m.Headers()){
-               stream << header.first << ": " << header.second << std::endl;
+               stream << rikitiki::to_wstring(header.first) << ": " <<
+                      rikitiki::to_wstring(header.second) << std::endl;
           }
           stream << std::endl << std::endl;
           stream << mxcomp::utf::convert( m.Body().str() );

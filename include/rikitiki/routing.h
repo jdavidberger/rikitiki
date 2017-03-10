@@ -12,12 +12,12 @@ namespace rikitiki {
         and also has a specification as to what http method it accepts.
         */
      struct Route : public Handler {
-          std::wstring route;
+          rikitiki::string route;
           Request::Method method;
 
-          Route(const std::wstring& _route, Request::Method _method);
-          Route(const std::wstring& _route);
-          virtual std::wstring name() const;
+          Route(const rikitiki::string& _route, Request::Method _method);
+          Route(const rikitiki::string& _route);
+          virtual rikitiki::string name() const;
      };
 
 
@@ -98,7 +98,7 @@ namespace rikitiki {
           P* parent;
           F f;
           virtual bool visible() const { return false; }
-          Route_(P* p, const std::wstring& _route, F _f, Request::Method method);
+          Route_(P* p, const rikitiki::string& _route, F _f, Request::Method method);
           
           int ScanTest(Request&, T&... t);
           int Scan(ConnContextRef, T&... t);
@@ -115,7 +115,7 @@ namespace rikitiki {
           P* parent;
           F f;
           virtual bool visible() const { return method == RequestMethod::GET || method == RequestMethod::ANY; }
-          Route_(P* p, const std::wstring& _route, F _f, Request::Method method);
+          Route_(P* p, const rikitiki::string& _route, F _f, Request::Method method);
           virtual bool Handle(ConnContextRef ctx);
           virtual bool CanHandle(Request& ctx);
      };
@@ -129,13 +129,13 @@ namespace rikitiki {
      struct CreateRoute {
           template<typename P>
           static Route* With(P* p,
-               const std::wstring& _route,
+               const rikitiki::string& _route,
                typename Route_<P, T...>::F _f,
                Request::Method method = RequestMethod::ANY);
 
           template<typename P>
           static Route* With(P* p,
-               const std::wstring& _route,
+               const rikitiki::string& _route,
                Request::Method method = RequestMethod::ANY);
 
      };

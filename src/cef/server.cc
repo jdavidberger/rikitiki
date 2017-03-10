@@ -92,7 +92,7 @@ namespace rikitiki {
                return 0;
           }
 #endif
-          CefInternalServer::CefInternalServer(const std::wstring& _host) : hostname(_host) {
+          CefInternalServer::CefInternalServer(const rikitiki::string& _host) : hostname(_host) {
 
           }
 

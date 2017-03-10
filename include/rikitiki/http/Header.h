@@ -4,16 +4,18 @@
 #include <map>
 #include <vector>
 #include <sstream>
+#include <rikitiki/types.h>
+#include <cstring>
 
 namespace rikitiki {
-     typedef std::pair<std::wstring, std::wstring> wstringpair;
+     typedef std::pair<rikitiki::string, rikitiki::string> wstringpair;
 
      /**
      Things parsed out of the response, ala forms
      We can't just typedef it since we want to pass it around with stream operators
      */
      struct PostContent : public wstringpair {
-          PostContent(const std::wstring& name, const std::wstring& value);
+          PostContent(const rikitiki::string& name, const rikitiki::string& value);
      };
 
      /**
@@ -21,10 +23,10 @@ namespace rikitiki {
      TODO: Add expiration, domain, etc
      */
      struct Cookie : public wstringpair {
-          Cookie(const std::wstring& nameAndValue);
-          Cookie(const std::wstring& name, const std::wstring& value,
-               const std::wstring& Domain = L"", const std::wstring& Path = L"/",
-               const std::wstring& Expires = L"", bool secure = false, bool httpOnly = false);
+          Cookie(const rikitiki::string& nameAndValue);
+          Cookie(const rikitiki::string& name, const rikitiki::string& value,
+               const rikitiki::string& Domain = RT_STRING_LITERAL"", const rikitiki::string& Path = RT_STRING_LITERAL"/",
+               const rikitiki::string& Expires = RT_STRING_LITERAL"", bool secure = false, bool httpOnly = false);
      };
 
      /**
@@ -32,7 +34,7 @@ namespace rikitiki {
      We can't just typedef it since we want to pass it around with stream operators
      */
      struct Header : public wstringpair {
-          Header(const std::wstring& name, const std::wstring& value);
+          Header(const rikitiki::string& name, const rikitiki::string& value);
      };
 
      /**
@@ -55,40 +57,43 @@ namespace rikitiki {
           }
      };
 
-     struct QueryStringCollection : public std::map<std::wstring, std::wstring> {
+     struct QueryStringCollection : public std::map<rikitiki::string, rikitiki::string> {
           void FromQueryString(const std::wstring&);
           void FromQueryString(const std::string&);
+         bool hasValue(const rikitiki::string& name, rikitiki::string& value);
      };
 
-     typedef multimap<std::wstring, std::wstring> PostCollection;
+     typedef multimap<rikitiki::string, rikitiki::string> PostCollection;
 
-     class CookieCollection : public std::map<std::wstring, std::wstring> {};
-     class HeaderCollection : public std::map < std::wstring, std::wstring > {
+     class CookieCollection : public std::map<rikitiki::string, rikitiki::string> {};
+     class HeaderCollection : public std::map < rikitiki::string, rikitiki::string > {
 
      public:
           void Add(const std::string& name, const std::string& value);
           void Set(const std::string& name, const std::string& value);
+          void Set(const std::string& name, size_t value);
+
           void Add(const std::wstring& name, const std::wstring& value);
           void Set(const std::wstring& name, const std::wstring& value);
           void Set(const std::wstring& name, size_t value);
 
-          const std::wstring* Get(const std::wstring& name) const;
-          const std::vector<std::wstring> GetList(const std::wstring& name) const {
-               std::vector<std::wstring> rtn;
-               const std::wstring* csv = Get(name);
+          const rikitiki::string* Get(const rikitiki::string& name) const;
+          const std::vector<rikitiki::string> GetList(const rikitiki::string& name) const {
+               std::vector<rikitiki::string> rtn;
+               const rikitiki::string* csv = Get(name);
                if (csv == 0)
                     return rtn;
-               const wchar_t* buffer = csv->data();
-               const wchar_t* n = 0;
+               auto buffer = csv->data();
+               auto n = buffer;
                do {
-                    n = wcschr(buffer, L',');
+                    n = strchr(buffer, RT_STRING_LITERAL',');
                     if (n == 0) {
                          rtn.push_back(buffer); 
                     }
                     else {
                          auto end = n;
                          while (*(end - 1) == ' ') end--;
-                         rtn.push_back(std::wstring(buffer, end));
+                         rtn.push_back(rikitiki::string(buffer, end));
                          buffer = n + 1;
                          while (*buffer == ' ') buffer++;
                     }
@@ -98,10 +103,10 @@ namespace rikitiki {
           }
 
           template <typename T>
-          const T Get(const std::wstring& name, T def = T()) const {
+          const T Get(const rikitiki::string& name, T def = T()) const {
                auto v = Get(name);
                T rtn = def;
-               std::wstringstream wss;
+               rikitiki::stringstream wss;
                if (v) {
                     wss << *v;
                     wss >> rtn;

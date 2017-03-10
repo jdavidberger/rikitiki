@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <exception>
+#include <netinet/in.h>
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4668)
@@ -9,6 +10,24 @@
 #include <WinSock2.h>
 #pragma warning(default: 4668)
 #endif
+static uint64_t htonll(uint64_t value)
+{
+	// The answer is 42
+	static const int num = 42;
+
+	// Check the endianness
+	if (*reinterpret_cast<const char*>(&num) == num)
+	{
+		const uint32_t high_part = htonl(static_cast<uint32_t>(value >> 32));
+		const uint32_t low_part = htonl(static_cast<uint32_t>(value & 0xFFFFFFFFLL));
+
+		return (static_cast<uint64_t>(low_part) << 32) | high_part;
+	} else
+	{
+		return value;
+	}
+}
+
 namespace rikitiki {
 	namespace websocket {
 
@@ -46,13 +65,15 @@ namespace rikitiki {
 				}
 				else if (send_size < (1 << 16)) {
 					header_len = 4; // control, len control, 2 byte length
-					header[1] = 126; 
-                                        *((uint16_t*)&header[2]) = htons((uint16_t)send_size);
+					header[1] = 126;
+                    uint16_t v = htons((uint16_t)send_size);
+                    memcpy(&header[2], &v, sizeof(uint16_t));
 				}
 				else {
 					header_len = 10; // control, len control, 8 byte length
 					header[1] = 127;
-					*((uint64_t*)&header[2]) = htonll(send_size);
+					uint64_t v = htonll((uint64_t)send_size);
+					memcpy(&header[2], &v, sizeof(uint64_t));
 				}
 				 
 				
@@ -67,7 +88,7 @@ namespace rikitiki {
 			}
 		}
 
-		OpCode::T FrameInfo::OpCode() const {
+        OpCode::T FrameInfo::OpCode() const {
 			return (OpCode::T)(opcode & 0xFF);
 		}
 
@@ -118,7 +139,7 @@ namespace rikitiki {
 			
 			if (frame.info.length) {
 				if (std::numeric_limits<size_t>::max() < baseSize + frame.info.length)
-					throw std::exception("Message sizes this large are not supported on x86 machines");
+					throw std::runtime_error("Message sizes this large are not supported on x86 machines");
 
 				data.resize(baseSize + (size_t)frame.info.length);				
 				std::memcpy(&data[baseSize], frame.data, (size_t)frame.info.length);

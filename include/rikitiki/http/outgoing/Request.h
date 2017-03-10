@@ -17,15 +17,17 @@ namespace rikitiki {
           QueryStringCollection queryString;
 
           ByteStream body;
-
+         QueryStringCollection post;
      public:
           
-          std::wstring uri;
+          rikitiki::string uri;
 
           virtual size_t WritePayloadData(const char*, size_t) OVERRIDE;
           virtual void WriteHeader(const Header&) OVERRIDE;
 
-          virtual ~ORequestMemory(){}
+         QueryStringCollection &Post() override;
+
+         virtual ~ORequestMemory(){}
           virtual RequestMethod::t RequestMethod() const OVERRIDE{
                return method;
           };
@@ -44,13 +46,15 @@ namespace rikitiki {
                return queryString;
           };
 
-          virtual const wchar_t* URI() const OVERRIDE{
+          virtual const rikitiki::string::value_type * URI() const OVERRIDE{
                return uri.data();
           };
 
           virtual ByteStream& Body() OVERRIDE{
                return body;
           }
+
+         size_t WriteData(const char *string1, size_t size) override;
      };
 
      typedef ORequestMemory SimpleRequest;

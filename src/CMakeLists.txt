@@ -75,9 +75,10 @@ macro(add_server_directory srcdir)
 
 	SOURCE_GROUP("Source" FILES ${_SOURCES})
 	SOURCE_GROUP("Include" FILES ${_INCLUDES})
-	add_library(rt_${srcdir} ${_INCLUDES} ${_SOURCES})
+	add_rikitiki_library(rt_${srcdir} ${_INCLUDES} ${_SOURCES})
         target_link_libraries(rt_${srcdir} rikitiki)
         set_property(TARGET rt_${srcdir} PROPERTY FOLDER "servers")
+
 endmacro(add_server_directory)
 
 
@@ -131,13 +132,14 @@ ENDIF()
 
 CONFIGURE_FILE(config.h.in ${CMAKE_SOURCE_DIR}/include/rikitiki/config.h)	
 
-add_library(rikitiki ${RT_SRC})
-target_link_libraries(rikitiki ${RT_LIBS})		     
+add_rikitiki_library(rikitiki ${RT_SRC})
+target_link_libraries(rikitiki ${RT_LIBS})
+
 #add_cppcheck(rikitiki STYLE POSSIBLE_ERROR FAIL_ON_WARNINGS) 
 
 IF(USE_MONGOOSE)
 	add_server_directory(mongoose)
-
+		target_link_libraries(rt_mongoose mongoose)
 	include_directories(${THIRD_PARTY_DIR}/mongoose)
         set(rikitiki_INCLUDE_DIRS "${rikitiki_INCLUDE_DIRS};${THIRD_PARTY_DIR}/mongoose")         
 	#set(RT_LIBS ${RT_LIBS} mongoose )
@@ -158,10 +160,7 @@ IF(USE_CEF)
         target_link_libraries(rt_cef libcef libcef_dll_wrapper )		     
         set(rikitiki_INCLUDE_DIRS "${rikitiki_INCLUDE_DIRS};${THIRD_PARTY_DIR}/cef/cef3/")         
 	include_directories(${THIRD_PARTY_DIR}/cef/cef3/)
-ENDIF() 
-
-
-install(TARGETS rikitiki DESTINATION lib)
+ENDIF()
 
 if(MAKE_EXAMPLES)
 	add_subdirectory(examples)

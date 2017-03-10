@@ -3,6 +3,7 @@
 
 #pragma once 
 #include <string>
+#include <rikitiki/types.h>
 
 namespace rikitiki {
   namespace ContentType {
@@ -88,11 +89,12 @@ namespace rikitiki {
       MAX
     };
 
-    t FromString(const std::wstring& type);
+    t FromString(const rikitiki::string& type);
     t FromString(const std::string& type);
 
-    std::wstring ToString(t type);
-    std::wistream& operator >>(std::wistream& s, t& _t);
+    rikitiki::string ToString(t type);
+     std::wistream& operator >>(std::wistream& s, t& _t);
+      std::istream& operator >>(std::istream& s, t& _t);
 
 
   }

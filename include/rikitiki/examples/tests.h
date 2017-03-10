@@ -30,7 +30,7 @@ namespace rikitiki {
                
                // Make sure whatever ingests route does a good job of it. 
                void QueryStringTest(ConnContextRef ctx, int num) {
-                    ctx << "Saw: " << num << " and " << ctx->Request.QueryString()[L"qs"];
+                    ctx << "Saw: " << num << " and " << ctx->Request.QueryString()[RT_STRING_LITERAL"qs"];
                }
                static void QueryStringTest(std::shared_ptr<Response> response) {
                     std::string payload(response->Body().str());
@@ -41,28 +41,28 @@ namespace rikitiki {
                // Make sure we can set a handler. 
                static void HeadersTest(std::shared_ptr<Response> response) {
                     QUNIT_IS_TRUE(response->Headers().size() > 0);
-                    auto value = response->Headers().Get(L"Test");
+                    auto value = response->Headers().Get(RT_STRING_LITERAL"Test");
                     bool found = value != 0;
                     if (found) {
-                         QUNIT_IS_EQUAL(*value, std::wstring(L"42"));
+                         QUNIT_IS_EQUAL(*value, rikitiki::string(RT_STRING_LITERAL"42"));
                     }
                     
-                    auto list = response->Headers().GetList(L"A");
+                    auto list = response->Headers().GetList(RT_STRING_LITERAL"A");
                     QUNIT_IS_TRUE(list.size() == 3);
                     if (list.size() == 3) {
-                         QUNIT_IS_TRUE(list[0] == L"a");
-                         QUNIT_IS_TRUE(list[1] == L"b");
-                         QUNIT_IS_TRUE(list[2] == L"c");
+                         QUNIT_IS_TRUE(list[0] == RT_STRING_LITERAL"a");
+                         QUNIT_IS_TRUE(list[1] == RT_STRING_LITERAL"b");
+                         QUNIT_IS_TRUE(list[2] == RT_STRING_LITERAL"c");
                     }
 
                     QUNIT_IS_TRUE(found);
                }
                void HeadersTest(ConnContextRef ctx) {
-                    ctx << rikitiki::Header(L"A", L"a");
-                    ctx << rikitiki::Header(L"Test1", L"42");
-                    ctx << rikitiki::Header(L"Test", L"42");
-                    ctx << rikitiki::Header(L"A", L"b");
-                    ctx << rikitiki::Header(L"A", L"c") << "!";
+                    ctx << rikitiki::Header(RT_STRING_LITERAL"A", RT_STRING_LITERAL"a");
+                    ctx << rikitiki::Header(RT_STRING_LITERAL"Test1", RT_STRING_LITERAL"42");
+                    ctx << rikitiki::Header(RT_STRING_LITERAL"Test", RT_STRING_LITERAL"42");
+                    ctx << rikitiki::Header(RT_STRING_LITERAL"A", RT_STRING_LITERAL"b");
+                    ctx << rikitiki::Header(RT_STRING_LITERAL"A", RT_STRING_LITERAL"c") << "!";
                }
 
                // Make sure we can send a payload with the request
@@ -93,7 +93,7 @@ namespace rikitiki {
                     
                }
                void CookiesTest(ConnContextRef ctx) {
-                    ctx << rikitiki::Cookie(L"Cookie", L"12345");
+                    ctx << rikitiki::Cookie(RT_STRING_LITERAL"Cookie", RT_STRING_LITERAL"12345");
                }
 
                // Make sure we can set the status string however
@@ -127,9 +127,9 @@ namespace rikitiki {
                }
 
                // Set up a test to be run. 
-               void SetupTest(rikitiki::Server& server, const std::wstring& url, void(*testf)(std::shared_ptr<Response>), const std::string& payload = "") {
+               void SetupTest(rikitiki::Server& server, const rikitiki::string& url, void(*testf)(std::shared_ptr<Response>), const std::string& payload = "") {
                     ORequestMemory request;
-                    request.uri = L"/" + url;
+                    request.uri = RT_STRING_LITERAL"/" + url;
                     if (payload.size()) {
                          request.Body().write(payload.data(), (std::streamsize)payload.size());
                          request.SetContentLength(payload.size());
@@ -153,42 +153,42 @@ namespace rikitiki {
                     numTests = 0;
                     auto& server = *ctx->server;
                     test_results.str("");
-                    auto test = ctx->Request.QueryString()[L"Test"];
+                    auto test = ctx->Request.QueryString()[RT_STRING_LITERAL"Test"];
                     
-                    if (test.empty() || test == L"PayloadTest")
-                         SetupTest(server, L"PayloadTest", &TestsModule::PayloadTest, "this is a test");
+                    if (test.empty() || test == RT_STRING_LITERAL"PayloadTest")
+                         SetupTest(server, RT_STRING_LITERAL"PayloadTest", &TestsModule::PayloadTest, "this is a test");
 
-                    if (test.empty() || test == L"BasicTest")
-                         SetupTest(server, L"BasicTest", &TestsModule::BasicTest);
+                    if (test.empty() || test == RT_STRING_LITERAL"BasicTest")
+                         SetupTest(server, RT_STRING_LITERAL"BasicTest", &TestsModule::BasicTest);
 
-                    if (test.empty() || test == L"QueryStringTest")
-                         SetupTest(server, L"QueryStringTest/42?qs=43", &TestsModule::QueryStringTest);
+                    if (test.empty() || test == RT_STRING_LITERAL"QueryStringTest")
+                         SetupTest(server, RT_STRING_LITERAL"QueryStringTest/42?qs=43", &TestsModule::QueryStringTest);
 
-                    if (test.empty() || test == L"StatusTest")
-                         SetupTest(server, L"StatusTest", &TestsModule::StatusTest);
+                    if (test.empty() || test == RT_STRING_LITERAL"StatusTest")
+                         SetupTest(server, RT_STRING_LITERAL"StatusTest", &TestsModule::StatusTest);
 
-                    if (test.empty() || test == L"CookiesTest")
-                         SetupTest(server, L"CookiesTest", &TestsModule::CookiesTest);
+                    if (test.empty() || test == RT_STRING_LITERAL"CookiesTest")
+                         SetupTest(server, RT_STRING_LITERAL"CookiesTest", &TestsModule::CookiesTest);
 
-                    if (test.empty() || test == L"HeadersTest")
-                         SetupTest(server, L"HeadersTest", &TestsModule::HeadersTest);
+                    if (test.empty() || test == RT_STRING_LITERAL"HeadersTest")
+                         SetupTest(server, RT_STRING_LITERAL"HeadersTest", &TestsModule::HeadersTest);
 
-                    if (test.empty() || test == L"AsyncTests") 
-                         SetupTest(server, L"AsyncTests", &TestsModule::AsyncTests);
+                    if (test.empty() || test == RT_STRING_LITERAL"AsyncTests")
+                         SetupTest(server, RT_STRING_LITERAL"AsyncTests", &TestsModule::AsyncTests);
                     
                     this->operator()(ctx);
                }
 
                void Register(rikitiki::Server& server) OVERRIDE{
-                    server.AddHandler(CreateRoute<>::With(this, L"/BasicTest", &TestsModule::BasicTest));
-                    server.AddHandler(CreateRoute<int>::With(this, L"/QueryStringTest/{num}", &TestsModule::QueryStringTest));
-                    server.AddHandler(CreateRoute<>::With(this, L"/HeadersTest", &TestsModule::HeadersTest));
-                    server.AddHandler(CreateRoute<>::With(this, L"/PayloadTest", &TestsModule::PayloadTest));
-                    server.AddHandler(CreateRoute<>::With(this, L"/StatusTest", &TestsModule::StatusTest));
-                    server.AddHandler(CreateRoute<>::With(this, L"/CookiesTest", &TestsModule::CookiesTest));
-                    server.AddHandler(CreateRoute<>::With(this, L"/AsyncTests", &TestsModule::AsyncTests));                    
-                    server.AddHandler(CreateRoute<>::With(this, L"/StartTests", &TestsModule::StartTests));
-                    server.AddHandler(CreateRoute<>::With(this, L"/"));
+                    server.AddHandler(CreateRoute<>::With(this, RT_STRING_LITERAL"/BasicTest", &TestsModule::BasicTest));
+                    server.AddHandler(CreateRoute<int>::With(this, RT_STRING_LITERAL"/QueryStringTest/{num}", &TestsModule::QueryStringTest));
+                    server.AddHandler(CreateRoute<>::With(this, RT_STRING_LITERAL"/HeadersTest", &TestsModule::HeadersTest));
+                    server.AddHandler(CreateRoute<>::With(this, RT_STRING_LITERAL"/PayloadTest", &TestsModule::PayloadTest));
+                    server.AddHandler(CreateRoute<>::With(this, RT_STRING_LITERAL"/StatusTest", &TestsModule::StatusTest));
+                    server.AddHandler(CreateRoute<>::With(this, RT_STRING_LITERAL"/CookiesTest", &TestsModule::CookiesTest));
+                    server.AddHandler(CreateRoute<>::With(this, RT_STRING_LITERAL"/AsyncTests", &TestsModule::AsyncTests));
+                    server.AddHandler(CreateRoute<>::With(this, RT_STRING_LITERAL"/StartTests", &TestsModule::StartTests));
+                    server.AddHandler(CreateRoute<>::With(this, RT_STRING_LITERAL"/"));
 
                     server.AddHandler(new StaticContentHandler("/static/", "c:\\"));
                }

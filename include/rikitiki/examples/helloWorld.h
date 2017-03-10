@@ -11,9 +11,9 @@ namespace rikitiki {
      */
     struct HelloWorldModule : public rikitiki::WebModule {
       void Register(Server& server) override {
-		server.AddHandler( CreateRoute<>::With(this, L"/hw/hello") );
-                server.AddHandler(CreateRoute<int>::With(this, L"/hw/{number}"));
-                server.AddHandler(CreateRoute<std::wstring>::With(this, L"/hw/{word}"));
+		server.AddHandler( CreateRoute<>::With(this, RT_STRING_LITERAL"/hw/hello") );
+                server.AddHandler(CreateRoute<int>::With(this, RT_STRING_LITERAL"/hw/{number}"));
+                server.AddHandler(CreateRoute<rikitiki::string>::With(this, RT_STRING_LITERAL"/hw/{word}"));
                 server.AddHandler(new StaticContentHandler("/static/", "c:\\"));
       }
 
@@ -25,7 +25,7 @@ namespace rikitiki {
 		ctx	<< "Number: " << number;
       }
 
-      void operator()(ConnContextRef ctx, const std::wstring& word){
+      void operator()(ConnContextRef ctx, const rikitiki::string& word){
 		ctx << "Word: " << word;
       }  
     };

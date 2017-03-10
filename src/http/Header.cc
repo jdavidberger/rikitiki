@@ -11,36 +11,36 @@
 
 namespace rikitiki {
 
-     Cookie::Cookie(const std::wstring&) {
+     Cookie::Cookie(const rikitiki::string&) {
           assert(false);
      }
 
-     Cookie::Cookie(const std::wstring& name, const std::wstring& value,
-          const std::wstring& Domain, const std::wstring& Path,
-          const std::wstring& Expires, bool secure, bool httpOnly) {
+     Cookie::Cookie(const rikitiki::string& name, const rikitiki::string& value,
+          const rikitiki::string& Domain, const rikitiki::string& Path,
+          const rikitiki::string& Expires, bool secure, bool httpOnly) {
           first = name;
-          second = value + L"; ";
+          second = value + RT_STRING_LITERAL"; ";
           //    if(Domain.size())
-          second += L"Domain=" + Domain + L"; ";
+          second += RT_STRING_LITERAL"Domain=" + Domain + RT_STRING_LITERAL"; ";
           if (Path.size())
-               second += L"Path=" + Path + L"; ";
+               second += RT_STRING_LITERAL"Path=" + Path + RT_STRING_LITERAL"; ";
           if (Expires.size())
-               second += L"Expires=" + Expires + L"; ";
+               second += RT_STRING_LITERAL"Expires=" + Expires + RT_STRING_LITERAL"; ";
           if (secure)
-               second += L"Secure; ";
+               second += RT_STRING_LITERAL"Secure; ";
           if (httpOnly)
-               second += L"HttpOnly";
+               second += RT_STRING_LITERAL"HttpOnly";
      }
 
-     void HeaderCollection::Add(const std::wstring& name, const std::wstring& value) {
-          std::wstring& current = (*this)[name];
+     void HeaderCollection::Add(const std::string& name, const std::string& value) {
+          auto& current = (*this)[name];
           if (current.length() > 0) {
-               current += L", ";
+               current += RT_STRING_LITERAL", ";
           }
           current += value;
      }
 
-     void HeaderCollection::Add(const std::string& name, const std::string& value) {
+     void HeaderCollection::Add(const std::wstring& name, const std::wstring& value) {
           Add(mxcomp::utf::convert(name.data()), mxcomp::utf::convert(value.data()));
      }
      void HeaderCollection::Set(const std::string& name, const std::string& value) {
@@ -48,15 +48,20 @@ namespace rikitiki {
      }
 
      void HeaderCollection::Set(const std::wstring& name, const std::wstring& value) {
-          (*this)[name] = value;          
+          (*this)[ rikitiki::to_rt_string(name)] = rikitiki::to_rt_string(value);
      }
      void HeaderCollection::Set(const std::wstring& name, size_t value) {
-          std::wstringstream ss; 
+          rikitiki::stringstream ss;
           ss << value;
-          Set(name, ss.str());
+          Set(rikitiki::to_rt_string(name), ss.str());
      }
+    void HeaderCollection::Set(const std::string& name, size_t value) {
+         rikitiki::stringstream ss;
+         ss << value;
+         Set(rikitiki::to_rt_string(name), ss.str());
+    }
 
-     const std::wstring* HeaderCollection::Get(const std::wstring& name) const {
+     const rikitiki::string* HeaderCollection::Get(const rikitiki::string& name) const {
           auto el = this->find(name);
           if (el == this->end())
                return 0;
@@ -67,17 +72,17 @@ namespace rikitiki {
      }
      void QueryStringCollection::FromQueryString(const std::wstring& qs) {
           const wchar_t* _qs = &qs[0];
-          std::wstring name;
-          std::wstring* val = 0;
+          rikitiki::string name;
+          rikitiki::string* val = 0;
           bool nameMode = true;
           while (*_qs != 0){
                if (nameMode){
-                    if (*_qs == L'='){
+                    if (*_qs == RT_STRING_LITERAL'='){
                          nameMode = false;
                          val = &(*this)[name];
                     }
-                    else if (*_qs == L'&'){
-                         (*this)[name] = L"";
+                    else if (*_qs == RT_STRING_LITERAL'&'){
+                         (*this)[name] = RT_STRING_LITERAL"";
                          name.clear();
                     }
                     else {
@@ -85,7 +90,7 @@ namespace rikitiki {
                     }
                }
                else {
-                    if (*_qs == L'&'){
+                    if (*_qs == RT_STRING_LITERAL'&'){
                          nameMode = true;
                          name.clear();
                     }
@@ -96,4 +101,12 @@ namespace rikitiki {
                _qs++;
           }
      }
+
+    bool QueryStringCollection::hasValue(const rikitiki::string &name, rikitiki::string &value) {
+         auto find = this->find(name);
+         if(find == this->end())
+              return false;
+         value = find->second;
+         return true;
+    }
 }

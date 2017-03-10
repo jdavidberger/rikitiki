@@ -18,7 +18,7 @@
 namespace rikitiki {
 
      std::ostream& operator <<(std::ostream& response, const wchar_t* obj);
-     std::ostream& operator <<(std::ostream& response, const std::wstring& obj);
+     std::ostream& operator <<(std::ostream& response, const rikitiki::string& obj);
 
      std::wostream& operator <<(std::wostream& response, const std::string& obj);
 
@@ -30,6 +30,7 @@ namespace rikitiki {
           CookieCollection cookies; 
            HeaderCollection headers;
            ByteStream body;
+           QueryStringCollection post;
      public:
           Response();
           ~Response();
@@ -49,10 +50,12 @@ namespace rikitiki {
 
           std::mutex payloadWrite;
 
-          virtual void SetStartline(const std::wstring&) OVERRIDE;
-          virtual std::wstring Startline() const OVERRIDE;
+          virtual void SetStartline(const rikitiki::string&) OVERRIDE;
+          virtual rikitiki::string Startline() const OVERRIDE;
 
-          Response& operator <<(const rikitiki::HttpStatus& t);
+         QueryStringCollection &Post() override;
+
+         Response& operator <<(const rikitiki::HttpStatus& t);
           using Message::operator<<;          
      };
  

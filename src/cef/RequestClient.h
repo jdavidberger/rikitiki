@@ -17,7 +17,7 @@ public:
                                             request->GetResponse()->GetStatusText().ToString());
           request->GetResponse()->GetHeaderMap(headers);
           for (auto it = headers.begin(); it != headers.end(); it++) {
-               response->Headers().Add(std::wstring(it->first), std::wstring(it->second));
+               response->Headers().Add(rikitiki::string(it->first), rikitiki::string(it->second));
           }
           promise.set_value(response);
      }

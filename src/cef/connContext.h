@@ -56,7 +56,7 @@ namespace rikitiki {
                virtual void FillRequestMethod(Request::Method&) const OVERRIDE;
                virtual void FillQueryString(QueryStringCollection&) const OVERRIDE;
                CefRefPtr<CefRequest> request;
-               mutable std::wstring url; 
+               mutable rikitiki::string url;
           public:
                Request(const CefRefPtr<CefRequest>& req) : request(req) {
                     currentState.streamState = MessageState::FINISHED;

@@ -23,7 +23,7 @@ namespace rikitiki {
      class Header;
      class HeaderCollection;
      class CookieCollection;
-
+     class QueryStringCollection;
      // http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4
      typedef std::basic_stringstream<char> ByteStream;
      class Message {
@@ -33,16 +33,17 @@ namespace rikitiki {
           virtual HeaderCollection& Headers() = 0;
           virtual ByteStream& Body() = 0;
           virtual CookieCollection& Cookies() = 0;
+         virtual QueryStringCollection& Post() = 0;
 
-          virtual size_t ContentLength() const;
+         virtual size_t ContentLength() const;
           virtual Encoding::t TransferEncoding() const;          
           virtual ContentType::t ContentType() const;
-          virtual std::wstring Startline() const = 0; 
+          virtual rikitiki::string Startline() const = 0; 
 
           virtual void SetContentLength(size_t);
           virtual void SetTransferEncoding(Encoding::t);
           virtual void SetContentType(ContentType::t t);
-          virtual void SetStartline(const std::wstring&) = 0;          
+          virtual void SetStartline(const rikitiki::string&) = 0;          
 
           const HeaderCollection& Headers() const;
           const ByteStream& Body() const;
@@ -58,6 +59,8 @@ namespace rikitiki {
           virtual Message& operator <<(rikitiki::ContentType::t t);
           virtual Message& operator <<(const rikitiki::Cookie& t);
           virtual Message& operator <<(const rikitiki::Header& t);
+
+
      };
 
      std::ostream&  operator<< (std::ostream&,  const Message&);

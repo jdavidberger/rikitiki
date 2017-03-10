@@ -10,6 +10,7 @@ The full license is available in the LICENSE file at the root of this project an
 #include <string>
 #include <string.h>
 #include <assert.h>
+#include <rikitiki/types.h>
 
 namespace rikitiki {
      namespace RequestMethod {
@@ -45,8 +46,8 @@ namespace rikitiki {
                return ANY;
           }
 
-#define MATCH_METHOD_STR(eval) case eval: return L###eval;
-          const wchar_t* ToString(t method){
+#define MATCH_METHOD_STR(eval) case eval: return #eval;
+          const rikitiki::string::value_type* ToString(t method){
                switch (method) {
                     MATCH_METHOD_STR(GET);
                     MATCH_METHOD_STR(POST);
@@ -61,16 +62,16 @@ namespace rikitiki {
                case OTHER:
                default:
                     LOG(Server, Error) << "methodToStr failed on str '" << method << "'" << std::endl;
-                    return L"ANY";
+                    return "ANY";
                }
           }
 
      }
 
      namespace Encoding {          
-          const wchar_t* ToString(t) {
+          const rikitiki::string::value_type* ToString(t) {
                assert(false);
-               return L"";
+               return  RT_STRING_LITERAL"";
           }
           t FromString(const wchar_t * str) {
                if (wcscmp(str, L"chunked") == 0)
@@ -91,7 +92,15 @@ namespace rikitiki {
                s >> str;
                _t = FromString(str.data());
                return s;
-          }          
+          }
+
+
+         std::istream& operator >>(std::istream& s, t& _t) {
+             std::string str;
+             s >> str;
+             _t = FromString(rikitiki::from_rt_string(str.data()).c_str());
+             return s;
+         }
 
 
      }

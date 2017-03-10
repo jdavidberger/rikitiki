@@ -15,7 +15,7 @@ namespace rikitiki {
           virtual bool Handle(ConnContextRef ctx) OVERRIDE;
           virtual bool CanHandle(Request& ctx) OVERRIDE;
           virtual bool visible() const;
-          virtual std::wstring name() const;
+          virtual rikitiki::string name() const;
           virtual ~StaticContentHandler();
      };
 }

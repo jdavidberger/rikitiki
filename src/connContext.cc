@@ -10,14 +10,14 @@
 
 namespace rikitiki {
      void type_conversion_error(ConnContext& ctx, void** handlers){
-          std::wstring accepts;
+          rikitiki::string accepts;
           for (auto _type = 0; _type < (int)ContentType::MAX; _type++)
                if (handlers[_type]){
                if (accepts.size())
-                    accepts += L", ";
+                    accepts += RT_STRING_LITERAL", ";
                accepts += ContentType::ToString((ContentType::t)_type);
                }
-          ctx << Header(L"Accept", accepts);
+          ctx << Header(RT_STRING_LITERAL"Accept", accepts);
           throw rikitiki::HandlerException(HttpStatus::Not_Acceptable);
      }
 
@@ -25,7 +25,7 @@ namespace rikitiki {
      {
        return response << mxcomp::utf::convert(obj);
      }
-     std::ostream& operator <<(std::ostream& response, const std::wstring& obj) {
+     std::ostream& operator <<(std::ostream& response, const rikitiki::string& obj) {
           return response << obj.c_str();
      }
 
@@ -106,15 +106,30 @@ namespace rikitiki {
           return *this;
      }
 
-     void unescapeString(wchar_t* s, wchar_t* e, std::wstring& rtn) {
+    ConnContext &ConnContext::operator<<(const std::string & s) {
+        this->Response.WritePayloadData(s);
+        return *this;
+    }
+
+    ConnContext &ConnContext::operator<<(const char * s) {
+        this->Response.WritePayloadData(s);
+        return *this;
+    }
+
+    ConnContext &ConnContext::operator<<(rikitiki::ContentType::t t) {
+        this->Response << t;
+        return *this;
+    }
+
+    void unescapeString(rikitiki::string::value_type * s, rikitiki::string::value_type * e, rikitiki::string& rtn) {
           assert(e > s);
-          rtn.reserve((std::wstring::size_type)(e - s));
+          rtn.reserve((rikitiki::string::size_type)(e - s));
           for (; s < e; s++) {
                if (*s == '%' && s + 2 < e) {
                     s++;
                     wchar_t z = s[2];
                     s[2] = 0; // most we can read is 2
-                    rtn.push_back((wchar_t)wcstol(s, 0, 16));
+                    rtn.push_back((rikitiki::string::value_type )strtol(s, 0, 16));
                     s[2] = z;
                     s++;
                }
@@ -123,8 +138,9 @@ namespace rikitiki {
                }
           }
      }
+
      void mapContents(ByteStream& raw_content_stream, PostCollection& post){
-       std::wstring raw_content = mxcomp::utf::convert( raw_content_stream.str() );
+       rikitiki::string raw_content = rikitiki::to_rt_string( raw_content_stream.str() );
 
           if (raw_content.size() == 0)
                return;
@@ -133,16 +149,16 @@ namespace rikitiki {
 
           std::replace(raw_content.begin(), raw_content.end(), L'+', L' ');
           auto l_it = raw_content.begin();
-          std::wstring name;
+          rikitiki::string name;
           for (auto it = raw_content.begin(); it != raw_content.end(); it++){
                switch (*it){
                case L'=':
-                    name = std::wstring(l_it, it);
+                    name = rikitiki::string(l_it, it);
                     l_it = it + 1;
                     break;
                case L'&':
 
-                    std::wstring value;
+                    rikitiki::string value;
                     unescapeString(&*l_it, &*it, value);
                     post.insert(PostContent(name, value));
 
